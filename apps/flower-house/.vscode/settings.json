@@ -1,0 +1,22 @@
+{
+  "editor.formatOnSave": true, // 저장 시 자동 포맷팅을 활성화합니다.
+  "editor.defaultFormatter": "esbenp.prettier-vscode", // Prettier를 기본 포맷터로 지정합니다.
+
+  // 파일 경로 이동 시 TypeScript 파일의 import 경로를 자동으로 업데이트합니다.
+  "typescript.updateImportsOnFileMove.enabled": "always",
+  // 파일을 저장할 때 라인 끝의 불필요한 공백을 자동으로 제거합니다.
+  "files.trimTrailingWhitespace": true,
+  // 에디터에서 지정된 열(여기서는 150열)에 눈금선을 표시합니다. 코드 길이 제한을 시각적으로 나타냅니다.
+  "editor.rulers": [150],
+
+  // 저장 시 TypeScript 파일에서 import 경로를 정리하고, 사용하지 않는 코드를 제거합니다.
+  "editor.codeActionsOnSave": {
+    "source.organizeImports": "explicit",
+    "source.fixAll": "explicit"
+  },
+
+  // TypeScript 파일의 자동 완성, 오류 검사 등을 활성화합니다.
+  "typescript.validate.enable": true,
+  // TypeScript 프로젝트에서의 자동 import 시, 절대 경로가 아닌 상대 경로를 사용하도록 설정합니다.
+  "typescript.preferences.importModuleSpecifier": "non-relative"
+}
