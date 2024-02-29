@@ -4,12 +4,14 @@
   "private": true,
   "scripts": {
     "build": "next build",
+    "build-storybook": "storybook build",
     "dev": "next dev",
     "lint": "next lint",
     "lint:ts": "eslint --cache --cache-location=.cache/eslint --ext ts,tsx --report-unused-disable-directives --max-warnings 0 .",
     "prepare": "husky",
     "prettier": "prettier --write --ignore-unknown .",
     "start": "next start",
+    "storybook": "storybook dev -p 6006",
     "ts:check": "tsc --project ./tsconfig.json --noEmit"
   },
   "dependencies": {
@@ -24,6 +26,14 @@
     "zustand": "^4.4.7"
   },
   "devDependencies": {
+    "@storybook/addon-essentials": "^7.6.17",
+    "@storybook/addon-interactions": "^7.6.17",
+    "@storybook/addon-links": "^7.6.17",
+    "@storybook/addon-onboarding": "1.0.11",
+    "@storybook/blocks": "^7.6.17",
+    "@storybook/nextjs": "^7.6.17",
+    "@storybook/react": "^7.6.17",
+    "@storybook/test": "^7.6.17",
     "@tanstack/eslint-plugin-query": "^5.12.1",
     "@tanstack/react-query-devtools": "^5.24.0",
     "@testing-library/jest-dom": "^6.1.6",
@@ -36,10 +46,12 @@
     "autoprefixer": "^10.0.1",
     "eslint": "^8",
     "eslint-config-next": "14.1.0",
+    "eslint-plugin-storybook": "^0.8.0",
     "msw": "^2.0.11",
     "postcss": "^8",
     "prettier": "^3.1.1",
     "react-error-boundary": "^4.0.12",
+    "storybook": "^7.6.17",
     "tailwindcss": "^3.3.0",
     "typescript": "^5"
   }
