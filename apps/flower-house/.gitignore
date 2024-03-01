@@ -37,3 +37,6 @@ next-env.d.ts
 
 # cache
 .cache
+
+# storybook
+build-storybook.log

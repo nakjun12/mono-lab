@@ -5,6 +5,7 @@
   "scripts": {
     "build": "next build",
     "build-storybook": "storybook build",
+    "chromatic": "npx chromatic --project-token=chpt_71df197d26dccfc",
     "dev": "next dev",
     "lint": "next lint",
     "lint:ts": "eslint --cache --cache-location=.cache/eslint --ext ts,tsx --report-unused-disable-directives --max-warnings 0 .",
@@ -44,6 +45,7 @@
     "@types/react": "^18",
     "@types/react-dom": "^18",
     "autoprefixer": "^10.0.1",
+    "chromatic": "^11.0.0",
     "eslint": "^8",
     "eslint-config-next": "14.1.0",
     "eslint-plugin-storybook": "^0.8.0",
