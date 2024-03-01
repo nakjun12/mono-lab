@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Footer from "./_shared/_components/footer";
 
 function Home() {
   return (
@@ -11,6 +12,8 @@ function Home() {
         width={1920}
         height={1080}
       />
+
+      <Footer />
     </div>
   );
 }
