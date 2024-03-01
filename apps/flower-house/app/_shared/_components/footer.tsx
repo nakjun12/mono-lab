@@ -2,6 +2,7 @@
 import Image from "next/image";
 import { IconNames } from "../_types/footer";
 import { useRouter, usePathname } from "next/navigation";
+import FileInput from "./file-input";
 
 const Footer: React.FC = () => {
   const router = useRouter();
@@ -12,6 +13,7 @@ const Footer: React.FC = () => {
 
   const handleTapChange = (idx: number) => {
     if (pathname === tabPaths[idx]) return;
+    if (idx === 2) return;
     router.push(tabPaths[idx]);
   };
 
@@ -22,13 +24,7 @@ const Footer: React.FC = () => {
           key={imageName}
           className="relative flex justify-center items-center w-1/4 border-none bg-transparent p-0"
           onClick={() => handleTapChange(idx)}>
-          {idx === 2 && (
-            <input
-              className="absolute opacity-0 w-full h-full"
-              type="file"
-              accept="video/*, image/*"
-            />
-          )}
+          {idx === 2 && <FileInput router={router} />}
           <Image
             src={`/footerIcons/${imageName}-${
               pathname === tabPaths[idx] ? "on" : "off"
