@@ -17,13 +17,6 @@ jobs:
       - name: Install dependencies with pnpm
         run: pnpm install
 
-      - name: Check current directory and list contents
-        run: |
-          echo "Current directory:"
-          pwd
-          echo "Directory contents:"
-          ls -lah
-
       - uses: chromaui/action@v1 # Chromatic Action의 최신 버전을 확인하고 필요하면 업데이트하세요
         with:
           projectToken: ${{ secrets.CHROMATIC_PROJECT_TOKEN }}
