@@ -1,15 +1,14 @@
 name: "Chromatic Deployment"
-# 워크플로우가 실행될 이벤트 설정
+
 on:
   push:
     paths:
       - "apps/flower-house/**"
-# List of jobs
+
 jobs:
   test:
-    # Operating System
     runs-on: ubuntu-latest
-    # Job steps
+
     steps:
       - uses: actions/checkout@v1
       - name: Install pnpm
@@ -17,10 +16,11 @@ jobs:
 
       - name: Install dependencies with pnpm
         run: pnpm install
-        #👇 Adds Chromatic as a step in the workflow
+
+      - name: Check current directory # 현재 디렉토리 확인
+        run: pwd # 현재 작업 디렉토리 출력
+
       - uses: chromaui/action@v1
-        # Options required for Chromatic's GitHub Action
         with:
-          #👇 Chromatic projectToken, see https://storybook.js.org/tutorials/intro-to-storybook/react/ko/deploy/ to obtain it
           projectToken: ${{ secrets.CHROMATIC_PROJECT_TOKEN }}
           token: ${{ secrets.GITHUB_TOKEN }}
