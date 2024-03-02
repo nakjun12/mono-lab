@@ -1,26 +1,22 @@
 name: "Chromatic Deployment"
 
-# 워크플로우가 실행될 이벤트 설정
 on:
   push:
     paths:
       - "apps/flower-house/**"
 
-# List of jobs
 jobs:
   test:
-    # Operating System
     runs-on: ubuntu-latest
-    # Job steps
+    
     steps:
-      - uses: actions/checkout@v1
-      - name: Install pnpm
-        run: npm install -g pnpm
+      - uses: actions/checkout@v3 # 최신 버전으로 업데이트
+      - name: Install pnpm globally # 설명을 더 명확하게 변경
+        run: curl -f https://get.pnpm.io/v6.16.js | node - add --global pnpm # pnpm을 안정적으로 설치하는 방법
 
       - name: Install dependencies with pnpm
         run: pnpm install
 
-      # 현재 디렉토리 확인 단계
       - name: Check current directory and list contents
         run: |
           echo "Current directory:"
@@ -28,8 +24,7 @@ jobs:
           echo "Directory contents:"
           ls -lah
 
-      # Chromatic을 워크플로우 단계로 추가
-      - uses: chromaui/action@v1
+      - uses: chromaui/action@v1 # Chromatic Action의 최신 버전을 확인하고 필요하면 업데이트하세요
         with:
           projectToken: ${{ secrets.CHROMATIC_PROJECT_TOKEN }}
           token: ${{ secrets.GITHUB_TOKEN }}
