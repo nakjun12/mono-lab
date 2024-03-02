@@ -9,6 +9,7 @@ export default function NewPostPage() {
     title: "",
     description: ""
   });
+
   // 컴포넌트가 마운트될 때 로컬 스토리지에서 이미지 데이터를 가져와 상태를 업데이트합니다.
   useEffect(() => {
     const imgData = localStorage.getItem("prevImgData") || "";
