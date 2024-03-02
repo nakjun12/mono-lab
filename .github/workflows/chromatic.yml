@@ -7,7 +7,7 @@ jobs:
   chromatic:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3 # Updated to latest version for better performance and reliability
+      - uses: actions/checkout@v1 # Updated to latest version for better performance and reliability
 
       - name: Install pnpm
         run: npm install -g pnpm
@@ -18,7 +18,7 @@ jobs:
 
       # Publish Flower House Project to Chromatic
       - name: Publish to Chromatic
-        uses: chromaui/action@latest
+        uses: chromaui/action@v1
         with:
           projectToken: ${{ secrets.CHROMATIC_PROJECT_TOKEN }}
           token: ${{ secrets.GITHUB_TOKEN }}
