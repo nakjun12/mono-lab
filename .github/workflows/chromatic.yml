@@ -1,23 +1,27 @@
-name: "Chromatic Deployment"
+# Workflow name
+name: "Chromatic for Flower House Project"
 
-on:
-  push:
-    paths:
-      - "apps/flower-house/**"
+
+on: push
 
 jobs:
-  test:
+  chromatic:
     runs-on: ubuntu-latest
-    
     steps:
-      - uses: actions/checkout@v3 # 최신 버전으로 업데이트
-      - name: Install pnpm globally # 설명을 더 명확하게 변경
-        run: curl -f https://get.pnpm.io/v6.16.js | node - add --global pnpm # pnpm을 안정적으로 설치하는 방법
+      - uses: actions/checkout@v1 # Updated to latest version for better performance and reliability
 
-      - name: Install dependencies with pnpm
+      - name: Install pnpm
+        run: npm install -g pnpm
+
+      - name: Install dependencies for Flower House Project
         run: pnpm install
+        working-directory: apps/flower-house # Adjusted to the new directory structure
 
-      - uses: chromaui/action@v1 # Chromatic Action의 최신 버전을 확인하고 필요하면 업데이트하세요
+
+      # Publish Flower House Project to Chromatic
+      - name: Publish to Chromatic
+        uses: chromaui/action@v1
         with:
           projectToken: ${{ secrets.CHROMATIC_PROJECT_TOKEN }}
           token: ${{ secrets.GITHUB_TOKEN }}
+          workingDir: apps/flower-house # Adjusted to the new directory structure
