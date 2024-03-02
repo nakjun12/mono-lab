@@ -20,10 +20,16 @@ jobs:
       - name: Install dependencies with pnpm
         run: pnpm install
 
-        #👇 Adds Chromatic as a step in the workflow
+      # 현재 디렉토리 확인 단계
+      - name: Check current directory and list contents
+        run: |
+          echo "Current directory:"
+          pwd
+          echo "Directory contents:"
+          ls -lah
+
+      # Chromatic을 워크플로우 단계로 추가
       - uses: chromaui/action@v1
-        # Options required for Chromatic's GitHub Action
         with:
-          #👇 Chromatic projectToken, see https://storybook.js.org/tutorials/intro-to-storybook/react/ko/deploy/ to obtain it
           projectToken: ${{ secrets.CHROMATIC_PROJECT_TOKEN }}
           token: ${{ secrets.GITHUB_TOKEN }}
