@@ -22,7 +22,7 @@ jobs:
 
     # 현재 디렉토리 확인 단계 추가
       - name: Check current directory and list contents
-        run: |
+        run:
           echo "Current directory:"
           pwd
           echo "Directory contents:"
