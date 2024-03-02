@@ -19,16 +19,6 @@ jobs:
 
       - name: Install dependencies with pnpm
         run: pnpm install
-
-    # 현재 디렉토리 확인 단계 추가
-      - name: Check current directory and list contents
-        run: |
-          echo "Current directory:"
-          pwd
-          echo "Directory contents:"
-          ls -lah
-
-
         #👇 Adds Chromatic as a step in the workflow
       - uses: chromaui/action@v1
         # Options required for Chromatic's GitHub Action
