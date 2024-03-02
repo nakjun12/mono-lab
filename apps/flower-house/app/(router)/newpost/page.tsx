@@ -1,6 +1,6 @@
 "use client";
 import Image from "next/image";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import NewpostHeader from "./_components/newpost-header";
 
 export default function NewPostPage() {
@@ -9,12 +9,23 @@ export default function NewPostPage() {
     title: "",
     description: ""
   });
-  const imgData = localStorage.getItem("prevImgData") || "";
+
+  // 컴포넌트가 마운트될 때 로컬 스토리지에서 이미지 데이터를 가져와 상태를 업데이트합니다.
+  useEffect(() => {
+    const imgData = localStorage.getItem("prevImgData") || "";
+    setContents((contents) => ({ ...contents, image: imgData }));
+  }, []);
+
   return (
     <main className="flex flex-col items-center justify-center h-screen md:h-screen">
       <NewpostHeader />
       <div>
-        <Image src={imgData} alt="post-preview-img" width={200} height={200} />
+        <Image
+          src={contents.image}
+          alt="post-preview-img"
+          width={200}
+          height={200}
+        />
       </div>
       <div>
         description
