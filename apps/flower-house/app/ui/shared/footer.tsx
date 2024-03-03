@@ -1,8 +1,8 @@
 "use client";
 import Image from "next/image";
-import { IconNames } from "../_types/footer";
-import { useRouter, usePathname } from "next/navigation";
-import FileInput from "./file-input";
+import { usePathname, useRouter } from "next/navigation";
+import { IconNames } from "../../types/footer-type";
+import FileInput from "./form/file-input";
 
 const Footer: React.FC = () => {
   const router = useRouter();
@@ -23,7 +23,8 @@ const Footer: React.FC = () => {
         <button
           key={imageName}
           className="relative flex justify-center items-center w-1/4 border-none bg-transparent p-0"
-          onClick={() => handleTapChange(idx)}>
+          onClick={() => handleTapChange(idx)}
+        >
           {idx === 2 && <FileInput router={router} />}
           <Image
             src={`/footerIcons/${imageName}-${
