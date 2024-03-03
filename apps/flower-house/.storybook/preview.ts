@@ -20,7 +20,7 @@ const preview: Preview = {
         ...INITIAL_VIEWPORTS,
         ...MINIMAL_VIEWPORTS
       },
-      defaultViewport: "iphone14promax"
+      defaultViewport: "iphone14pro"
     },
     nextjs: {
       appDirectory: true
