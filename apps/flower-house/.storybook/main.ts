@@ -45,3 +45,12 @@ const config: StorybookConfig = {
   staticDirs: ["../public"]
 };
 export default config;
+
+//폰트 적용
+//https://storybook.js.org/docs/configure/images-and-assets
+//FIGMA 적용
+//https://storybookjs.github.io/addon-designs/?path=/docs/docs-quick-start--docs
+//app 라우터 이슈
+//https://github.com/storybookjs/storybook/issues/24722
+//절대경로 이슈
+//https://github.com/storybookjs/storybook/issues/21901
