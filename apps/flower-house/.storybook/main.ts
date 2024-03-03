@@ -27,7 +27,7 @@ const config: StorybookConfig = {
       name: getAbsolutePath("@storybook/addon-storysource"),
       options: {
         rule: {
-          include: [path.resolve(__dirname, "../src")] // src 디렉토리를 지정합니다.
+          include: [path.resolve(__dirname, "../app")]
         },
         loaderOptions: {
           prettierConfig: { printWidth: 80, singleQuote: false } // Prettier 설정을 지정합니다.
