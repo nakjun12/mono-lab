@@ -1,7 +1,7 @@
 "use client";
+import NewpostHeader from "@/app/ui/newpost/newpost-header";
 import Image from "next/image";
 import { useEffect, useState } from "react";
-import NewpostHeader from "./_components/newpost-header";
 
 export default function NewPostPage() {
   const [contents, setContents] = useState({

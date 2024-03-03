@@ -1,10 +1,10 @@
 "use client";
-import Footer from "@/app/_shared/_components/footer";
+import Footer from "@/app/ui/shared/footer";
 
-export default function FeedsPage() {
+export default function NotificationPage() {
   return (
     <main className="flex items-center justify-center h-screen md:h-screen">
-      <div>Feeds</div>
+      <div>Notification</div>
       <Footer />
     </main>
   );
