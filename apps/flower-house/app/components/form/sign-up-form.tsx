@@ -1,10 +1,11 @@
-import Divider from "@/app/ui/shared/divider";
-import Button from "@/app/ui/shared/button";
-import FormSubmitButton from "@/app/ui/shared/button/form-submit-button";
-import GuestButton from "@/app/ui/shared/button/guest-button";
-import SocialLoginButton from "@/app/ui/shared/button/social-login-button";
-import FormInputField from "@/app/ui/shared/form/form-Input-field";
+import Button from "@/app/components/button";
+import FormSubmitButton from "@/app/components/button/form-submit-button";
+import GuestButton from "@/app/components/button/guest-button";
+import SocialLoginButton from "@/app/components/button/social-login-button";
+import Divider from "@/app/components/divider";
+import FormInputField from "@/app/components/form/form-Input-field";
 import Image from "next/image";
+
 function SignUpForm() {
   return (
     <div className="flex overflow-hidden relative flex-col px-3.5 w-full min-h-[932px]">
