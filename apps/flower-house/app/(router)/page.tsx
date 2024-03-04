@@ -1,4 +1,4 @@
-import Footer from "@/app/components/footer";
+import Footer from "@/app/shared/components/footer";
 import Image from "next/image";
 
 function Home() {
