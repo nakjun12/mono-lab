@@ -1,5 +1,5 @@
+import Footer from "@/app/shared/components/footer";
 import Image from "next/image";
-import Footer from "./ui/shared/footer";
 
 function Home() {
   return (

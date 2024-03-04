@@ -1,5 +1,5 @@
 "use client";
-import Footer from "@/app/ui/shared/footer";
+import Footer from "@/app/shared/components/footer";
 
 export default function FeedsPage() {
   return (

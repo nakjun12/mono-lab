@@ -3,8 +3,8 @@ import {
   MINIMAL_VIEWPORTS
 } from "@storybook/addon-viewport";
 import type { Preview } from "@storybook/react";
-import withAppRouterContext from "../app/lib/with-app-router-context";
-import "../app/ui/shared/globals.css";
+import "../app/shared/globals.css";
+import withAppRouterContext from "../app/shared/lib/with-app-router-context";
 
 const preview: Preview = {
   parameters: {
