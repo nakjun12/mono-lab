@@ -1,6 +1,6 @@
 import Footer from "@/app/shared/components/footer";
+import NaverMap from "@/app/shared/components/naver-map";
 import Image from "next/image";
-
 function Home() {
   return (
     <div className="flex overflow-hidden relative flex-col px-3.5 w-full min-h-[932px]">
@@ -12,7 +12,7 @@ function Home() {
         width={1920}
         height={1080}
       />
-
+      <NaverMap />
       <Footer />
     </div>
   );
