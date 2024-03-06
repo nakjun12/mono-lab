@@ -3,7 +3,7 @@
 import { INITIAL_CENTER, INITIAL_ZOOM } from "@/app/shared/hooks/use-naver-map";
 import Script from "next/script";
 import { useEffect, useRef } from "react";
-import type { Coordinates, NaverMap } from "../types/map-types";
+import type { Coordinates, NaverMap } from "../../types/map-types";
 type Props = {
   mapId?: string;
   initialCenter?: Coordinates;
@@ -54,7 +54,7 @@ const NaverMap = ({
         src={`https://openapi.map.naver.com/openapi/v3/maps.js?ncpClientId=wcursjl0rk`}
         onReady={initializeMap}
       />
-      <div id={mapId} style={{ width: "100%", height: "100%" }} />
+      <div id={mapId} style={{ width: "500px", height: "500px" }} />
     </>
   );
 };

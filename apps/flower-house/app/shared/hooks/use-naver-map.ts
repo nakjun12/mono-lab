@@ -1,3 +1,4 @@
+"use client";
 import type { Coordinates, NaverMap } from "@/app/shared/types/map-types";
 import { useCallback } from "react";
 import useSWR, { mutate } from "swr";
