@@ -28,6 +28,11 @@ const NaverMap = ({
       mapDataControl: false,
       logoControlOptions: {
         position: naver.maps.Position.BOTTOM_LEFT
+      },
+      zoomControl: true,
+      zoomControlOptions: {
+        style: naver.maps.ZoomControlStyle.SMALL,
+        position: naver.maps.Position.TOP_RIGHT
       }
     };
     //새로운 네이버 맵 인스턴스 생성
