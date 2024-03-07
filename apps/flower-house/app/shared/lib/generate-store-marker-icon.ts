@@ -11,7 +11,7 @@ export function generateStoreMarkerIcon(
   markerIndex: number,
   isSelected: boolean
 ): ImageIcon {
-  console.log("작동");
+  // console.log("작동");
   return {
     url: isSelected ? "/footerIcons/home-off.svg" : "/footerIcons/home-off.svg",
     size: new naver.maps.Size(SCALED_MARKER_WIDTH, SCALED_MARKER_HEIGHT),

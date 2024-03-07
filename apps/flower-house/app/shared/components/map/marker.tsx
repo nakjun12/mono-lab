@@ -3,7 +3,7 @@ import { useEffect } from "react";
 
 const Marker = ({ map, coordinates, icon, onClick }: Marker): null => {
   useEffect(() => {
-    console.log("Marker useEffect", map, icon, coordinates, onClick);
+    // console.log("Marker useEffect", map, icon, coordinates, onClick);
     let marker: naver.maps.Marker | null = null;
     if (map) {
       marker = new naver.maps.Marker({

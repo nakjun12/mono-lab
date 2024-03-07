@@ -13,7 +13,7 @@ const Markers = () => {
   const { data: stores } = useSWR<Store[]>(STORE_KEY);
   const { data: currentStore } = useSWR<Store>(CURRENT_STORE_KEY);
   const { setCurrentStore, clearCurrentStore } = useCurrentStore();
-
+  //   console.log("Markers render", map, stores, currentStore);
   if (!map || !stores) return null;
   return (
     <>
