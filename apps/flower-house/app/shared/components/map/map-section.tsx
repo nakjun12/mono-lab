@@ -35,6 +35,7 @@ const MapSection = () => {
     if (!searchParams.get("lat") || !searchParams.get("lng")) {
       getCurrentLocation()
         .then(([latitude, longitude]) => {
+          //TODO: 추후 리셋 값으로 관리해야함
           map.setCenter(new window.naver.maps.LatLng(latitude, longitude));
         })
         .catch((error) =>
