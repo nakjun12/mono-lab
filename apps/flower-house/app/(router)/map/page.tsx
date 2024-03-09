@@ -3,7 +3,7 @@ import MapSection from "@/app/(router)/map/components/map-initializer";
 import MapOverlay from "@/app/(router)/map/components/map-overlay";
 import Footer from "@/app/shared/components/footer";
 
-function MapPage() {
+export default function MapPage() {
   return (
     <main className="flex overflow-hidden relative flex-col md:px-3.5 w-full min-h-[932px]">
       <MapOverlay>
@@ -13,5 +13,3 @@ function MapPage() {
     </main>
   );
 }
-
-export default MapPage;
