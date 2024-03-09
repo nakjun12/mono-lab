@@ -5,12 +5,12 @@ import Footer from "@/app/shared/components/footer";
 
 function MapPage() {
   return (
-    <div className="flex overflow-hidden relative flex-col md:px-3.5 w-full min-h-[932px]">
+    <main className="flex overflow-hidden relative flex-col md:px-3.5 w-full min-h-[932px]">
       <MapOverlay>
         <MapSection />
       </MapOverlay>
       <Footer />
-    </div>
+    </main>
   );
 }
 
