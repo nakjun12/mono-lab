@@ -1,7 +1,7 @@
-import type { Store } from "../types/map-types";
-export const STORES: Store[] = [
+import type { Marker } from "../types/map-types";
+export const MARKERS: Marker[] = [
   {
-    nid: "store-1",
+    nid: "Marker-1",
     name: "봄의 꽃 카페",
     coordinates: [37.5643, 126.977], // 서울 광화문 광장 근처
     season: 1,
@@ -9,7 +9,7 @@ export const STORES: Store[] = [
     category: "카페"
   },
   {
-    nid: "store-2",
+    nid: "Marker-2",
     name: "여름 해변 식당",
     coordinates: [37.5651, 126.978], // 서울 청계천 근처
     season: 2,
@@ -17,7 +17,7 @@ export const STORES: Store[] = [
     category: "해산물"
   },
   {
-    nid: "store-3",
+    nid: "Marker-3",
     name: "가을 산책길 빵집",
     coordinates: [37.572, 126.979], // 서울 북촌 한옥마을 근처
     season: 3,
@@ -25,7 +25,7 @@ export const STORES: Store[] = [
     category: "베이커리"
   },
   {
-    nid: "store-4",
+    nid: "Marker-4",
     name: "겨울 난로 카페",
     coordinates: [37.5617, 126.983], // 서울 이화벽화마을 근처
     season: 4,
