@@ -20,3 +20,33 @@ export type Marker = {
   description?: string; // 선택적 필드
   category?: string; // 선택적 필드
 };
+
+export type NavigationInfo = {
+  code: number;
+  message: string;
+  currentDateTime: string;
+  route: {
+    trafast: Trafast[];
+  };
+};
+
+type Trafast = {
+  summary: Summary;
+  path: Coordinates[];
+};
+
+type Summary = {
+  start: {
+    location: Coordinates; // Coordinates 타입을 number[]로 사용
+  };
+  goal: {
+    location: Coordinates; // Coordinates 타입을 number[]로 사용
+    dir: number;
+  };
+  distance: number;
+  duration: number;
+  bbox: Coordinates[]; // bbox 타입을 Coordinates[]로 유지, 여기서 Coordinates는 number[]
+  tollFare: number;
+  taxiFare: number;
+  fuelPrice: number;
+};

@@ -1,4 +1,4 @@
-import type { Marker } from "../types/map-types";
+import type { Marker, NavigationInfo } from "@/app/shared/types/map-types";
 export const MARKERS: Marker[] = [
   {
     nid: "Marker-1",
@@ -33,3 +33,35 @@ export const MARKERS: Marker[] = [
     category: "카페"
   }
 ];
+
+// 주어진 JSON 데이터에서 경로(path) 데이터 추출
+export const routeData: NavigationInfo = {
+  code: 0,
+  message: "길찾기를 성공하였습니다.",
+  currentDateTime: "2018-12-21T14:45:34",
+  route: {
+    trafast: [
+      {
+        summary: {
+          start: { location: [127.1058342, 37.3597078] },
+          goal: { location: [129.0759853, 35.1794697], dir: 2 },
+          distance: 382403,
+          duration: 15372873,
+          bbox: [
+            [127.0833901, 35.1793188],
+            [129.0817364, 37.3599059]
+          ],
+          tollFare: 24500,
+          taxiFare: 319900,
+          fuelPrice: 46027
+        },
+        path: [
+          [127.1059968, 37.3597093],
+          // ... 중략 ...
+          [129.0764276, 35.1795108],
+          [129.0762855, 35.1793188]
+        ]
+      }
+    ]
+  }
+};

@@ -5,8 +5,10 @@ import useCurrentMarker, {
 import { MAP_KEY } from "@/app/(router)/map/hooks/use-map";
 import { MARKERS_KEY } from "@/app/(router)/map/hooks/use-markers";
 import { generateMarkerMarkerIcon } from "@/app/(router)/map/lib/generate-store-marker-icon";
+// import { routeData } from "@/app/shared/lib/dummy";
 import type { Map, Marker } from "@/app/shared/types/map-types";
 import useSWR from "swr";
+// import Navigation from "./navigation";
 
 const Markers = () => {
   const { data: map } = useSWR<Map>(MAP_KEY); // 맵관리 SWR
@@ -39,6 +41,8 @@ const Markers = () => {
           key={CurrentMarker.nid}
         />
       )}
+
+      {/* <Navigation map={map} navigationInfo={routeData} /> */}
     </>
   );
 };
