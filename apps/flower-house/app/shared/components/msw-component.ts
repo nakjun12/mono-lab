@@ -1,7 +1,7 @@
 "use client";
 import { useEffect } from "react";
 
-export const MSWComponent = () => {
+const MSWComponent = () => {
   useEffect(() => {
     if (typeof window !== "undefined") {
       console.log(process.env.NEXT_PUBLIC_API_MOCKING);
@@ -14,3 +14,5 @@ export const MSWComponent = () => {
 
   return null;
 };
+
+export default MSWComponent;
