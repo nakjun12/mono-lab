@@ -108,6 +108,9 @@ importers:
       swiper:
         specifier: ^11.0.5
         version: 11.0.7
+      swr:
+        specifier: ^2.2.5
+        version: 2.2.5(react@18.2.0)
       zustand:
         specifier: ^4.4.7
         version: 4.5.1(@types/react@18.2.46)(react@18.2.0)
@@ -166,6 +169,9 @@ importers:
       '@testing-library/user-event':
         specifier: ^14.4.3
         version: 14.5.2(@testing-library/dom@9.3.4)
+      '@types/navermaps':
+        specifier: ^3.7.4
+        version: 3.7.4
       '@types/node':
         specifier: ^20
         version: 20.10.6
@@ -4920,6 +4926,10 @@ packages:
     resolution: {integrity: sha512-frsJrz2t/CeGifcu/6uRo4b+SzAwT4NYCVPu1GN8IB9XTzrpPkGuV0tmh9mN+/L0PklAlsC3u5Fxt0ju00LXIw==}
     dev: true
 
+  /@types/geojson@7946.0.14:
+    resolution: {integrity: sha512-WCfD5Ht3ZesJUsONdhvm84dmzWOiOzOAqOncN0++w0lBw1o8OuDNJF2McvvCef/yBqb/HYRahp1BYtODFQ8bRg==}
+    dev: true
+
   /@types/glob@7.2.0:
     resolution: {integrity: sha512-ZUxbzKl0IfJILTS6t7ip5fQQM/J3TJYubDm3nMbgubNNYS62eXeUpoLUC8/7fJNiFYHTrGPQn7hspDUzIHX3UA==}
     dependencies:
@@ -5004,6 +5014,12 @@ packages:
     resolution: {integrity: sha512-CPM9nzrCPPJHQNA9keH9CVkVI+WR5kMa+7XEs5jcGQ0VoAGnLv242w8lIVgwAEfmE4oufJRaTc9PNLQl0ioAow==}
     dependencies:
       '@types/node': 20.11.21
+    dev: true
+
+  /@types/navermaps@3.7.4:
+    resolution: {integrity: sha512-fAazswZgl/l/1Mw375hJcNAC244SiTA0+Y6HE8atkVAtrdawlpgpkaRMCpFX+15iDiQzTfO0MmE+y1+6NpWFuQ==}
+    dependencies:
+      '@types/geojson': 7946.0.14
     dev: true
 
   /@types/node-fetch@2.6.11:
@@ -13154,6 +13170,16 @@ packages:
   /swiper@11.0.7:
     resolution: {integrity: sha512-cDfglW1B6uSmB6eB6pNmzDTNLmZtu5bWWa1vak0RU7fOI9qHjMzl7gVBvYSl34b0RU2N11HxxETJqQ5LeqI1cA==}
     engines: {node: '>= 4.7.0'}
+    dev: false
+
+  /swr@2.2.5(react@18.2.0):
+    resolution: {integrity: sha512-QtxqyclFeAsxEUeZIYmsaQ0UjimSq1RZ9Un7I68/0ClKK/U3LoyQunwkQfJZr2fc22DfIXLNDc2wFyTEikCUpg==}
+    peerDependencies:
+      react: ^16.11.0 || ^17.0.0 || ^18.0.0
+    dependencies:
+      client-only: 0.0.1
+      react: 18.2.0
+      use-sync-external-store: 1.2.0(react@18.2.0)
     dev: false
 
   /synchronous-promise@2.0.17:
