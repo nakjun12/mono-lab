@@ -1,9 +1,11 @@
 "use client";
 
 import { INITIAL_CENTER, INITIAL_ZOOM } from "@/app/(router)/map/hooks/use-map";
+import { NCP_CLIENT_ID } from "@/app/shared/constants/config";
 import type { Coordinates, Map } from "@/app/shared/types/map-types";
 import Script from "next/script";
 import { useEffect, useRef } from "react";
+
 type MapProps = {
   mapId?: string;
   initialCenter?: Coordinates;
@@ -55,7 +57,7 @@ const Map: React.FC<MapProps> = ({
       <Script
         strategy="afterInteractive"
         type="text/javascript"
-        src={`https://openapi.map.naver.com/openapi/v3/maps.js?ncpClientId=wcursjl0rk`}
+        src={`https://openapi.map.naver.com/openapi/v3/maps.js?ncpClientId=${NCP_CLIENT_ID}`}
         onReady={initializeMap}
       />
       <div id={mapId} style={{ width: "100%", height: "500px" }} />
