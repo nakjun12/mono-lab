@@ -1,10 +1,14 @@
 "use client";
 import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
-
+import {
+  createInquiry,
+  deleteInquiryById,
+  getAllInquiries
+} from "../mocks/handlersFun";
 import type { IconNames } from "../types/footer-type";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import FileInput from "./form/file-input";
 
 export type Movie = {
@@ -17,6 +21,11 @@ const Footer: React.FC = () => {
   const pathname = usePathname();
   const [movies, setMovies] = useState<Array<Movie>>([]);
 
+  useEffect(() => {
+    getAllInquiries().then((inquiries) => {
+      console.log(inquiries);
+    });
+  }, []);
   const imageNames: IconNames = ["home", "clone", "add-square", "notification"];
   const tabPaths = ["/", "/feeds", "/newpost", "/notification"];
 
@@ -26,37 +35,33 @@ const Footer: React.FC = () => {
     router.push(tabPaths[idx]);
   };
 
-  const fetchMovies = () => {
-    fetch("/graphql", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        query: `
-          query ListMovies {
-            movies {
-              id
-              title
-            }
-          }
-        `
-      })
-    })
-      .then((response) => response.json())
-      .then((response) => {
-        setMovies(response.data.movies);
-      })
-      .catch(() => setMovies([]));
+  const handleAllInquiries = () => {
+    getAllInquiries().then((inquiries) => {
+      console.log(inquiries);
+    });
+  };
+  const handleDeleteInquiry = (id: number) => {
+    deleteInquiryById(id).then(() => {
+      console.log("delete success");
+    });
+  };
+
+  const handleCreateInquiry = () => {
+    createInquiry({ dd: "김치" }).then(() => {
+      console.log("create success");
+    });
   };
 
   return (
     <footer className="flex fixed bottom-0 left-0 w-full h-16 bg-white">
+      <button onClick={() => handleAllInquiries()}>확인</button>
+      <button onClick={() => handleDeleteInquiry(1)}>삭제</button>
+      <button onClick={() => handleCreateInquiry()}>추가</button>
       {imageNames.map((imageName, idx) => (
         <button
           key={imageName}
           className="relative flex justify-center items-center w-1/4 border-none bg-transparent p-0"
-          onClick={fetchMovies}
+          onClick={() => handleTapChange(idx)}
         >
           {idx === 2 && <FileInput router={router} />}
           <Image
