@@ -14,6 +14,7 @@ const nextConfig = {
     instrumentationHook: true
   },
 
-};
+}
 
 export default nextConfig;
+//리액트 쿼리를 사용해서 통신은 가능하지만 안정적이지 못하기때문에 express로 하는게 맞아보인다

@@ -8,7 +8,7 @@ import {
 } from "../mocks/handlersFun";
 import type { IconNames } from "../types/footer-type";
 
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import FileInput from "./form/file-input";
 
 export type Movie = {
@@ -19,7 +19,6 @@ export type Movie = {
 const Footer: React.FC = () => {
   const router = useRouter();
   const pathname = usePathname();
-  const [movies, setMovies] = useState<Array<Movie>>([]);
 
   useEffect(() => {
     getAllInquiries().then((inquiries) => {
@@ -47,16 +46,16 @@ const Footer: React.FC = () => {
   };
 
   const handleCreateInquiry = () => {
-    createInquiry({ dd: "김치" }).then(() => {
+    createInquiry({ test: "test1" }).then(() => {
       console.log("create success");
     });
   };
 
   return (
     <footer className="flex fixed bottom-0 left-0 w-full h-16 bg-white">
-      <button onClick={() => handleAllInquiries()}>확인</button>
-      <button onClick={() => handleDeleteInquiry(1)}>삭제</button>
-      <button onClick={() => handleCreateInquiry()}>추가</button>
+      <button onClick={() => handleAllInquiries()}>check</button>
+      <button onClick={() => handleDeleteInquiry(1)}>delete</button>
+      <button onClick={() => handleCreateInquiry()}>add</button>
       {imageNames.map((imageName, idx) => (
         <button
           key={imageName}

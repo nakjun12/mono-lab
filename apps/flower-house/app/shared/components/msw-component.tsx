@@ -6,26 +6,21 @@ export function MockProvider({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const [mockingEnabled, enableMocking] = useState(false);
+  const [isMocking, setIsMocking] = useState(false);
 
   useEffect(() => {
     async function enableApiMocking() {
-      /**
-       * @fixme Next puts this import to the top of
-       * this module and runs it during the build
-       * in Node.js. This makes "msw/browser" import to fail.
-       */
       if (typeof window !== "undefined") {
         const { worker } = await import("../mocks/browser");
         await worker.start();
       }
-      enableMocking(true);
+      setIsMocking(true);
     }
 
     enableApiMocking();
   }, []);
 
-  if (!mockingEnabled) {
+  if (!isMocking) {
     return null;
   }
 

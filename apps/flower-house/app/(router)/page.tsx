@@ -25,11 +25,11 @@ async function getUser() {
 }
 
 export default async function Home() {
-  const user = await getAllInquiries();
-  console.log(user);
+  const inquiries = await getAllInquiries();
+  console.log(inquiries);
   return (
     <main className="flex items-center justify-center h-screen md:h-screen">
-      {user.length}
+      {inquiries.length}
       <Footer />
     </main>
   );
