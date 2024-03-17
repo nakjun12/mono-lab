@@ -1,12 +1,12 @@
-import MarkerComponent from "@/app/core/components/map/marker";
+import MarkerComponent from "@/app/core/map/components/marker";
 import useCurrentMarker, {
   CURRENT_MARKER_KEY
-} from "@/app/core/hooks/use-current-marker";
-import { MAP_KEY } from "@/app/core/hooks/use-map";
-import { MARKERS_KEY } from "@/app/core/hooks/use-markers";
-import { generateMarkerMarkerIcon } from "@/app/core/libs/map/generate-store-marker-icon";
+} from "@/app/core/map/hooks/use-current-marker";
+import { MAP_KEY } from "@/app/core/map/hooks/use-map";
+import { MARKERS_KEY } from "@/app/core/map/hooks/use-markers";
+import { generateMarkerMarkerIcon } from "@/app/core/map/libs/generate-store-marker-icon";
 // import { routeData } from "@/app/core/lib/dummy";
-import type { Map, Marker } from "@/app/core/types/map-types";
+import type { Map, Marker } from "@/app/core/shared/types/map-types";
 import useSWR from "swr";
 // import Navigation from "./navigation";
 

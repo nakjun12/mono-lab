@@ -1,9 +1,9 @@
-import Button from "@/app/core/components/shared/button";
-import FormSubmitButton from "@/app/core/components/shared/button/form-submit-button";
-import GuestButton from "@/app/core/components/shared/button/guest-button";
-import SocialLoginButton from "@/app/core/components/shared/button/social-login-button";
 import Divider from "@/app/core/components/shared/divider";
-import FormInputField from "@/app/core/components/shared/form/form-Input-field";
+import Button from "@/app/core/shared/components/button";
+import FormSubmitButton from "@/app/core/shared/components/button/form-submit-button";
+import GuestButton from "@/app/core/shared/components/button/guest-button";
+import SocialLoginButton from "@/app/core/shared/components/button/social-login-button";
+import FormInputField from "@/app/core/shared/components/form/form-Input-field";
 import Image from "next/image";
 
 function SignUpForm() {

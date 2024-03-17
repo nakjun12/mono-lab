@@ -1,5 +1,5 @@
-import SWRProvider from "@/app/core/components/shared/swr-provider";
-import "@/app/core/globals.css";
+import SWRProvider from "@/app/core/shared/components/swr-provider";
+import "@/app/core/shared/globals.css";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {

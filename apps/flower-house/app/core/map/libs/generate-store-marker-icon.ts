@@ -1,4 +1,4 @@
-import type { ImageIcon } from "@/app/core/types/map-types";
+import type { ImageIcon } from "@/app/core/shared/types/map-types";
 
 // 실제 마커 스프라이트 이미지에서 각 마커의 너비와 높이
 const SCALED_MARKER_WIDTH = 100; // 예: 스프라이트 이미지 내 각 마커의 너비가 30px라고 가정

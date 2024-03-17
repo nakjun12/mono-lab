@@ -1,4 +1,4 @@
-import type { Marker } from "@/app/core/types/map-types";
+import type { Marker } from "@/app/core/shared/types/map-types";
 import { useCallback } from "react";
 import { mutate } from "swr";
 export const MARKERS_KEY = "/markers";

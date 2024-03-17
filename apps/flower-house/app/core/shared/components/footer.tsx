@@ -2,7 +2,7 @@
 import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 
-import type { IconNames } from "../../types/footer-type";
+import type { IconNames } from "../types/footer-type";
 
 import FileInput from "./form/file-input";
 
