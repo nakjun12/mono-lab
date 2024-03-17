@@ -1,4 +1,4 @@
-import type { Marker, NavigationInfo } from "@/app/shared/types/map-types";
+import type { Marker, NavigationInfo } from "@/app/core/types/map-types";
 export const MARKERS: Marker[] = [
   {
     id: "marker-1",
