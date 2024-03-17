@@ -1,4 +1,3 @@
-import MSWComponent from "@/app/shared/components/msw-component";
 import SWRProvider from "@/app/shared/components/swr-provider";
 import "@/app/shared/globals.css";
 import type { Metadata } from "next";
@@ -15,7 +14,6 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <MSWComponent />
       <body>
         <SWRProvider>{children}</SWRProvider>
       </body>

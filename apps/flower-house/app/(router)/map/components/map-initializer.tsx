@@ -8,7 +8,7 @@ import useMap, {
 } from "@/app/(router)/map/hooks/use-map"; // 임포트 경로 수정
 import useMarkers from "@/app/(router)/map/hooks/use-markers";
 import getCurrentLocation from "@/app/(router)/map/lib/get-current-location";
-import { MARKERS } from "@/app/shared/lib/dummy";
+import { MARKERS } from "@/app/shared/constants/dummy";
 import type { Coordinates, Map } from "@/app/shared/types/map-types";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useMemo } from "react";
