@@ -1,15 +1,12 @@
 "use client";
 
-import MapComponent from "@/app/(router)/map/components/map"; // `Map`을 `MapComponent`로 이름 변경하여 혼동 방지
-import Markers from "@/app/(router)/map/components/markers";
-import useMap, {
-  INITIAL_CENTER,
-  INITIAL_ZOOM
-} from "@/app/(router)/map/hooks/use-map"; // 임포트 경로 수정
-import useMarkers from "@/app/(router)/map/hooks/use-markers";
-import getCurrentLocation from "@/app/(router)/map/lib/get-current-location";
-import { MARKERS } from "@/app/shared/constants/dummy";
-import type { Coordinates, Map } from "@/app/shared/types/map-types";
+import MapComponent from "@/app/core/components/map/map"; // `Map`을 `MapComponent`로 이름 변경하여 혼동 방지
+import Markers from "@/app/core/components/map/markers";
+import { MARKERS } from "@/app/core/constants/dummy";
+import useMap, { INITIAL_CENTER, INITIAL_ZOOM } from "@/app/core/hooks/use-map"; // 임포트 경로 수정
+import useMarkers from "@/app/core/hooks/use-markers";
+import getCurrentLocation from "@/app/core/libs/map/get-current-location";
+import type { Coordinates, Map } from "@/app/core/types/map-types";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useMemo } from "react";
 

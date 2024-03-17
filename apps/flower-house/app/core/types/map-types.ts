@@ -12,13 +12,12 @@ export type ImageIcon = {
 };
 
 export type Marker = {
-  //초기 설정
-  nid: string; // 맛집의 고유 식별자
-  name: string; // 맛집의 이름
-  coordinates: Coordinates; // 맛집의 위치 (위도, 경도)
-  season: number; //  계절
-  description?: string; // 선택적 필드
-  category?: string; // 선택적 필드
+  id: string; // 마커의 고유 식별자
+  title: string; // 마커의 제목 (예: 꽃의 이름)
+  description?: string; // 마커에 대한 추가적인 설명 (선택 사항)
+  coordinates: Coordinates; // 마커의 위치 좌표
+  address?: string; // 꽃이 위치한 한글 주소
+  category?: string; // 마커의 카테고리 (선택 사항, 예: "Wildflowers")
 };
 
 export type NavigationInfo = {

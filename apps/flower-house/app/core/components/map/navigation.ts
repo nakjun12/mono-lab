@@ -1,4 +1,4 @@
-import type { Map, NavigationInfo } from "@/app/shared/types/map-types";
+import type { Map, NavigationInfo } from "@/app/core/types/map-types";
 import React, { useEffect } from "react";
 
 type NavigationComponentProps = {

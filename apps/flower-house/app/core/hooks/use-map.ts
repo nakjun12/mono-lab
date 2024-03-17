@@ -1,5 +1,5 @@
 "use client";
-import type { Coordinates, Map } from "@/app/shared/types/map-types";
+import type { Coordinates, Map } from "@/app/core/types/map-types";
 import { usePathname, useRouter } from "next/navigation";
 import { useCallback } from "react";
 import useSWR, { mutate } from "swr";

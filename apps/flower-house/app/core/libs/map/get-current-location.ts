@@ -1,4 +1,4 @@
-import type { Coordinates } from "@/app/shared/types/map-types";
+import type { Coordinates } from "@/app/core/types/map-types";
 
 //현재 위치를 가져오는 함수
 function getCurrentLocation(): Promise<Coordinates> {

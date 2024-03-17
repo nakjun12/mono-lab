@@ -1,8 +1,8 @@
 "use client";
 
-import { INITIAL_CENTER, INITIAL_ZOOM } from "@/app/(router)/map/hooks/use-map";
-import { NCP_CLIENT_ID } from "@/app/shared/constants/config";
-import type { Coordinates, Map } from "@/app/shared/types/map-types";
+import { NCP_CLIENT_ID } from "@/app/core/constants/config";
+import { INITIAL_CENTER, INITIAL_ZOOM } from "@/app/core/hooks/use-map";
+import type { Coordinates, Map } from "@/app/core/types/map-types";
 import Script from "next/script";
 import { useEffect, useRef } from "react";
 
