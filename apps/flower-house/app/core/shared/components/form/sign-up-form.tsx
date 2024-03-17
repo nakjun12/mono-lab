@@ -1,8 +1,8 @@
-import Divider from "@/app/core/components/shared/divider";
 import Button from "@/app/core/shared/components/button";
 import FormSubmitButton from "@/app/core/shared/components/button/form-submit-button";
 import GuestButton from "@/app/core/shared/components/button/guest-button";
 import SocialLoginButton from "@/app/core/shared/components/button/social-login-button";
+import Divider from "@/app/core/shared/components/divider";
 import FormInputField from "@/app/core/shared/components/form/form-Input-field";
 import Image from "next/image";
 
