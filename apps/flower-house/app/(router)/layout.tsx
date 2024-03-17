@@ -14,7 +14,6 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      {/* <MSWComponent /> */}
       <body>
         <SWRProvider>{children}</SWRProvider>
       </body>
