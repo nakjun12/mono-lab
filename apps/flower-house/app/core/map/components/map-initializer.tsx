@@ -56,7 +56,7 @@ const MapInitializer = () => {
         //현재 위치로 이동하는 버튼 만들기
 
         if (!searchParams.get("lat") || !searchParams.get("lng")) {
-          map.setCenter(new window.naver.maps.LatLng(latitude, longitude));
+          map.panTo(new window.naver.maps.LatLng(latitude, longitude));
           setCurrentLocation([latitude, longitude]);
         }
       })
