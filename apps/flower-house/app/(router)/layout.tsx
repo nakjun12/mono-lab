@@ -1,3 +1,4 @@
+import Footer from "@/app/core/shared/components/footer";
 import SWRProvider from "@/app/core/shared/components/swr-provider";
 import "@/app/core/shared/globals.css";
 import type { Metadata } from "next";
@@ -16,6 +17,7 @@ export default function RootLayout({
     <html lang="en">
       <body>
         <SWRProvider>{children}</SWRProvider>
+        <Footer />
       </body>
     </html>
   );

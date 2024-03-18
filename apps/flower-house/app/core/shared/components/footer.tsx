@@ -6,6 +6,9 @@ import type { IconNames } from "../types/footer-type";
 
 import FileInput from "./form/file-input";
 
+export const FOOTER_HEIGHT_TAILWINDCSS = "h-16";
+export const FOOTER_HEIGHT_CSS = "64px";
+
 const Footer: React.FC = () => {
   const router = useRouter();
   const pathname = usePathname();
@@ -20,7 +23,9 @@ const Footer: React.FC = () => {
   };
 
   return (
-    <footer className="flex fixed bottom-0 left-0 w-full h-16 bg-white">
+    <footer
+      className={`flex fixed bottom-0 left-0 w-full ${FOOTER_HEIGHT_TAILWINDCSS} bg-white`}
+    >
       {imageNames.map((imageName, idx) => (
         <button
           key={imageName}
