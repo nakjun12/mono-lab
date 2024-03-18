@@ -1,21 +1,15 @@
 import MarkerComponent from "@/app/core/map/components/marker";
-import useCurrentMarker, {
-  CURRENT_MARKER_KEY
-} from "@/app/core/map/hooks/use-current-marker";
-import { MAP_KEY } from "@/app/core/map/hooks/use-map";
-import { MARKERS_KEY } from "@/app/core/map/hooks/use-markers";
-import { generateMarkerMarkerIcon } from "@/app/core/map/libs/generate-store-marker-icon";
-// import { routeData } from "@/app/core/lib/dummy";
-import type { Map, Marker } from "@/app/core/shared/types/map-types";
-import useSWR from "swr";
-// import Navigation from "./navigation";
+import useCurrentMarker from "@/app/core/map/hooks/use-current-marker";
+import useMap from "@/app/core/map/hooks/use-map";
+import useMarkers from "@/app/core/map/hooks/use-markers";
+import { generateMarkerIcon } from "@/app/core/map/libs/generate-marker-icon";
 
 const Markers = () => {
-  const { data: map } = useSWR<Map>(MAP_KEY); // 맵관리 SWR
-  const { data: markers } = useSWR<Marker[]>(MARKERS_KEY); // 마커관리 SWR
-  const { data: CurrentMarker } = useSWR<Marker>(CURRENT_MARKER_KEY); // 현재 마커관리 SWR
-  const { setCurrentMarker, clearCurrentMarker } = useCurrentMarker(); // 현재 마커 설정 및 초기화 함수
-  //   console.log("Markers render", map, Markers, CurrentMarker);
+  const { map } = useMap();
+  const { markers } = useMarkers(); // 마커관리 SWR
+  const { currentMarker, setCurrentMarker, clearCurrentMarker } =
+    useCurrentMarker(); // 현재 마커 설정 및 초기화 함수
+
   if (!map || !markers) return null;
   return (
     <>
@@ -25,6 +19,10 @@ const Markers = () => {
             map={map}
             coordinates={Marker.coordinates}
             key={Marker.id}
+            icon={generateMarkerIcon({
+              type: Marker.type,
+              isSelected: false
+            })}
             onClick={() => {
               console.log("setCurrentMarker", Marker);
               setCurrentMarker(Marker);
@@ -32,13 +30,16 @@ const Markers = () => {
           />
         );
       })}
-      {CurrentMarker && (
+      {currentMarker && (
         <MarkerComponent
           map={map}
-          coordinates={CurrentMarker.coordinates}
-          icon={generateMarkerMarkerIcon(1, true)}
+          coordinates={currentMarker.coordinates}
+          icon={generateMarkerIcon({
+            type: currentMarker.type,
+            isSelected: true
+          })}
           onClick={clearCurrentMarker}
-          key={CurrentMarker.id}
+          key={currentMarker.id}
         />
       )}
 

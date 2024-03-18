@@ -15,7 +15,7 @@ const useCopyAndReplaceMap = () => {
     navigator.clipboard.writeText(window.location.origin + query);
   }, [router, getMapOptions]);
 
-  return copyAndReplaceUrl;
+  return { copyAndReplaceUrl };
 };
 
 export default useCopyAndReplaceMap;

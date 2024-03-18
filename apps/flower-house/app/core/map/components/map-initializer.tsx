@@ -2,6 +2,7 @@
 
 import MapComponent from "@/app/core/map/components/map"; // `Map`을 `MapComponent`로 이름 변경하여 혼동 방지
 import Markers from "@/app/core/map/components/markers";
+import useCurrentLocation from "@/app/core/map/hooks/use-current-location";
 import useMap, {
   INITIAL_CENTER,
   INITIAL_ZOOM
@@ -17,6 +18,7 @@ import { useEffect, useMemo } from "react";
 const MapInitializer = () => {
   const { initializeMarkers } = useMarkers();
   const { initializeMap } = useMap();
+  const { setCurrentLocation } = useCurrentLocation();
   //const { clearCurrentMarker } = useCurrentMarker();
   const searchParams = useSearchParams(); // 현재 URL의 검색 매개변수
 
@@ -55,6 +57,7 @@ const MapInitializer = () => {
 
         if (!searchParams.get("lat") || !searchParams.get("lng")) {
           map.setCenter(new window.naver.maps.LatLng(latitude, longitude));
+          setCurrentLocation([latitude, longitude]);
         }
       })
       .catch((error) =>
