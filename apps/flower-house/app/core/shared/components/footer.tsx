@@ -36,7 +36,7 @@ const Footer: React.FC = () => {
         >
           {idx === 2 && <FileInput router={router} />}
           <Image
-            src={`/footerIcons/${imageName}-${
+            src={`/icons/footer-icons/${imageName}-${
               pathname === tabPaths[idx] ? "on" : "off"
             }.svg`}
             alt={`${imageName}-icon`}

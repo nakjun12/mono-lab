@@ -8,7 +8,7 @@ const NewpostHeader: React.FC = () => {
   return (
     <header className="flex fixed top-0 left-0 w-full h-16 bg-white p-3">
       <Image
-        src="/newpostIcons/arrow-left-1.svg"
+        src="icons/newpost-icons/arrow-left-1.svg"
         alt="prev-arrow-icon"
         width={30}
         height={30}
