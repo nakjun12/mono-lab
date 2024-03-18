@@ -1,3 +1,5 @@
+import { MARKER_URLS } from "@/app/core/map/libs/generate-marker-icon";
+
 export type Map = naver.maps.Map;
 
 type Lat = number;
@@ -6,18 +8,22 @@ export type Coordinates = [Lat, Lng];
 
 export type ImageIcon = {
   url: string;
-  size: naver.maps.Size;
-  origin: naver.maps.Point;
+  size?: naver.maps.Size;
+  anchor?: naver.maps.Point;
+  origin?: naver.maps.Point;
   scaledSize?: naver.maps.Size;
 };
 
 export type Marker = {
   id: string; // 마커의 고유 식별자
   title: string; // 마커의 제목 (예: 꽃의 이름)
-  description?: string; // 마커에 대한 추가적인 설명 (선택 사항)
+  address: string; // 꽃이 위치한 한글 주소
+  type: keyof typeof MARKER_URLS; // 마커 타입
+  thumbnail: string; // 마커의 썸네일 이미지 URL
   coordinates: Coordinates; // 마커의 위치 좌표
-  address?: string; // 꽃이 위치한 한글 주소
   category?: string; // 마커의 카테고리 (선택 사항, 예: "Wildflowers")
+  likes: number; // 마커에 대한 추천수
+  comments: number; // 마커에 달린 피드수
 };
 
 export type NavigationInfo = {

@@ -3,77 +3,115 @@ export const MARKERS: Marker[] = [
   {
     id: "marker-1",
     title: "긴고랑로의 봄 꽃",
-    description: "긴고랑로에 피어나는 아름다운 봄 꽃들을 관찰할 수 있습니다.",
-    coordinates: [37.5630685, 127.086228],
     address: "긴고랑로",
-    category: "Wildflowers"
+    type: "forsythia",
+    thumbnail: "/path/to/forsythia-thumbnail.jpg",
+    coordinates: [37.5630685, 127.086228], // 튜플 형태로 수정
+    category: "Wildflowers",
+    likes: 100,
+    comments: 15
   },
   {
     id: "marker-2",
     title: "영화사로의 여름 꽃",
-    description: "영화사로에서 여름철 피어나는 화려한 꽃들을 감상하세요.",
-    coordinates: [37.5546825, 127.094328],
     address: "영화사로",
-    category: "Wildflowers"
+    type: "cherryBlossom",
+    thumbnail: "/path/to/cherry-blossom-thumbnail.jpg",
+    coordinates: [37.5546825, 127.094328], // 튜플 형태로 수정
+    category: "Wildflowers",
+    likes: 150,
+    comments: 25
   },
   {
     id: "marker-3",
     title: "신정로의 가을 꽃",
-    coordinates: [37.510015, 126.843236],
     address: "신정로",
-    category: "Wildflowers"
+    type: "forsythia",
+    thumbnail: "/path/to/autumn-flower-thumbnail.jpg",
+    coordinates: [37.510015, 126.843236], // 튜플 형태로 수정
+    category: "Wildflowers",
+    likes: 80,
+    comments: 10
   },
+  // 다른 마커 데이터도 동일하게 수정...
   {
     id: "marker-4",
     title: "곰달래로5길의 겨울 꽃",
-    coordinates: [37.532835, 126.8320005],
     address: "곰달래로5길",
-    category: "Wildflowers"
+    type: "cherryBlossom",
+    thumbnail: "/path/to/winter-flower-thumbnail.jpg",
+    coordinates: [37.532835, 126.8320005], // 튜플 형태로 수정
+    category: "Wildflowers",
+    likes: 65,
+    comments: 12
   },
   {
     id: "marker-5",
     title: "곰달래로6길의 봄 꽃",
-    coordinates: [37.527941, 126.835969],
     address: "곰달래로6길",
-    category: "Wildflowers"
+    type: "forsythia",
+    thumbnail: "/path/to/spring-flower-thumbnail.jpg",
+    coordinates: [37.527941, 126.835969], // 튜플 형태로 수정
+    category: "Wildflowers",
+    likes: 110,
+    comments: 20
   },
   {
     id: "marker-6",
     title: "남부순환로72길의 꽃들",
-    coordinates: [37.5202865, 126.836785],
     address: "남부순환로72길",
-    category: "Wildflowers"
+    type: "cherryBlossom",
+    thumbnail: "/path/to/flowers-thumbnail.jpg",
+    coordinates: [37.5202865, 126.836785], // 튜플 형태로 수정
+    category: "Wildflowers",
+    likes: 95,
+    comments: 18
   },
   {
     id: "marker-7",
     title: "남부순환로88길의 자연",
-    coordinates: [37.51136, 126.838941],
     address: "남부순환로88길",
-    category: "Wildflowers"
+    type: "forsythia",
+    thumbnail: "/path/to/nature-thumbnail.jpg",
+    coordinates: [37.51136, 126.838941], // 튜플 형태로 수정
+    category: "Wildflowers",
+    likes: 75,
+    comments: 14
   },
   {
     id: "marker-8",
     title: "여의동로의 봄 꽃",
-    coordinates: [37.525248, 126.9234625],
     address: "여의동로",
-    category: "Wildflowers"
+    type: "cherryBlossom",
+    thumbnail: "/path/to/yeoui-spring-flower-thumbnail.jpg",
+    coordinates: [37.525248, 126.9234625], // 튜플 형태로 수정
+    category: "Wildflowers",
+    likes: 120,
+    comments: 22
   },
   {
     id: "marker-9",
     title: "여의서로의 향기로운 꽃",
-    coordinates: [37.525248, 126.9234625], // 여의서로와 여의동로가 같은 좌표를 공유하는 것으로 가정
     address: "여의서로",
-    category: "Wildflowers"
+    type: "forsythia",
+    thumbnail: "/path/to/fragrant-flower-thumbnail.jpg",
+    coordinates: [37.525248, 126.9234625], // 동일한 위치를 공유하는 것으로 가정
+    category: "Wildflowers",
+    likes: 130,
+    comments: 25
   },
   {
     id: "marker-10",
     title: "도신로의 꽃길",
-    coordinates: [37.509017, 126.9066115],
     address: "도신로",
-    category: "Wildflowers"
+    type: "cherryBlossom",
+    thumbnail: "/path/to/flower-road-thumbnail.jpg",
+    coordinates: [37.509017, 126.9066115], // 튜플 형태로 수정
+    category: "Wildflowers",
+    likes: 140,
+    comments: 30
   }
 ];
-
 // 주어진 JSON 데이터에서 경로(path) 데이터 추출
 export const routeData: NavigationInfo = {
   code: 0,
