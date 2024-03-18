@@ -1,7 +1,7 @@
 import type { ImageIcon } from "@/app/core/shared/types/map-types";
 
 // 마커 타입에 따른 URL 매핑
-const MARKER_URLS = {
+export const MARKER_URLS = {
   forsythia: "/icons/map-icons/forsythia.svg",
   cherryBlossom: "/icons/map-icons/cherry-blossom.svg"
 };
