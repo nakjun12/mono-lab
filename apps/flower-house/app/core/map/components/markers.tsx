@@ -11,12 +11,18 @@ const Markers = () => {
   const { currentMarker, setCurrentMarker, clearCurrentMarker } =
     useCurrentMarker(); // 현재 마커 설정 및 초기화 함수
 
-  const handleMarkerClick = useCallback((marker: Marker) => {
-    setCurrentMarker(marker);
-    // 마커의 위치를 기준으로 경계를 생성합니다.
-    const markerPosition = new window.naver.maps.LatLng(...marker.coordinates);
-    map.panTo(markerPosition);
-  }, []);
+  const handleMarkerClick = useCallback(
+    (marker: Marker) => {
+      setCurrentMarker(marker);
+      // 마커의 위치를 기준으로 경계를 생성합니다.
+
+      const markerPosition = new window.naver.maps.LatLng(
+        ...marker.coordinates
+      );
+      map.panTo(markerPosition);
+    },
+    [map]
+  );
 
   if (!map || !markers) return null;
 
