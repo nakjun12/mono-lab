@@ -95,6 +95,7 @@ const CardCarousel = <T extends { id: string | number }>({
         spaceBetween={5}
         autoplay={isAutoplay}
         onSlideChange={handleSlideChange}
+        onSwiper={(swiper) => console.log(swiper, "swiper")}
       >
         {data?.map((data) => (
           /*첫화면 레이지 로딩 걸릴 경우 오류 발생하니 주의할 것 */

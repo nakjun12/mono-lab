@@ -29,6 +29,29 @@ const useCurrentLocation = () => {
       );
   }, []);
 
+  // 현재 위치와 다른 위치 사이의 거리를 계산하는 함수
+  const calculateDistance = useCallback(
+    (targetCoords: Coordinates): number | undefined => {
+      if (!map || !currentLocation) return undefined;
+
+      const proj = map.getProjection();
+      const currentLatLng = new window.naver.maps.LatLng(
+        currentLocation[0],
+        currentLocation[1]
+      );
+      const targetLatLng = new window.naver.maps.LatLng(
+        targetCoords[0],
+        targetCoords[1]
+      );
+
+      const distance = proj.getDistance(currentLatLng, targetLatLng);
+      console.log(`현재 위치와 목표 지점 사이의 거리: ${distance} 미터`);
+
+      return distance;
+    },
+    [currentLocation, map]
+  );
+
   //현재 위치 초기화
   const clearCurrentLocation = useCallback(() => {
     console.log("clearCurrentLocation");
@@ -38,6 +61,7 @@ const useCurrentLocation = () => {
   return {
     currentLocation,
     setCurrentLocation,
+    calculateDistance,
     clearCurrentLocation
   };
 };

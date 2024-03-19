@@ -1,11 +1,27 @@
 import ShareButton from "@/app/core/map/components/share-button";
+import useCurrentLocation from "@/app/core/map/hooks/use-current-location";
+import { formatDistance } from "@/app/core/map/libs/formatDistance";
 import { MARKER_URLS } from "@/app/core/map/libs/generate-marker-icon";
 import type { Marker } from "@/app/core/shared/types/map-types";
 import Image from "next/image";
+import { useEffect, useState } from "react";
 
 const PlaceInfoCard: React.FC<{ data: Marker }> = ({
   data: { title, type, address, thumbnail, likes, comments, coordinates }
 }) => {
+  const { currentLocation, calculateDistance } = useCurrentLocation(); // useCurrentLocation에서 calculateDistance 함수 가져오기
+  const [distance, setDistance] = useState<string | undefined>(undefined); // 거리 상태 초기화
+
+  useEffect(() => {
+    if (!currentLocation) return; // 현재 위치가 없으면 함수 종료
+    const distanceInMeters = calculateDistance(coordinates); // 거리 계산
+    if (distanceInMeters !== undefined) {
+      // 거리를 상태에 저장 (예: "240m").
+      const formattedDistance = formatDistance(distanceInMeters);
+      setDistance(formattedDistance);
+    }
+  }, [currentLocation, coordinates, calculateDistance]);
+
   const url = MARKER_URLS[type]; // 구조 분해 할당을 사용하여 'type' 바로 접근
 
   return (
@@ -49,7 +65,7 @@ const PlaceInfoCard: React.FC<{ data: Marker }> = ({
         {/* 신고 아이콘과 시간 (여기서는 예시 데이터가 없으므로 기존 내용 유지) */}
         <span className="flex items-center text-gray-500 space-x-1 text-sm">
           <span>🚩</span>
-          <span>240m</span>
+          <span>{distance}</span>
         </span>
         {/* 공유 버튼 */}
         <ShareButton coordinates={coordinates} width={20} height={20} />{" "}
