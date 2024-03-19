@@ -1,11 +1,12 @@
 "use client";
 
-import { ComponentType, useRef, useState } from "react";
+import useCurrentSlideIndex from "@/app/core/map/hooks/use-current-slide-index";
+import { ComponentType, useEffect, useRef } from "react";
 import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
 import { Keyboard, Mousewheel, Pagination } from "swiper/modules";
-import { Swiper, SwiperSlide } from "swiper/react";
+import { Swiper, SwiperRef, SwiperSlide } from "swiper/react";
 
 type SwiperSettings = {
   loop?: boolean;
@@ -16,27 +17,54 @@ type SwiperSettings = {
 };
 
 // props 타입 정의
-type DynamicSwiperCarouselProps<T> = {
+type CardCarouselProps<T> = {
   data: T[]; // images는 문자열 배열입니다.
   Component: ComponentType<{ data: T }>;
   isLazy?: boolean;
+  onActiveSlideChange?: (index: number) => void;
+  currentData?: T;
   //ComponentType 일수도 있음
 } & SwiperSettings;
 
-const INITIAL_SLIDES_PER_VIEW = 4;
-
-const DynamicSwiperCarousel = <T extends { id: string | number }>({
+const CardCarousel = <T extends { id: string | number }>({
   data,
   Component,
   isLazy = false,
   loop = true,
-  pagination = true,
+  pagination = false,
   autoplay = false,
   mousewheel = false,
-  keyboard = false
-}: DynamicSwiperCarouselProps<T>) => {
-  const [slidesPerView, setSlidesPerView] = useState(INITIAL_SLIDES_PER_VIEW);
-  const updatedSlidesPerView = useRef(INITIAL_SLIDES_PER_VIEW);
+  keyboard = false,
+  currentData,
+  onActiveSlideChange
+}: CardCarouselProps<T>) => {
+  //TODO: 데이터 업데이트시에 마운트되어서 해당 주변 데이터 받아오도록
+  const swiperRef = useRef<SwiperRef>(null);
+  const { currentSlideIndex } = useCurrentSlideIndex();
+
+  useEffect(() => {
+    if (currentSlideIndex === undefined) return;
+
+    setTimeout(() => {
+      const isBoolean =
+        swiperRef.current?.swiper.slideToLoop(currentSlideIndex);
+      console.log(isBoolean, currentSlideIndex, "swiper.realIndex222");
+    }, 10);
+  }, [currentSlideIndex]);
+
+  const handleSlideChange = (swiper: {
+    realIndex: number;
+    activeIndex: number;
+  }) => {
+    console.log(
+      swiper.realIndex,
+      "swiper.realIndex222 슬라이드 변화",
+      swiper.activeIndex,
+      currentSlideIndex
+    );
+    onActiveSlideChange?.(swiper.realIndex);
+    // 슬라이드 변경이 사용자의 직접적인 액션에 의한 것이라면, onActiveSlideChange를 호출합니다.
+  };
 
   const isKeyboard = keyboard
     ? {
@@ -53,11 +81,11 @@ const DynamicSwiperCarousel = <T extends { id: string | number }>({
   const isPagination = pagination ? { clickable: true } : false;
 
   return (
-    <div className="max-w-screen-lg">
+    <div className="w-[750px]">
       <Swiper
+        ref={swiperRef}
         modules={[Keyboard, Pagination, Mousewheel]}
-        slidesPerView={slidesPerView}
-        className="mt-4 z-0"
+        slidesPerView={3}
         pagination={isPagination}
         keyboard={isKeyboard}
         loop={loop}
@@ -66,6 +94,7 @@ const DynamicSwiperCarousel = <T extends { id: string | number }>({
         speed={400}
         spaceBetween={5}
         autoplay={isAutoplay}
+        onSlideChange={handleSlideChange}
       >
         {data?.map((data) => (
           /*첫화면 레이지 로딩 걸릴 경우 오류 발생하니 주의할 것 */
@@ -78,4 +107,4 @@ const DynamicSwiperCarousel = <T extends { id: string | number }>({
   );
 };
 
-export default DynamicSwiperCarousel;
+export default CardCarousel;
