@@ -29,7 +29,10 @@ const Map: React.FC<MapProps> = ({
       zoom: initialZoom, //초기 설정
       minZoom: 9, //최소 줌
       scaleControl: false, //스케일 컨트롤 표시 여부
-      mapDataControl: false //맵 데이터 컨트롤 표시 여부
+      mapDataControl: false, //맵 데이터 컨트롤 표시 여부
+      logoControlOptions: {
+        position: naver.maps.Position.TOP_RIGHT
+      }
       // zoomControl: true, // 줌 컨트롤 표시여부
       // zoomControlOptions: {
       //   style: naver.maps.ZoomControlStyle.SMALL,

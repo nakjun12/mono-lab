@@ -5,7 +5,7 @@ export const MARKERS: Marker[] = [
     title: "긴고랑로의 봄 꽃",
     address: "긴고랑로",
     type: "forsythia",
-    thumbnail: "/path/to/forsythia-thumbnail.jpg",
+    thumbnail: "/example.png",
     coordinates: [37.5630685, 127.086228], // 튜플 형태로 수정
     category: "Wildflowers",
     likes: 100,
@@ -16,7 +16,7 @@ export const MARKERS: Marker[] = [
     title: "영화사로의 여름 꽃",
     address: "영화사로",
     type: "cherryBlossom",
-    thumbnail: "/path/to/cherry-blossom-thumbnail.jpg",
+    thumbnail: "/example.png",
     coordinates: [37.5546825, 127.094328], // 튜플 형태로 수정
     category: "Wildflowers",
     likes: 150,
@@ -27,7 +27,7 @@ export const MARKERS: Marker[] = [
     title: "신정로의 가을 꽃",
     address: "신정로",
     type: "forsythia",
-    thumbnail: "/path/to/autumn-flower-thumbnail.jpg",
+    thumbnail: "/example.png",
     coordinates: [37.510015, 126.843236], // 튜플 형태로 수정
     category: "Wildflowers",
     likes: 80,
@@ -39,7 +39,7 @@ export const MARKERS: Marker[] = [
     title: "곰달래로5길의 겨울 꽃",
     address: "곰달래로5길",
     type: "cherryBlossom",
-    thumbnail: "/path/to/winter-flower-thumbnail.jpg",
+    thumbnail: "/example.png",
     coordinates: [37.532835, 126.8320005], // 튜플 형태로 수정
     category: "Wildflowers",
     likes: 65,
@@ -50,7 +50,7 @@ export const MARKERS: Marker[] = [
     title: "곰달래로6길의 봄 꽃",
     address: "곰달래로6길",
     type: "forsythia",
-    thumbnail: "/path/to/spring-flower-thumbnail.jpg",
+    thumbnail: "/example.png",
     coordinates: [37.527941, 126.835969], // 튜플 형태로 수정
     category: "Wildflowers",
     likes: 110,
@@ -61,7 +61,7 @@ export const MARKERS: Marker[] = [
     title: "남부순환로72길의 꽃들",
     address: "남부순환로72길",
     type: "cherryBlossom",
-    thumbnail: "/path/to/flowers-thumbnail.jpg",
+    thumbnail: "/example.png",
     coordinates: [37.5202865, 126.836785], // 튜플 형태로 수정
     category: "Wildflowers",
     likes: 95,
@@ -72,7 +72,7 @@ export const MARKERS: Marker[] = [
     title: "남부순환로88길의 자연",
     address: "남부순환로88길",
     type: "forsythia",
-    thumbnail: "/path/to/nature-thumbnail.jpg",
+    thumbnail: "/example.png",
     coordinates: [37.51136, 126.838941], // 튜플 형태로 수정
     category: "Wildflowers",
     likes: 75,
@@ -83,7 +83,7 @@ export const MARKERS: Marker[] = [
     title: "여의동로의 봄 꽃",
     address: "여의동로",
     type: "cherryBlossom",
-    thumbnail: "/path/to/yeoui-spring-flower-thumbnail.jpg",
+    thumbnail: "/example.png",
     coordinates: [37.525248, 126.9234625], // 튜플 형태로 수정
     category: "Wildflowers",
     likes: 120,
@@ -94,8 +94,8 @@ export const MARKERS: Marker[] = [
     title: "여의서로의 향기로운 꽃",
     address: "여의서로",
     type: "forsythia",
-    thumbnail: "/path/to/fragrant-flower-thumbnail.jpg",
-    coordinates: [37.525248, 126.9234625], // 동일한 위치를 공유하는 것으로 가정
+    thumbnail: "/example.png",
+    coordinates: [37.525248, 126.8234625], // 동일한 위치를 공유하는 것으로 가정
     category: "Wildflowers",
     likes: 130,
     comments: 25
@@ -105,7 +105,7 @@ export const MARKERS: Marker[] = [
     title: "도신로의 꽃길",
     address: "도신로",
     type: "cherryBlossom",
-    thumbnail: "/path/to/flower-road-thumbnail.jpg",
+    thumbnail: "/example.png",
     coordinates: [37.509017, 126.9066115], // 튜플 형태로 수정
     category: "Wildflowers",
     likes: 140,
