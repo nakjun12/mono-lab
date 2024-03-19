@@ -1,8 +1,6 @@
 import Footer from "@/app/core/shared/components/footer";
 import SWRProvider from "@/app/core/shared/components/swr-provider";
 import "@/app/core/shared/globals.css";
-import { NextUIProvider } from "@nextui-org/react";
-
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -17,14 +15,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <SWRProvider>
-        <NextUIProvider>
-          <body>
-            {children}
-            <Footer />
-          </body>
-        </NextUIProvider>
-      </SWRProvider>
+      <body>
+        <SWRProvider>{children}</SWRProvider>
+        <Footer />
+      </body>
     </html>
   );
 }
