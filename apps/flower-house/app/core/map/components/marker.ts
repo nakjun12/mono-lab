@@ -1,4 +1,8 @@
-import type { Coordinates, ImageIcon, Map } from "@/app/shared/types/map-types";
+import type {
+  Coordinates,
+  ImageIcon,
+  Map
+} from "@/app/core/shared/types/map-types";
 import { useEffect } from "react";
 
 export type MarkerProps = {

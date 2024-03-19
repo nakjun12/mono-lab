@@ -1,7 +1,7 @@
 "use client";
 
-import useCopyAndReplaceMap from "@/app/(router)/map/hooks/use-copy-and-replace-map";
-import useMap from "@/app/(router)/map/hooks/use-map";
+import useCopyAndReplaceMap from "@/app/core/map/hooks/use-copy-and-replace-map";
+import useMap from "@/app/core/map/hooks/use-map";
 
 import { FC, ReactNode } from "react";
 

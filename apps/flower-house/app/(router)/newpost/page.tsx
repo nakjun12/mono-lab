@@ -1,5 +1,5 @@
 "use client";
-import NewpostHeader from "@/app/(router)/newpost/components/newpost-header";
+import NewpostHeader from "@/app/core/post/components/newpost-header";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 

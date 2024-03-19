@@ -1,4 +1,4 @@
-import useMap from "@/app/(router)/map/hooks/use-map";
+import useMap from "@/app/core/map/hooks/use-map";
 import { usePathname, useRouter } from "next/navigation";
 import { useCallback } from "react";
 

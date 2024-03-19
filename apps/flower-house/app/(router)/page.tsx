@@ -1,7 +1,7 @@
 "use client";
-import MapSection from "@/app/(router)/map/components/map-initializer";
-import MapOverlay from "@/app/(router)/map/components/map-overlay";
-import Footer from "@/app/shared/components/footer";
+import MapSection from "@/app/core/map/components/map-initializer";
+import MapOverlay from "@/app/core/map/components/map-overlay";
+import Footer from "@/app/core/shared/components/footer";
 
 export default function Home() {
   return (

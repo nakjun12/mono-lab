@@ -8,7 +8,6 @@
     "chromatic": "npx chromatic --project-token=chpt_71df197d26dccfc",
     "dev": "next dev",
     "lint": "next lint",
-    "lint:ts": "eslint --cache --cache-location=.cache/eslint --ext ts,tsx --report-unused-disable-directives --max-warnings 0 .",
     "mock": "npx tsx watch ./app/shared/mocks/http.ts",
     "prepare": "husky",
     "prettier": "prettier --write --ignore-unknown .",

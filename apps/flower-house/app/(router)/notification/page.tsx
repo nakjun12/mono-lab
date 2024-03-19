@@ -1,5 +1,5 @@
 "use client";
-import Footer from "@/app/shared/components/footer";
+import Footer from "@/app/core/shared/components/footer";
 
 export default function NotificationPage() {
   return (
