@@ -8,7 +8,6 @@ import useMap, {
   INITIAL_ZOOM
 } from "@/app/core/map/hooks/use-map"; // 임포트 경로 수정
 import useMarkers from "@/app/core/map/hooks/use-markers";
-import getCurrentLocation from "@/app/core/map/libs/get-current-location";
 import { MARKERS } from "@/app/core/shared/constants/dummy";
 import type { Coordinates, Map } from "@/app/core/shared/types/map-types";
 import { useSearchParams } from "next/navigation";
@@ -48,21 +47,9 @@ const MapInitializer = () => {
 
   const onLoadMap = (map: Map) => {
     initializeMap(map);
-
+    if (!searchParams.get("lat") || !searchParams.get("lng"))
+      setCurrentLocation(); // 서치 파라미터가 존재하지 않는 경우에만 현재 위치로 이동합니다.
     // 서치 파라미터가 존재하지 않는 경우에만 현재 위치로 이동합니다.
-
-    getCurrentLocation()
-      .then(([latitude, longitude]) => {
-        //현재 위치로 이동하는 버튼 만들기
-
-        if (!searchParams.get("lat") || !searchParams.get("lng")) {
-          map.panTo(new window.naver.maps.LatLng(latitude, longitude));
-          setCurrentLocation([latitude, longitude]);
-        }
-      })
-      .catch((error) =>
-        console.error("Error getting current location:", error)
-      );
   };
 
   // console.log("MapSection render", initialZoom, initialCenter);
