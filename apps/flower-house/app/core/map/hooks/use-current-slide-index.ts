@@ -3,7 +3,7 @@ import useSWR, { mutate } from "swr";
 
 export const CURRENT_SLIDE_KEY = "/current-slide";
 
-//현재 선택한 마커 관리하는 함수
+//현재 선택한 캐러셀의 인덱스를 관리하는 커스텀 훅
 const useCurrentSlideIndex = () => {
   const { data: currentSlideIndex } = useSWR<number>(CURRENT_SLIDE_KEY);
   //현재 마커 설정
