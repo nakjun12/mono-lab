@@ -1,7 +1,5 @@
 "use client";
-import useCurrentLocation from "@/app/core/map/hooks/use-current-location";
 import type { Coordinates, Map } from "@/app/core/shared/types/map-types";
-import { usePathname, useRouter } from "next/navigation";
 import { useCallback } from "react";
 import useSWR, { mutate } from "swr";
 
@@ -13,22 +11,10 @@ export const MAP_KEY = "/map";
 //맵 인스턴스를 관리하는 훅
 const useMap = () => {
   const { data: map } = useSWR(MAP_KEY);
-  const router = useRouter();
-  const pathname = usePathname();
-  const { currentLocation } = useCurrentLocation();
   //초기 맵 설정
   const initializeMap = useCallback((map: Map) => {
     mutate(MAP_KEY, map);
   }, []);
-
-  const location = currentLocation || INITIAL_CENTER;
-
-  // 맵 초기화
-  const resetMapOptions = useCallback(() => {
-    router.replace(pathname);
-    //TODO: 추후 정확한 리셋 값으로 수정 필요함
-    map.morph(new naver.maps.LatLng(...location), INITIAL_ZOOM);
-  }, [map, currentLocation]);
 
   //맵 옵션 가져오기
   const getMapOptions = useCallback(() => {
@@ -42,7 +28,6 @@ const useMap = () => {
   return {
     map,
     initializeMap,
-    resetMapOptions,
     getMapOptions
   };
 };
