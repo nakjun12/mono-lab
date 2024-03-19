@@ -1,31 +1,41 @@
 import MarkerComponent from "@/app/core/map/components/marker";
 import useCurrentMarker from "@/app/core/map/hooks/use-current-marker";
+import useCurrentSlideIndex from "@/app/core/map/hooks/use-current-slide-index";
 import useMap from "@/app/core/map/hooks/use-map";
 import useMarkers from "@/app/core/map/hooks/use-markers";
 import { generateMarkerIcon } from "@/app/core/map/libs/generate-marker-icon";
 import type { Marker } from "@/app/core/shared/types/map-types";
 import { useCallback } from "react";
+
 const Markers = () => {
   const { map } = useMap();
   const { markers } = useMarkers(); // 마커관리 SWR
-  const { currentMarker, setCurrentMarker, clearCurrentMarker } =
-    useCurrentMarker(); // 현재 마커 설정 및 초기화 함수
+  const { currentMarker, setCurrentMarker } = useCurrentMarker(); // 현재 마커 설정 및 초기화 함수
+  const { setCurrentSlideIndex } = useCurrentSlideIndex(); // 현재 슬라이드 설정 및 초기화 함수
 
   const handleMarkerClick = useCallback(
     (marker: Marker) => {
-      setCurrentMarker(marker);
-      // 마커의 위치를 기준으로 경계를 생성합니다.
-
-      const markerPosition = new window.naver.maps.LatLng(
-        ...marker.coordinates
-      );
-      map.panTo(markerPosition);
+      if (map && markers) {
+        const index = markers.findIndex((m) => m.id === marker.id);
+        const num = index - 1 < 0 ? markers.length - 1 : index - 1;
+        setCurrentSlideIndex(num);
+        console.log(
+          "swiper.realIndex222",
+          num,
+          "num",
+          index,
+          "index",
+          markers[index].title,
+          markers[num].title
+        );
+      }
     },
     [map]
   );
 
   if (!map || !markers) return null;
 
+  console.log(currentMarker, "currentMarker");
   return (
     <>
       {markers.map((Marker) => {
@@ -52,7 +62,6 @@ const Markers = () => {
             type: currentMarker.type,
             isSelected: true
           })}
-          onClick={clearCurrentMarker}
           key={currentMarker.id}
         />
       )}
