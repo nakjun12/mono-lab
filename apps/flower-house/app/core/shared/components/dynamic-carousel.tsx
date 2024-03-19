@@ -1,8 +1,10 @@
+"use client";
+
 import { ComponentType, useRef, useState } from "react";
 import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
-import { Autoplay, Keyboard, Mousewheel, Pagination } from "swiper/modules";
+import { Keyboard, Mousewheel, Pagination } from "swiper/modules";
 import { Swiper, SwiperSlide } from "swiper/react";
 
 type SwiperSettings = {
@@ -51,9 +53,9 @@ const DynamicSwiperCarousel = <T extends { id: string | number }>({
   const isPagination = pagination ? { clickable: true } : false;
 
   return (
-    <div className="p-4">
+    <div className="max-w-screen-lg">
       <Swiper
-        modules={[Keyboard, Pagination, Mousewheel, Autoplay]}
+        modules={[Keyboard, Pagination, Mousewheel]}
         slidesPerView={slidesPerView}
         className="mt-4 z-0"
         pagination={isPagination}
