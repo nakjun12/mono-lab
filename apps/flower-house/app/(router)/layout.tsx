@@ -1,7 +1,7 @@
 import Footer from "@/app/core/shared/components/footer";
-import SWRProvider from "@/app/core/shared/components/swr-provider";
+import { Providers as NextUIProvider } from "@/app/core/shared/components/provider/nextui-provider";
+import SWRProvider from "@/app/core/shared/components/provider/swr-provider";
 import "@/app/core/shared/globals.css";
-import { NextUIProvider } from "@nextui-org/react";
 
 import type { Metadata } from "next";
 
@@ -17,14 +17,14 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <SWRProvider>
-        <NextUIProvider>
-          <body>
+      <body>
+        <SWRProvider>
+          <NextUIProvider>
             {children}
             <Footer />
-          </body>
-        </NextUIProvider>
-      </SWRProvider>
+          </NextUIProvider>
+        </SWRProvider>
+      </body>
     </html>
   );
 }
