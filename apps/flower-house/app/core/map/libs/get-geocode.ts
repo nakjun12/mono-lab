@@ -25,6 +25,7 @@ export interface GeocodeAddress {
   distance: string;
 }
 
+//TODO : return 값 정리할 것
 export function geocodeAddress(address: string): Promise<GeocodeAddress> {
   return new Promise((resolve, reject) => {
     window.naver.maps.Service.geocode(
