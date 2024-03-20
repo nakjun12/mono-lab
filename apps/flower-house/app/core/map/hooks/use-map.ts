@@ -18,8 +18,11 @@ const useMap = () => {
 
   //맵 옵션 가져오기
   const getMapOptions = useCallback(() => {
+    if (!map) {
+      return { center: INITIAL_CENTER, zoom: INITIAL_ZOOM };
+    }
     const mapCenter = map.getCenter();
-    const center: Coordinates = [mapCenter.lat(), mapCenter.lng()];
+    const center: Coordinates = [mapCenter.y, mapCenter.x];
     const zoom = map.getZoom();
 
     return { center, zoom };
