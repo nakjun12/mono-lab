@@ -61,7 +61,7 @@ const Map: React.FC<MapProps> = ({
       <Script
         strategy="afterInteractive"
         type="text/javascript"
-        src={`https://openapi.map.naver.com/openapi/v3/maps.js?ncpClientId=${NCP_CLIENT_ID}`}
+        src={`https://openapi.map.naver.com/openapi/v3/maps.js?ncpClientId=${NCP_CLIENT_ID}&submodules=geocoder`}
         onReady={initializeMap}
       />
       <div
