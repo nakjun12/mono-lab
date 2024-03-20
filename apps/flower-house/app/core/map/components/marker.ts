@@ -20,7 +20,6 @@ const Marker: React.FC<MarkerProps> = ({
   onClick
 }): null => {
   useEffect(() => {
-    // console.log("Marker useEffect", map, icon, coordinates, onClick);
     let marker: naver.maps.Marker | null = null;
     if (map) {
       marker = new naver.maps.Marker({

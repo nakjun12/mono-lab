@@ -19,15 +19,6 @@ const Markers = () => {
         const index = markers.findIndex((m) => m.id === marker.id);
         const num = index - 1 < 0 ? markers.length - 1 : index - 1;
         setCurrentSlideIndex(num);
-        console.log(
-          "swiper.realIndex222",
-          num,
-          "num",
-          index,
-          "index",
-          markers[index].title,
-          markers[num].title
-        );
       }
     },
     [map]
@@ -35,7 +26,6 @@ const Markers = () => {
 
   if (!map || !markers) return null;
 
-  console.log(currentMarker, "currentMarker");
   return (
     <>
       {markers.map((Marker) => {

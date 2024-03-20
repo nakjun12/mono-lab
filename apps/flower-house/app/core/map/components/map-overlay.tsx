@@ -21,7 +21,6 @@ const MapOverlay: FC<MapOverlayProps> = ({}) => {
     const num = index + 1 >= markers.length ? 0 : index + 1;
     const marker = markers[num];
 
-    console.log("swiper.realIndex222num", num);
     setCurrentMarker(marker);
     const markerPosition = new window.naver.maps.LatLng(...marker.coordinates);
     map.panTo(markerPosition);
