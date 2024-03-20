@@ -1,9 +1,8 @@
 import useMap from "@/app/core/map/hooks/use-map";
 import getCurrentLocation from "@/app/core/map/libs/get-current-location";
-import type { Coordinates } from "@/app/core/shared/types/map-types";
+import type { Coordinates, Map } from "@/app/core/shared/types/map-types";
 import { useCallback } from "react";
 import useSWR, { mutate } from "swr";
-
 export const CURRENT_LOCATION_KEY = "/current-location";
 
 //현재 위치 관리하는 함수
@@ -12,22 +11,30 @@ const useCurrentLocation = () => {
   const { map } = useMap();
 
   //현재 위치 설정
-  const setCurrentLocation = useCallback(() => {
-    if (!map) return;
+  const setCurrentLocation = useCallback(
+    (inputMap?: Map) => {
+      const targetMap = inputMap || map; // inputMap이 존재하면 사용하고, 없으면 컴포넌트 상태의 map을 사용
 
-    getCurrentLocation()
-      .then(([latitude, longitude]) => {
-        //현재 위치로 이동하는 버튼 만들기
+      if (!targetMap) {
+        console.log("map is not exist");
+        return;
+      }
 
-        console.log("setCurrentLocation");
-        map.panTo(new window.naver.maps.LatLng(latitude, longitude));
+      getCurrentLocation()
+        .then(([latitude, longitude]) => {
+          //현재 위치로 이동하는 버튼 만들기
 
-        mutate(CURRENT_LOCATION_KEY, [latitude, longitude]);
-      })
-      .catch((error) =>
-        console.error("Error getting current location:", error)
-      );
-  }, []);
+          console.log("setCurrentLocation");
+          targetMap.panTo(new window.naver.maps.LatLng(latitude, longitude));
+
+          mutate(CURRENT_LOCATION_KEY, [latitude, longitude]);
+        })
+        .catch((error) =>
+          console.error("Error getting current location:", error)
+        );
+    },
+    [map]
+  );
 
   // 현재 위치와 다른 위치 사이의 거리를 계산하는 함수
   const calculateDistance = useCallback(
@@ -45,7 +52,6 @@ const useCurrentLocation = () => {
       );
 
       const distance = proj.getDistance(currentLatLng, targetLatLng);
-      console.log(`현재 위치와 목표 지점 사이의 거리: ${distance} 미터`);
 
       return distance;
     },

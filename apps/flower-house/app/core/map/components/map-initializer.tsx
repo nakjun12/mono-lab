@@ -47,8 +47,11 @@ const MapInitializer = () => {
 
   const onLoadMap = (map: Map) => {
     initializeMap(map);
-    if (!searchParams.get("lat") || !searchParams.get("lng"))
-      setCurrentLocation(); // 서치 파라미터가 존재하지 않는 경우에만 현재 위치로 이동합니다.
+
+    if (!searchParams.get("lat") || !searchParams.get("lng")) {
+      console.log("setCurrentLocation");
+      setCurrentLocation(map); // 서치 파라미터가 존재하지 않는 경우에만 현재 위치로 이동합니다.
+    }
     // 서치 파라미터가 존재하지 않는 경우에만 현재 위치로 이동합니다.
   };
 
