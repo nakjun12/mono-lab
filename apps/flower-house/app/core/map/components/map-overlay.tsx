@@ -2,9 +2,11 @@
 
 import DynamicSwiperCarousel from "@/app/core/map/components/card-carousel";
 import ResetButton from "@/app/core/map/components/reset-button";
+import { useAddressOnMove } from "@/app/core/map/hooks/use-address-on-move";
 import useCurrentMarker from "@/app/core/map/hooks/use-current-marker";
 import useMap from "@/app/core/map/hooks/use-map";
 import useMarkers from "@/app/core/map/hooks/use-markers";
+import { useSearchFromAddress } from "@/app/core/map/hooks/use-search-from-address";
 import CardComponent from "@/app/core/shared/components/card/place-info-card";
 import { FC } from "react";
 
@@ -12,8 +14,20 @@ interface MapOverlayProps {}
 
 const MapOverlay: FC<MapOverlayProps> = ({}) => {
   const { map } = useMap();
+
   const { markers } = useMarkers(); // 마커관리 SWR
   const { currentMarker, setCurrentMarker } = useCurrentMarker();
+  const { reverseGeocodeResults, isLoading, isError } = useAddressOnMove(map);
+  const { geocodeResult, updateAddress, searchedAddress } =
+    useSearchFromAddress();
+  // console.log(
+  //   "reverseGeocodeResults",
+  //   reverseGeocodeResults,
+  //   isLoading,
+  //   isError
+  // );
+
+  // console.log("geocodeResult", geocodeResult, searchedAddress);
 
   const handleSwiperClick = (index: number) => {
     if (!markers) return; // 마커 데이터가 유효하지 않으면 함수 실행 중단
@@ -33,6 +47,7 @@ const MapOverlay: FC<MapOverlayProps> = ({}) => {
       <div className="fixed top-0 m-4">
         {/*맵 옵션 리셋하기 */}
         <ResetButton />
+        {/* <button onClick={() => updateAddress("가산동")}>구로</button> */}
       </div>
       <div className={`fixed bottom-[80px] z-20`}>
         {/*현재 위치 url로 복사하기 */}
