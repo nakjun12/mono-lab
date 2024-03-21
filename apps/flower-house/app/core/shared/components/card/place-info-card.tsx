@@ -25,7 +25,7 @@ const PlaceInfoCard: React.FC<{ data: Marker }> = ({
   const url = MARKER_URLS[type]; // 구조 분해 할당을 사용하여 'type' 바로 접근
 
   return (
-    <div className="flex flex-col max-w-md mx-auto bg-white rounded-xl border-gray-200 shadow-md md:max-w-2xl">
+    <div className="flex flex-col max-w-md mx-auto bg-white rounded-xl border-gray-200 shadow-md md:max-w-2xl cursor-pointer">
       <div className="flex max-w-md mx-auto bg-white rounded-xl overflow-hidden md:max-w-2xl">
         <div className="flex-1 p-4 w-2/3 overflow-hidden">
           <div className="flex items-center space-x-2 max-w-50">
