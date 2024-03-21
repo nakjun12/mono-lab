@@ -46,9 +46,10 @@ export function useAddressOnMove(map: Map) {
     }
   }, [map]);
 
-  // data는 SimplifiedGeocodeAddress[] 타입 또는 undefined입니다.
+  const reverseGeocodeResults = data?.[0].roadAddress;
+
   return {
-    reverseGeocodeResults: data,
+    reverseGeocodeResults,
     isLoading: !error && !data,
     isError: error
   };
