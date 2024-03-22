@@ -5,7 +5,7 @@ import React from "react";
 interface ShareButtonProps {
   width?: number;
   height?: number;
-  coordinates?: Coordinates;
+  coordinates: Coordinates;
 }
 
 const ShareButton: React.FC<ShareButtonProps> = ({
