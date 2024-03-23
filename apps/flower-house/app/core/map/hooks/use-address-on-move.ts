@@ -20,7 +20,7 @@ const fetchReverseGeocode = async (map: Map) => {
 //위치 이동 시 갱신을 위한 훅
 //TODO: 캐싱 메모리 관리하는 방법 고려할 것, 에러 처리 신경쓸 것
 export function useAddressOnMove(map: Map) {
-  const { data, error } = useSWR<SimplifiedGeocodeAddress[], Error>(
+  const { data: result, error } = useSWR<SimplifiedGeocodeAddress[], Error>(
     ADDRESS_FETCH_KEY,
     () => fetchReverseGeocode(map),
     {}
@@ -46,11 +46,11 @@ export function useAddressOnMove(map: Map) {
     }
   }, [map]);
 
-  const reverseGeocodeResults = data?.[0].roadAddress;
+  const reverseGeocodeResults = result?.[0];
 
   return {
     reverseGeocodeResults,
-    isLoading: !error && !data,
+    isLoading: !error && !result,
     isError: error
   };
 }

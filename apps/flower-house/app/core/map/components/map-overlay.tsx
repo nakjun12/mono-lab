@@ -64,7 +64,8 @@ const MapOverlay: FC<MapOverlayProps> = ({}) => {
   if (!map || !markers) return null;
   console.log(geocodeResult, searchedAddress, "이거");
 
-  const placeholder = reverseGeocodeResults || "주소를 입력해주세요";
+  const placeholder =
+    reverseGeocodeResults?.roadAddress || "주소를 입력해주세요";
   return (
     <div>
       <div className="fixed top-0">
