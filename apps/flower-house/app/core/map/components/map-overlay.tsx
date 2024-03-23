@@ -12,6 +12,9 @@ import CardComponent from "@/app/core/shared/components/card/place-info-card";
 import SearchBar from "@/app/core/shared/components/search-bar";
 import { FC, useEffect } from "react";
 
+const OVERLAY_BOTTOM_WIDTH = "w-[800px]";
+const OVERLAY_MD_BOTTOM_WIDTH = `md:w-[800px]`;
+
 interface MapOverlayProps {}
 
 const MapOverlay: FC<MapOverlayProps> = ({}) => {
@@ -70,24 +73,41 @@ const MapOverlay: FC<MapOverlayProps> = ({}) => {
     <div>
       <div className="fixed top-0">
         {/*맵 옵션 리셋하기 */}
-        <CurrentLocationButton onCurrentLocation={currentLocationMap} />
+
         <div className="flex justify-center w-screen ">
           <SearchBar onSearch={updateAddress} placeholder={placeholder} />
         </div>
       </div>
-      <div className={`fixed bottom-[80px] z-20`}>
+      <div
+        className={`fixed bottom-[80px] flex flex-col justify-center w-screen z-20`}
+      >
         {/*현재 위치 url로 복사하기 */}
         {/* <CardComponent /> */}
-
-        <div className="flex justify-center w-screen ">
-          {markers && markers.length > 0 && (
-            <CardCarousel
-              Component={CardComponent}
-              data={markers}
-              onActiveSlideChange={handleSwiperClick}
-              currentData={currentMarker}
-            />
-          )}
+        <div className="flex justify-center w-screen "></div>
+        <div className="flex flex-col justify-center w-screen items-center ">
+          <div
+            className={`relative h-12 flex items-center justify-center mb-1 w-screen ${OVERLAY_MD_BOTTOM_WIDTH}`}
+          >
+            <div className="absolute left-0 pl-1">
+              <CurrentLocationButton onCurrentLocation={currentLocationMap} />
+            </div>
+            <button
+              className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+              onClick={currentLocationMap}
+            >
+              현위치 검색
+            </button>
+          </div>
+          <div className={OVERLAY_BOTTOM_WIDTH}>
+            {markers && markers.length > 0 && (
+              <CardCarousel
+                Component={CardComponent}
+                data={markers}
+                onActiveSlideChange={handleSwiperClick}
+                currentData={currentMarker}
+              />
+            )}
+          </div>
         </div>
       </div>
     </div>

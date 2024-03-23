@@ -76,7 +76,7 @@ const CardCarousel = <T extends { id: string | number }>({
   const isPagination = pagination ? { clickable: true } : false;
 
   return (
-    <div className="w-[750px]">
+    <div>
       <Swiper
         ref={swiperRef}
         modules={[Keyboard, Pagination, Mousewheel]}
