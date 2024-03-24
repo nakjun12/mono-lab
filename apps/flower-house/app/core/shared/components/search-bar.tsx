@@ -22,7 +22,7 @@ const SearchBar = ({ onSearch, placeholder }: SearchBarProps) => {
   };
 
   return (
-    <div className="mt-4 mx-auto w-10/12 md:w-4/12 z-10 rounded-xl  shadow-lg">
+    <div className="mt-4 mx-auto w-8/12 md:w-6/12 z-10 rounded-xl  shadow-lg">
       <form
         onSubmit={handleSubmit}
         className="flex items-center rounded-xl bg-white overflow-hidden"
