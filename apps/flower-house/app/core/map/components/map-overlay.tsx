@@ -14,15 +14,14 @@ import SearchBar from "@/app/core/shared/components/search-bar";
 import type { Coordinates } from "@/app/core/shared/types/map-types";
 import { FC, useCallback, useEffect } from "react";
 
-const OVERLAY_BOTTOM_WIDTH = "w-[800px]";
-const OVERLAY_MD_BOTTOM_WIDTH = `md:w-[800px]`;
+const OVERLAY_WIDTH = "w-[800px]";
+const OVERLAY_MD_WIDTH = `md:w-[800px]`;
 
 interface MapOverlayProps {}
 
 const MapOverlay: FC<MapOverlayProps> = ({}) => {
   const { map } = useMap();
-
-  const { markers } = useMarkers(); // 마커관리 SWR
+  const { markers } = useMarkers();
   const { currentLocation, calculateDistance, setCurrentLocation } =
     useCurrentLocation();
   const { currentMarker, setCurrentMarker } = useCurrentMarker();
@@ -38,67 +37,60 @@ const MapOverlay: FC<MapOverlayProps> = ({}) => {
       map.panTo(new window.naver.maps.LatLng(coordinates));
       console.log(geocodeResult, "geocodeResult");
     }
-  }, [geocodeResult]);
+  }, [geocodeResult, map]);
 
-  const handleSwiperClick = (index: number) => {
-    if (!markers) return; // 마커 데이터가 유효하지 않으면 함수 실행 중단
+  const handleSwiperClick = useCallback(
+    (index: number) => {
+      if (!markers) return;
 
-    const num = index + 1 >= markers.length ? 0 : index + 1;
-    const marker = markers[num];
+      const nextIndex = (index + 1) % markers.length;
+      const marker = markers[nextIndex];
 
-    setCurrentMarker(marker);
-    const markerPosition = new window.naver.maps.LatLng(...marker.coordinates);
-    map.panTo(markerPosition);
-  };
+      setCurrentMarker(marker);
+      const markerPosition = new window.naver.maps.LatLng(
+        ...marker.coordinates
+      );
+      map.panTo(markerPosition);
+    },
+    [markers, setCurrentMarker, map]
+  );
 
-  const currentLocationMap = () => {
+  const currentLocationMap = useCallback(() => {
     setCurrentLocation(map);
-  };
+  }, [setCurrentLocation, map]);
 
   const handleDistance = useCallback(
     (targetCoords: Coordinates): string => {
-      // 현재 위치가 없으면 '알 수 없음'을 반환
-      if (!currentLocation) {
-        return "알 수 없음";
-      }
+      if (!currentLocation) return "알 수 없음";
 
-      // 거리 계산
       const distanceInMeters = calculateDistance(targetCoords, map);
-
-      // 거리 계산이 가능한 경우, 포맷된 거리 문자열을 반환
-      if (distanceInMeters !== undefined) {
-        return formatDistance(distanceInMeters); // "240m"와 같은 형식
-      }
-
-      // 거리 계산이 불가능한 경우, '거리 계산 중...'을 반환
-      return "거리 계산 중...";
+      return distanceInMeters !== undefined
+        ? formatDistance(distanceInMeters)
+        : "거리 계산 중...";
     },
     [currentLocation, calculateDistance, map]
   );
 
   if (!map || !markers) return null;
-  console.log(geocodeResult, searchedAddress, "이거");
 
   const placeholder =
     reverseGeocodeResults?.roadAddress || "주소를 입력해주세요";
   return (
     <div>
       <div className="fixed top-0">
-        {/*맵 옵션 리셋하기 */}
-
         <div className="flex justify-center w-screen ">
-          <SearchBar onSearch={updateAddress} placeholder={placeholder} />
+          <div className={OVERLAY_WIDTH}>
+            <SearchBar onSearch={updateAddress} placeholder={placeholder} />
+          </div>
         </div>
       </div>
       <div
         className={`fixed bottom-[80px] flex flex-col justify-center w-screen z-20`}
       >
-        {/*현재 위치 url로 복사하기 */}
-        {/* <CardComponent /> */}
         <div className="flex justify-center w-screen "></div>
         <div className="flex flex-col justify-center w-screen items-center ">
           <div
-            className={`relative h-12 flex items-center justify-center mb-1 w-screen ${OVERLAY_MD_BOTTOM_WIDTH}`}
+            className={`relative h-12 flex items-center justify-center mb-1 w-screen ${OVERLAY_MD_WIDTH}`}
           >
             <div className="absolute left-0 pl-1">
               <CurrentLocationButton onCurrentLocation={currentLocationMap} />
@@ -110,7 +102,7 @@ const MapOverlay: FC<MapOverlayProps> = ({}) => {
               현위치 검색
             </button>
           </div>
-          <div className={OVERLAY_BOTTOM_WIDTH}>
+          <div className={OVERLAY_WIDTH}>
             {markers && markers.length > 0 && (
               <CardCarousel
                 Component={CardComponent}
