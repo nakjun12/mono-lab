@@ -8,9 +8,11 @@ import useCurrentMarker from "@/app/core/map/hooks/use-current-marker";
 import useMap from "@/app/core/map/hooks/use-map";
 import useMarkers from "@/app/core/map/hooks/use-markers";
 import { useSearchFromAddress } from "@/app/core/map/hooks/use-search-from-address";
+import { formatDistance } from "@/app/core/map/libs/formatDistance";
 import CardComponent from "@/app/core/shared/components/card/place-info-card";
 import SearchBar from "@/app/core/shared/components/search-bar";
-import { FC, useEffect } from "react";
+import type { Coordinates } from "@/app/core/shared/types/map-types";
+import { FC, useCallback, useEffect } from "react";
 
 const OVERLAY_BOTTOM_WIDTH = "w-[800px]";
 const OVERLAY_MD_BOTTOM_WIDTH = `md:w-[800px]`;
@@ -53,16 +55,26 @@ const MapOverlay: FC<MapOverlayProps> = ({}) => {
     setCurrentLocation(map);
   };
 
-  // const handleDistance = (targetCoords: Coordinates) => {
-  //   if (!currentLocation) return; // 현재 위치가 없으면 함수 종료
-  //   const distanceInMeters = calculateDistance(targetCoords, map); // 거리 계산
-  //   if (distanceInMeters !== undefined) {
-  //     // 거리를 상태에 저장 (예: "240m").
-  //     const formattedDistance = formatDistance(distanceInMeters);
-  //     return formattedDistance;
-  //   }
-  //   return "거리 계산 중...";
-  // };
+  const handleDistance = useCallback(
+    (targetCoords: Coordinates): string => {
+      // 현재 위치가 없으면 '알 수 없음'을 반환
+      if (!currentLocation) {
+        return "알 수 없음";
+      }
+
+      // 거리 계산
+      const distanceInMeters = calculateDistance(targetCoords, map);
+
+      // 거리 계산이 가능한 경우, 포맷된 거리 문자열을 반환
+      if (distanceInMeters !== undefined) {
+        return formatDistance(distanceInMeters); // "240m"와 같은 형식
+      }
+
+      // 거리 계산이 불가능한 경우, '거리 계산 중...'을 반환
+      return "거리 계산 중...";
+    },
+    [currentLocation, calculateDistance, map]
+  );
 
   if (!map || !markers) return null;
   console.log(geocodeResult, searchedAddress, "이거");
@@ -102,9 +114,9 @@ const MapOverlay: FC<MapOverlayProps> = ({}) => {
             {markers && markers.length > 0 && (
               <CardCarousel
                 Component={CardComponent}
-                data={markers}
+                datas={markers}
                 onActiveSlideChange={handleSwiperClick}
-                currentData={currentMarker}
+                onDistance={handleDistance}
               />
             )}
           </div>

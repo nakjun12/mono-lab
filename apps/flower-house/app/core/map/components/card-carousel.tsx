@@ -1,7 +1,8 @@
 "use client";
 
 import useCurrentSlideIndex from "@/app/core/map/hooks/use-current-slide-index";
-import { ComponentType, useEffect, useRef, useState } from "react";
+import type { Coordinates, Marker } from "@/app/core/shared/types/map-types";
+import { ComponentType, useEffect, useRef } from "react";
 import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
@@ -16,18 +17,22 @@ type SwiperSettings = {
   keyboard?: boolean;
 };
 
+export type onDistance = (targetCoords: Coordinates) => string;
+
 // props 타입 정의
-type CardCarouselProps<T> = {
-  data: T[]; // images는 문자열 배열입니다.
-  Component: ComponentType<{ data: T }>;
-  isLazy?: boolean;
+type CardCarouselProps = {
+  datas: Marker[]; // images는 문자열 배열입니다.
+  onDistance: onDistance;
   onActiveSlideChange?: (index: number) => void;
-  currentData?: T;
-  //ComponentType 일수도 있음
+  Component: ComponentType<{
+    data: Marker; // Marker 타입이 어떻게 정의되어 있는지에 따라 달라질 수 있음
+    onDistance: onDistance;
+  }>;
+  isLazy?: boolean;
 } & SwiperSettings;
 
-const CardCarousel = <T extends { id: string | number }>({
-  data,
+const CardCarousel = ({
+  datas,
   Component,
   isLazy = false,
   loop = true,
@@ -35,20 +40,20 @@ const CardCarousel = <T extends { id: string | number }>({
   autoplay = false,
   mousewheel = false,
   keyboard = false,
-  currentData,
-  onActiveSlideChange
-}: CardCarouselProps<T>) => {
+  onActiveSlideChange,
+  onDistance
+}: CardCarouselProps) => {
   //TODO: 데이터 업데이트시에 마운트되어서 해당 주변 데이터 받아오도록
   const swiperRef = useRef<SwiperRef>(null);
   const isInitLoadRef = useRef(false);
-  const [isInitialLoad, setIsInitialLoad] = useState(false);
+
   const { currentSlideIndex } = useCurrentSlideIndex();
 
   useEffect(() => {
     if (currentSlideIndex === undefined) return;
-    setIsInitialLoad(true);
+
     isInitLoadRef.current = true;
-    const isBoolean = swiperRef.current?.swiper.slideToLoop(currentSlideIndex);
+    swiperRef.current?.swiper.slideToLoop(currentSlideIndex);
   }, [currentSlideIndex]);
 
   const handleSlideChange = (swiper: {
@@ -95,10 +100,10 @@ const CardCarousel = <T extends { id: string | number }>({
           isInitLoadRef.current = true; // Swiper 초기화 시 초기 로드 상태를 false로 설정
         }}
       >
-        {data?.map((data) => (
+        {datas?.map((data) => (
           /*첫화면 레이지 로딩 걸릴 경우 오류 발생하니 주의할 것 */
           <SwiperSlide key={`${data.id}`} lazy={isLazy}>
-            <Component data={data} />
+            <Component data={data} onDistance={onDistance} />
           </SwiperSlide>
         ))}
       </Swiper>

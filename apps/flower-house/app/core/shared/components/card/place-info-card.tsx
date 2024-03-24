@@ -1,28 +1,25 @@
+import type { onDistance } from "@/app/core/map/components/card-carousel";
 import ShareButton from "@/app/core/map/components/share-button";
-import useCurrentLocation from "@/app/core/map/hooks/use-current-location";
-import useMap from "@/app/core/map/hooks/use-map";
-import { formatDistance } from "@/app/core/map/libs/formatDistance";
 import { MARKER_URLS } from "@/app/core/map/libs/generate-marker-icon";
 import type { Marker } from "@/app/core/shared/types/map-types";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 
-const PlaceInfoCard: React.FC<{ data: Marker }> = ({
-  data: { title, type, address, thumbnail, likes, comments, coordinates }
+type PlaceInfoCardProps = {
+  data: Marker; // Marker 타입이 어떻게 정의되어 있는지에 따라 달라질 수 있음
+  onDistance: onDistance;
+};
+
+const PlaceInfoCard: React.FC<PlaceInfoCardProps> = ({
+  data: { title, type, address, thumbnail, likes, comments, coordinates },
+  onDistance
 }) => {
-  const { map } = useMap();
-  const { currentLocation, calculateDistance } = useCurrentLocation(); // useCurrentLocation에서 calculateDistance 함수 가져오기
-  const [distance, setDistance] = useState<string | undefined>(undefined); // 거리 상태 초기화
+  const [distance, setDistance] = useState<string>("계산중.."); // 거리 상태 초기화
 
   useEffect(() => {
-    if (!currentLocation) return; // 현재 위치가 없으면 함수 종료
-    const distanceInMeters = calculateDistance(coordinates, map); // 거리 계산
-    if (distanceInMeters !== undefined) {
-      // 거리를 상태에 저장 (예: "240m").
-      const formattedDistance = formatDistance(distanceInMeters);
-      setDistance(formattedDistance);
-    }
-  }, [currentLocation, coordinates, calculateDistance]);
+    const distance = onDistance(coordinates); // onDistance 함수를 사용하여 거리 계산
+    setDistance(distance);
+  }, [onDistance]);
 
   const url = MARKER_URLS[type]; // 구조 분해 할당을 사용하여 'type' 바로 접근
 
