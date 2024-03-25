@@ -1,7 +1,6 @@
 "use client";
 
 import MapComponent from "@/app/core/map/components/map"; // `Map`을 `MapComponent`로 이름 변경하여 혼동 방지
-import Markers from "@/app/core/map/components/markers";
 import useCurrentLocation from "@/app/core/map/hooks/use-current-location";
 import useMap, {
   INITIAL_CENTER,
@@ -64,7 +63,6 @@ const MapInitializer = () => {
         initialZoom={initialZoom}
         initialCenter={initialCenter}
       />
-      <Markers />
     </>
   );
 };
