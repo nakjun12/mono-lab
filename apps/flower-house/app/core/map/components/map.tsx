@@ -1,6 +1,7 @@
 "use client";
 
 import { INITIAL_CENTER, INITIAL_ZOOM } from "@/app/core/map/hooks/use-map";
+import { FOOTER_HEIGHT_REM } from "@/app/core/shared/components/footer";
 import { NCP_CLIENT_ID } from "@/app/core/shared/constants/config";
 import type { Coordinates, Map } from "@/app/core/shared/types/map-types";
 import Script from "next/script";
@@ -29,11 +30,14 @@ const Map: React.FC<MapProps> = ({
       minZoom: 9, //최소 줌
       scaleControl: false, //스케일 컨트롤 표시 여부
       mapDataControl: false, //맵 데이터 컨트롤 표시 여부
-      zoomControl: true, // 줌 컨트롤 표시여부
-      zoomControlOptions: {
-        style: naver.maps.ZoomControlStyle.SMALL,
+      logoControlOptions: {
         position: naver.maps.Position.TOP_RIGHT
       }
+      // zoomControl: true, // 줌 컨트롤 표시여부
+      // zoomControlOptions: {
+      //   style: naver.maps.ZoomControlStyle.SMALL,
+      //   position: naver.maps.Position.TOP_RIGHT
+      // }
     };
     //새로운 네이버 맵 인스턴스 생성
     const map = new window.naver.maps.Map(mapId, mapOptions);
@@ -57,10 +61,13 @@ const Map: React.FC<MapProps> = ({
       <Script
         strategy="afterInteractive"
         type="text/javascript"
-        src={`https://openapi.map.naver.com/openapi/v3/maps.js?ncpClientId=${NCP_CLIENT_ID}`}
+        src={`https://openapi.map.naver.com/openapi/v3/maps.js?ncpClientId=${NCP_CLIENT_ID}&submodules=geocoder`}
         onReady={initializeMap}
       />
-      <div id={mapId} style={{ width: "100%", height: "500px" }} />
+      <div
+        id={mapId}
+        style={{ width: "100%", height: `calc(100vh - ${FOOTER_HEIGHT_REM})` }}
+      />
     </>
   );
 };

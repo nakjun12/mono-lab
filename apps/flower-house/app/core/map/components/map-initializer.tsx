@@ -2,12 +2,12 @@
 
 import MapComponent from "@/app/core/map/components/map"; // `Map`을 `MapComponent`로 이름 변경하여 혼동 방지
 import Markers from "@/app/core/map/components/markers";
+import useCurrentLocation from "@/app/core/map/hooks/use-current-location";
 import useMap, {
   INITIAL_CENTER,
   INITIAL_ZOOM
 } from "@/app/core/map/hooks/use-map"; // 임포트 경로 수정
 import useMarkers from "@/app/core/map/hooks/use-markers";
-import getCurrentLocation from "@/app/core/map/libs/get-current-location";
 import { MARKERS } from "@/app/core/shared/constants/dummy";
 import type { Coordinates, Map } from "@/app/core/shared/types/map-types";
 import { useSearchParams } from "next/navigation";
@@ -17,6 +17,7 @@ import { useEffect, useMemo } from "react";
 const MapInitializer = () => {
   const { initializeMarkers } = useMarkers();
   const { initializeMap } = useMap();
+  const { setCurrentLocation } = useCurrentLocation();
   //const { clearCurrentMarker } = useCurrentMarker();
   const searchParams = useSearchParams(); // 현재 URL의 검색 매개변수
 
@@ -47,19 +48,11 @@ const MapInitializer = () => {
   const onLoadMap = (map: Map) => {
     initializeMap(map);
 
+    if (!searchParams.get("lat") || !searchParams.get("lng")) {
+      console.log("setCurrentLocation");
+      setCurrentLocation(map); // 서치 파라미터가 존재하지 않는 경우에만 현재 위치로 이동합니다.
+    }
     // 서치 파라미터가 존재하지 않는 경우에만 현재 위치로 이동합니다.
-
-    getCurrentLocation()
-      .then(([latitude, longitude]) => {
-        //현재 위치로 이동하는 버튼 만들기
-
-        if (!searchParams.get("lat") || !searchParams.get("lng")) {
-          map.setCenter(new window.naver.maps.LatLng(latitude, longitude));
-        }
-      })
-      .catch((error) =>
-        console.error("Error getting current location:", error)
-      );
   };
 
   // console.log("MapSection render", initialZoom, initialCenter);

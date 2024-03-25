@@ -1,22 +1,31 @@
 import MarkerComponent from "@/app/core/map/components/marker";
-import useCurrentMarker, {
-  CURRENT_MARKER_KEY
-} from "@/app/core/map/hooks/use-current-marker";
-import { MAP_KEY } from "@/app/core/map/hooks/use-map";
-import { MARKERS_KEY } from "@/app/core/map/hooks/use-markers";
-import { generateMarkerMarkerIcon } from "@/app/core/map/libs/generate-store-marker-icon";
-// import { routeData } from "@/app/core/lib/dummy";
-import type { Map, Marker } from "@/app/core/shared/types/map-types";
-import useSWR from "swr";
-// import Navigation from "./navigation";
+import useCurrentMarker from "@/app/core/map/hooks/use-current-marker";
+import useCurrentSlideIndex from "@/app/core/map/hooks/use-current-slide-index";
+import useMap from "@/app/core/map/hooks/use-map";
+import useMarkers from "@/app/core/map/hooks/use-markers";
+import { generateMarkerIcon } from "@/app/core/map/libs/generate-marker-icon";
+import type { Marker } from "@/app/core/shared/types/map-types";
+import { useCallback } from "react";
 
 const Markers = () => {
-  const { data: map } = useSWR<Map>(MAP_KEY); // 맵관리 SWR
-  const { data: markers } = useSWR<Marker[]>(MARKERS_KEY); // 마커관리 SWR
-  const { data: CurrentMarker } = useSWR<Marker>(CURRENT_MARKER_KEY); // 현재 마커관리 SWR
-  const { setCurrentMarker, clearCurrentMarker } = useCurrentMarker(); // 현재 마커 설정 및 초기화 함수
-  //   console.log("Markers render", map, Markers, CurrentMarker);
+  const { map } = useMap();
+  const { markers } = useMarkers(); // 마커관리 SWR
+  const { currentMarker, setCurrentMarker } = useCurrentMarker(); // 현재 마커 설정 및 초기화 함수
+  const { setCurrentSlideIndex } = useCurrentSlideIndex(); // 현재 슬라이드 설정 및 초기화 함수
+
+  const handleMarkerClick = useCallback(
+    (marker: Marker) => {
+      if (map && markers) {
+        const index = markers.findIndex((m) => m.id === marker.id);
+        const num = index - 1 < 0 ? markers.length - 1 : index - 1;
+        setCurrentSlideIndex(num);
+      }
+    },
+    [map]
+  );
+
   if (!map || !markers) return null;
+
   return (
     <>
       {markers.map((Marker) => {
@@ -25,20 +34,25 @@ const Markers = () => {
             map={map}
             coordinates={Marker.coordinates}
             key={Marker.id}
+            icon={generateMarkerIcon({
+              type: Marker.type,
+              isSelected: false
+            })}
             onClick={() => {
-              console.log("setCurrentMarker", Marker);
-              setCurrentMarker(Marker);
+              handleMarkerClick(Marker);
             }}
           />
         );
       })}
-      {CurrentMarker && (
+      {currentMarker && (
         <MarkerComponent
           map={map}
-          coordinates={CurrentMarker.coordinates}
-          icon={generateMarkerMarkerIcon(1, true)}
-          onClick={clearCurrentMarker}
-          key={CurrentMarker.id}
+          coordinates={currentMarker.coordinates}
+          icon={generateMarkerIcon({
+            type: currentMarker.type,
+            isSelected: true
+          })}
+          key={currentMarker.id}
         />
       )}
 
