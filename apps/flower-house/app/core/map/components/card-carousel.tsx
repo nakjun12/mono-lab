@@ -97,7 +97,7 @@ const CardCarousel = ({
         onSlideChange={handleSlideChange}
         onSliderFirstMove={() => {
           console.log("slider first move");
-          isInitLoadRef.current = true; // Swiper 초기화 시 초기 로드 상태를 false로 설정
+          isInitLoadRef.current = true;
         }}
       >
         {datas?.map((data) => (

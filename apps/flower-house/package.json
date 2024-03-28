@@ -20,7 +20,7 @@
     "test:e2e:chrome": "pnpm exec playwright test --project=chromium",
     "test:e2e:debug": "pnpm exec playwright test --debug",
     "test:e2e:ui": "pnpm exec playwright test --ui",
-    "test:vitest": "vitest",
+    "test:vi": "vitest",
     "ts:check": "tsc --project ./tsconfig.json --noEmit"
   },
   "dependencies": {
