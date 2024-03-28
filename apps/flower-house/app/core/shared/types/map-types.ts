@@ -8,10 +8,10 @@ export type Coordinates = [Lat, Lng];
 
 export type ImageIcon = {
   url: string;
-  size?: naver.maps.Size;
-  anchor?: naver.maps.Point;
-  origin?: naver.maps.Point;
-  scaledSize?: naver.maps.Size;
+  size: naver.maps.Size;
+  anchor: naver.maps.Point;
+  origin: naver.maps.Point;
+  scaledSize: naver.maps.Size;
 };
 
 export type Marker = {
