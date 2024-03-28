@@ -1,6 +1,6 @@
 // 거리에 따라 적절한 단위로 변환하는 함수
 export const formatDistance = (distanceInMeters: number) => {
-  if (distanceInMeters < 1000) {
+  if (distanceInMeters < 1000 && distanceInMeters >= 0) {
     // 1000미터 미만이면 미터 단위로 반환
     return `${distanceInMeters.toFixed(0)}m`;
   } else if (distanceInMeters >= 1000) {
