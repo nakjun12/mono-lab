@@ -1,8 +1,15 @@
 # Workflow name
 name: "Chromatic for Flower House Project"
 
-
-on: push
+on:
+  push:
+    branches: [main]
+    paths:
+      - "apps/flower-house/**"
+  pull_request:
+    branches: [main]
+    paths:
+      - "apps/flower-house/**"
 
 jobs:
   chromatic:
@@ -16,7 +23,6 @@ jobs:
       - name: Install dependencies for Flower House Project
         run: pnpm install
         working-directory: apps/flower-house # Adjusted to the new directory structure
-
 
       # Publish Flower House Project to Chromatic
       - name: Publish to Chromatic
