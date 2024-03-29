@@ -1,5 +1,5 @@
 # Workflow name
-name: "Chromatic for Flower House Project"
+name: Flower House CI/CD with Chromatic
 
 on:
   push:
