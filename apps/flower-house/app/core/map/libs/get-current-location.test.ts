@@ -3,9 +3,10 @@ import getCurrentLocation from "./get-current-location";
 
 describe("getCurrentLocation 함수", () => {
   it("브라우저가 Geolocation을 지원하지 않는 경우 예외 처리", async () => {
-    // Geolocation 지원하지 않는 경우 설정
-    vi.stubGlobal("navigator", { geolocation: undefined });
-
+    beforeAll(() => {
+      // Geolocation 지원하지 않는 경우 설정
+      vi.stubGlobal("navigator", { geolocation: undefined });
+    });
     // 함수 실행 및 예외 처리 검증
     await expect(getCurrentLocation()).rejects.toThrow(
       "Geolocation is not supported by your browser."

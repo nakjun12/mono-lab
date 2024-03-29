@@ -1,24 +1,17 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { MARKER_URLS, generateMarkerIcon } from "./generate-marker-icon";
 
-// beforeEach와 afterEach를 사용하여 테스트 전후로 global.naver 객체를 설정하고 정리합니다.
-let originalNaver: typeof globalThis.naver;
-
 beforeEach(() => {
-  // 원래 global.naver 값을 저장합니다.
-  originalNaver = global.naver;
-  global.naver = {
+  vi.stubGlobal("naver", {
     maps: {
-      ...global.naver?.maps,
       Size: vi.fn().mockImplementation((width, height) => ({ width, height })),
       Point: vi.fn().mockImplementation((x, y) => ({ x, y }))
     }
-  };
+  });
 });
 
-// 각 테스트 이후에 global.naver 객체를 원래 상태로 복구합니다.
 afterEach(() => {
-  global.naver = originalNaver;
+  vi.restoreAllMocks();
 });
 
 describe("generateMarkerIcon 함수 테스트", () => {
