@@ -32,7 +32,7 @@ export function getGeocodeAddress(address: string): Promise<GeocodeAddress> {
       {
         query: address // 주소 전달
       },
-      function (status, response) {
+      (status, response) => {
         if (status !== window.naver.maps.Service.Status.OK) {
           reject(new Error("Geocoding failed"));
         } else {
