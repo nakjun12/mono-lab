@@ -1,4 +1,4 @@
-name: Flower House CI/CD with Playwright and Vitest
+name: Flower House CI/CD with test
 on:
   push:
     branches: [main]
