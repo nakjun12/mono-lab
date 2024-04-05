@@ -81,9 +81,6 @@ importers:
 
   apps/flower-house:
     dependencies:
-      '@tanstack/react-query':
-        specifier: ^5.17.9
-        version: 5.24.1(react@18.2.0)
       axios:
         specifier: ^1.6.5
         version: 1.6.7
@@ -5133,6 +5130,7 @@ packages:
 
   /@tanstack/query-core@5.24.1:
     resolution: {integrity: sha512-DZ6Nx9p7BhjkG50ayJ+MKPgff+lMeol7QYXkvuU5jr2ryW/4ok5eanaS9W5eooA4xN0A/GPHdLGOZGzArgf5Cg==}
+    dev: true
 
   /@tanstack/query-devtools@5.24.0:
     resolution: {integrity: sha512-pThim455t69zrZaQKa7IRkEIK8UBTS+gHVAdNfhO72Xh4rWpMc63ovRje5/n6iw63+d6QiJzVadsJVdPoodSeQ==}
@@ -5156,6 +5154,7 @@ packages:
     dependencies:
       '@tanstack/query-core': 5.24.1
       react: 18.2.0
+    dev: true
 
   /@testing-library/dom@9.3.4:
     resolution: {integrity: sha512-FlS4ZWlp97iiNWig0Muq8p+3rVDjRiYE+YKGbAqXOu9nwJFFOdL00kFpz42M+4huzYi86vAK1sOOfyOG45muIQ==}
