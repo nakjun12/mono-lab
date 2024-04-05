@@ -24,7 +24,6 @@
     "ts:check": "tsc --project ./tsconfig.json --noEmit"
   },
   "dependencies": {
-    "@tanstack/react-query": "^5.17.9",
     "axios": "^1.6.5",
     "date-fns": "^3.3.1",
     "lodash.debounce": "^4.0.8",
