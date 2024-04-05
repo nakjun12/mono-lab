@@ -9,7 +9,7 @@ export function useSearchFromAddress() {
   );
   const [error, setError] = useState<Error | null>(null);
 
-  const updateAddress = async (newAddress: string) => {
+  const updateAddress = (newAddress: string) => {
     // 주소가 비어 있는지 확인합니다.
     if (newAddress.trim() === "") {
       // 비어 있다면 오류를 throw합니다.
