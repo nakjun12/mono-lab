@@ -3,6 +3,10 @@ import { act, renderHook, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { useSearchFromAddress } from "./use-search-from-address";
 
+vi.mock("@/app/core/map/libs/get-geocode", () => ({
+  getGeocodeAddress: vi.fn()
+}));
+
 describe("useSearchFromAddress", () => {
   beforeEach(() => {
     vi.resetAllMocks();
