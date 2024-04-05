@@ -54,7 +54,7 @@ describe("useSearchFromAddress", () => {
 
     await waitFor(() => {
       expect(result.current.error).toEqual(mockError);
+      expect(result.current.geocodeResult).toBeNull();
     });
-    expect(result.current.geocodeResult).toBeNull();
   });
 });
