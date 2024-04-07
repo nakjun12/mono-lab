@@ -8,13 +8,13 @@ export const MARKERS_KEY = "/markers";
 const useMarkers = () => {
   const { data: markers } = useSWR<Marker[]>(MARKERS_KEY); // 마커관리 SWR
 
-  const initializeMarkers = useCallback((Markers: Marker[]) => {
+  const updateMarkers = useCallback((Markers: Marker[]) => {
     mutate(MARKERS_KEY, Markers);
   }, []);
 
   return {
     markers,
-    initializeMarkers
+    updateMarkers
   };
 };
 export default useMarkers;

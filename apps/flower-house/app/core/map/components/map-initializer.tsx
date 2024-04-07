@@ -14,7 +14,7 @@ import { useEffect, useMemo } from "react";
 
 //맵 초기 설정 및 마커 렌더링 컴포넌트
 const MapInitializer = () => {
-  const { initializeMarkers } = useMarkers();
+  const { updateMarkers } = useMarkers();
   const { initializeMap } = useMap();
   const { setCurrentLocation } = useCurrentLocation();
   //const { clearCurrentMarker } = useCurrentMarker();
@@ -23,8 +23,8 @@ const MapInitializer = () => {
   useEffect(() => {
     //초기 마커 더미로 설정함
     //추후 서버로 업데이트 예정
-    initializeMarkers(MARKERS); //전역 상태 업데이트
-  }, [initializeMarkers]);
+    updateMarkers(MARKERS); //전역 상태 업데이트
+  }, [updateMarkers]);
 
   //초기 줌을 설정합니다.
   const initialZoom = useMemo(
@@ -54,16 +54,12 @@ const MapInitializer = () => {
     // 서치 파라미터가 존재하지 않는 경우에만 현재 위치로 이동합니다.
   };
 
-  // console.log("MapSection render", initialZoom, initialCenter);
-
   return (
-    <>
-      <MapComponent
-        onLoad={onLoadMap}
-        initialZoom={initialZoom}
-        initialCenter={initialCenter}
-      />
-    </>
+    <MapComponent
+      onLoad={onLoadMap}
+      initialZoom={initialZoom}
+      initialCenter={initialCenter}
+    />
   );
 };
 
