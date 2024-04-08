@@ -8,6 +8,12 @@
     "chromatic": "npx chromatic --project-token=chpt_71df197d26dccfc",
     "codegen": "pnpm exec playwright codegen",
     "dev": "next dev",
+    "e2e": "pnpm exec playwright test",
+    "e2e:chrome": "pnpm exec playwright test --project=chromium",
+    "e2e:codegen": "pnpm exec playwright codegen",
+    "e2e:debug": "pnpm exec playwright test --debug",
+    "e2e:generate": "concurrently \"pnpm dev\" \"pnpm mock\" \"pnpm e2e:codegen http://localhost:3000\"",
+    "e2e:ui": "pnpm exec playwright test --ui",
     "lint": "next lint",
     "mock": "npx tsx watch ./app/shared/mocks/http.ts",
     "prepare": "husky",
@@ -16,12 +22,8 @@
     "show-report": "pnpm exec playwright show-report",
     "start": "next start",
     "storybook": "storybook dev -p 6006",
-    "test:e2e": "pnpm exec playwright test",
-    "test:e2e:chrome": "pnpm exec playwright test --project=chromium",
-    "test:e2e:debug": "pnpm exec playwright test --debug",
-    "test:e2e:ui": "pnpm exec playwright test --ui",
-    "test:vi": "vitest",
-    "ts:check": "tsc --project ./tsconfig.json --noEmit"
+    "ts:check": "tsc --project ./tsconfig.json --noEmit",
+    "vi": "vitest"
   },
   "dependencies": {
     "axios": "^1.6.5",
