@@ -2,6 +2,7 @@
 
 import CardCarousel from "@/app/core/map/components/card-carousel";
 import CurrentLocationButton from "@/app/core/map/components/current-location-button";
+import Markers from "@/app/core/map/components/markers";
 import { useAddressOnMove } from "@/app/core/map/hooks/use-address-on-move";
 import useCurrentLocation from "@/app/core/map/hooks/use-current-location";
 import useCurrentMarker from "@/app/core/map/hooks/use-current-marker";
@@ -84,6 +85,9 @@ const MapOverlay: FC<MapOverlayProps> = ({}) => {
           </div>
         </div>
       </div>
+
+      <Markers />
+
       <div
         className={`fixed bottom-[80px] flex flex-col justify-center w-screen z-20`}
       >

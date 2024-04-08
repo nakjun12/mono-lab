@@ -1,5 +1,16 @@
 import type { GeocodeAddress } from "@/app/core/map/libs/get-geocode";
 
+interface Area {
+  name: string;
+  coords: {
+    center: {
+      crs: string;
+      x: string; // 타입을 string으로 변경
+      y: string; // 실제 API 응답에 맞춰서 string으로 변경될 수 있음
+    };
+  };
+}
+
 interface Result {
   name: string;
   code: {
@@ -16,17 +27,6 @@ interface Result {
   };
 }
 
-interface Area {
-  name: string;
-  coords: {
-    center: {
-      crs: string;
-      x: string; // 타입을 string으로 변경
-      y: string; // 실제 API 응답에 맞춰서 string으로 변경될 수 있음
-    };
-  };
-}
-
 export interface SimplifiedGeocodeAddress
   extends Pick<GeocodeAddress, "roadAddress" | "x" | "y"> {}
 
@@ -38,7 +38,7 @@ export function getReverseGeocode(
       {
         coords: new window.naver.maps.LatLng(coords[0], coords[1])
       },
-      function (status, response) {
+      (status, response) => {
         if (status !== window.naver.maps.Service.Status.OK) {
           reject(new Error("Reverse Geocoding failed"));
         } else {

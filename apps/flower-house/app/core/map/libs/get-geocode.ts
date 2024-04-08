@@ -26,13 +26,13 @@ export interface GeocodeAddress {
 }
 
 //TODO : return 값 정리할 것
-export function geocodeAddress(address: string): Promise<GeocodeAddress> {
+export function getGeocodeAddress(address: string): Promise<GeocodeAddress> {
   return new Promise((resolve, reject) => {
     window.naver.maps.Service.geocode(
       {
         query: address // 주소 전달
       },
-      function (status, response) {
+      (status, response) => {
         if (status !== window.naver.maps.Service.Status.OK) {
           reject(new Error("Geocoding failed"));
         } else {

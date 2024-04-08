@@ -1,0 +1,54 @@
+name: Flower House CI/CD with test
+on:
+  push:
+    branches: [main]
+    paths:
+      - "apps/flower-house/**"
+  pull_request:
+    branches: [main]
+    paths:
+      - "apps/flower-house/**"
+jobs:
+  playwright-test:
+    name: Playwright e2e tests
+    timeout-minutes: 60
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Install dependencies
+        run: npm install -g pnpm && pnpm install
+        working-directory: apps/flower-house
+      - name: Start Flower House server
+        run: pnpm dev &
+        working-directory: apps/flower-house
+      - name: Install Playwright Browsers
+        run: pnpm exec playwright install --with-deps
+        working-directory: apps/flower-house
+      - name: Run Playwright tests
+        run: pnpm exec playwright test
+        working-directory: apps/flower-house
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: playwright-report
+          path: apps/flower-house/playwright-report/
+          retention-days: 30
+
+  vitest-test:
+    name: Vitest Unit Test
+    timeout-minutes: 60
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Install dependencies
+        run: npm install -g pnpm && pnpm install
+        working-directory: apps/flower-house
+      - name: Run Vitest tests
+        run: pnpm vitest
+        working-directory: apps/flower-house
