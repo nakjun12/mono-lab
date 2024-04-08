@@ -47,5 +47,5 @@ jobs:
         run: npm install -g pnpm && pnpm install
         working-directory: apps/flower-house
       - name: Run Vitest tests
-        run: pnpm run test:vi
+        run: pnpm vitest
         working-directory: apps/flower-house
