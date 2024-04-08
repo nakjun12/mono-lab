@@ -21,6 +21,9 @@ jobs:
       - name: Install dependencies
         run: npm install -g pnpm && pnpm install
         working-directory: apps/flower-house
+      - name: Start Flower House server
+        run: pnpm dev &
+        working-directory: apps/flower-house
       - name: Install Playwright Browsers
         run: pnpm exec playwright install --with-deps
         working-directory: apps/flower-house
