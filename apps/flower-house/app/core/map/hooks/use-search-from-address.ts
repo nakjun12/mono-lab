@@ -1,7 +1,6 @@
 import type { GeocodeAddress } from "@/app/core/map/libs/get-geocode";
-import { geocodeAddress } from "@/app/core/map/libs/get-geocode";
+import { getGeocodeAddress } from "@/app/core/map/libs/get-geocode";
 import { useEffect, useState } from "react";
-
 //주소를 통해 좌표를 찾아주는 훅
 export function useSearchFromAddress() {
   const [searchedAddress, setSearchedAddress] = useState<string>("");
@@ -10,7 +9,7 @@ export function useSearchFromAddress() {
   );
   const [error, setError] = useState<Error | null>(null);
 
-  const updateAddress = async (newAddress: string) => {
+  const updateAddress = (newAddress: string) => {
     // 주소가 비어 있는지 확인합니다.
     if (newAddress.trim() === "") {
       // 비어 있다면 오류를 throw합니다.
@@ -29,7 +28,7 @@ export function useSearchFromAddress() {
       return;
     }
 
-    geocodeAddress(searchedAddress)
+    getGeocodeAddress(searchedAddress)
       .then((result) => {
         setGeocodeResult(result);
         setError(null);
