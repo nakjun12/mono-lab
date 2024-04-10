@@ -21,6 +21,7 @@
     "@next/eslint-plugin-next": "^14.0.4",
     "@repo/eslint-config": "workspace:*",
     "@repo/typescript-config": "workspace:*",
+    "@tanstack/react-query-devtools": "^5.24.0",
     "@testing-library/react": "^14.1.2",
     "@types/eslint": "^8.56.1",
     "@types/node": "^20.10.6",

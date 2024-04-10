@@ -9,27 +9,29 @@ module.exports = {
     "prettier",
     require.resolve("@vercel/style-guide/eslint/next"),
     "eslint-config-turbo",
+    "plugin:@typescript-eslint/recommended"
   ],
   globals: {
     React: true,
-    JSX: true,
+    JSX: true
   },
+  parser: "@typescript-eslint/parser",
   env: {
     node: true,
-    browser: true,
+    browser: true
   },
   plugins: ["only-warn"],
   settings: {
     "import/resolver": {
       typescript: {
-        project,
-      },
-    },
+        project
+      }
+    }
   },
   ignorePatterns: [
     // Ignore dotfiles
     ".*.js",
-    "node_modules/",
+    "node_modules/"
   ],
-  overrides: [{ files: ["*.js?(x)", "*.ts?(x)"] }],
+  overrides: [{ files: ["*.js?(x)", "*.ts?(x)"] }]
 };
