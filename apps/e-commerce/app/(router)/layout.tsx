@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
+import { PropsWithChildren } from "react";
 import "~/app/core/shared/globals.css";
-import ReactQueryProvider from "~/app/core/shared/hook/react-query-provider";
+import ReactQueryProvider from "~/app/core/shared/hook/provider/react-query-provider";
+import RecoilProvider from "~/app/core/shared/hook/provider/recoil-provider";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
@@ -11,13 +13,13 @@ export const metadata: Metadata = {
 
 export default function RootLayout({
   children
-}: {
-  children: React.ReactNode;
-}): JSX.Element {
+}: Readonly<PropsWithChildren<object>>) {
   return (
     <html lang="en">
       <body className={inter.className}>
-        <ReactQueryProvider>{children}</ReactQueryProvider>
+        <RecoilProvider>
+          <ReactQueryProvider>{children}</ReactQueryProvider>
+        </RecoilProvider>
       </body>
     </html>
   );
