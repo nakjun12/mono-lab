@@ -5,6 +5,7 @@ import { Card } from "@repo/ui/card";
 import { Code } from "@repo/ui/code";
 import { useAtom } from "jotai";
 import Image from "next/image";
+import { useRecoilState } from "recoil";
 import {
   Accordion,
   AccordionContent,
@@ -12,7 +13,10 @@ import {
   AccordionTrigger
 } from "~/app/core/shared/component/ui/accordion";
 import styles from "~/app/core/shared/page.module.css";
-import { animeAtom } from "~/app/core/shared/store/sample.atom";
+import {
+  jotaiAnimeAtom,
+  recoilAnimeAtom
+} from "~/app/core/shared/store/sample.atom";
 
 export function AccordionDemo() {
   return (
@@ -89,19 +93,39 @@ const LINKS = [
 ];
 
 export default function Page(): JSX.Element {
-  const [anime, setAnime] = useAtom(animeAtom);
-  console.log(anime);
+  const [jotaiAnime, setJotaiAnime] = useAtom(jotaiAnimeAtom);
+  const [recoilAnime, setRecoilAnime] = useRecoilState(recoilAnimeAtom);
+
+  // jotai 상태 로그
+  console.log(jotaiAnime);
+  // recoil 상태 로그
+  console.log(recoilAnime);
+
   return (
     <main className={styles.main}>
       <div className={styles.description}>
         <ul>
-          {anime.map((item) => (
+          {/* jotai 상태를 사용하여 리스트 렌더링 */}
+          {jotaiAnime.map((item) => (
+            <li key={item.title}>{item.title}</li>
+          ))}
+          {recoilAnime.map((item) => (
             <li key={item.title}>{item.title}</li>
           ))}
         </ul>
         <button
           onClick={() => {
-            setAnime((anime) => [
+            // jotai 상태 업데이트
+            setJotaiAnime((anime) => [
+              ...anime,
+              {
+                title: "Cowboy Bebop",
+                year: 1998,
+                watched: false
+              }
+            ]);
+            // recoil 상태 업데이트
+            setRecoilAnime((anime) => [
               ...anime,
               {
                 title: "Cowboy Bebop",

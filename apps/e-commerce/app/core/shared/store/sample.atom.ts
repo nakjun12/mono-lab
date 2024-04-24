@@ -1,12 +1,25 @@
-import { atom } from "jotai";
+import { atom as jotaiAtom } from "jotai";
+import { atom as recoilAtom } from "recoil";
 
-const countAtom = atom(0);
+const jotaiCountAtom = jotaiAtom(0);
+const recoilCountAtom = recoilAtom({
+  key: "countState",
+  default: 0
+});
 
-const countryAtom = atom("Japan");
+const jotaiCountryAtom = jotaiAtom("Japan");
+const recoilCountryAtom = recoilAtom({
+  key: "countryState",
+  default: "Japan"
+});
 
-const citiesAtom = atom(["Tokyo", "Kyoto", "Osaka"]);
+const jotaiCitiesAtom = jotaiAtom(["Tokyo", "Kyoto", "Osaka"]);
+const recoilCitiesAtom = recoilAtom({
+  key: "citiesState",
+  default: ["Tokyo", "Kyoto", "Osaka"]
+});
 
-const animeAtom = atom([
+const jotaiAnimeAtom = jotaiAtom([
   {
     title: "Ghost in the Shell",
     year: 1995,
@@ -18,5 +31,29 @@ const animeAtom = atom([
     watched: false
   }
 ]);
+const recoilAnimeAtom = recoilAtom({
+  key: "animeState",
+  default: [
+    {
+      title: "Ghost in the Shell",
+      year: 1995,
+      watched: true
+    },
+    {
+      title: "Serial Experiments Lain",
+      year: 1998,
+      watched: false
+    }
+  ]
+});
 
-export { animeAtom, citiesAtom, countAtom, countryAtom };
+export {
+  jotaiAnimeAtom,
+  jotaiCitiesAtom,
+  jotaiCountAtom,
+  jotaiCountryAtom,
+  recoilAnimeAtom,
+  recoilCitiesAtom,
+  recoilCountAtom,
+  recoilCountryAtom
+};
