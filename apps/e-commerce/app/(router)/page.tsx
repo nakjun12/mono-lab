@@ -1,6 +1,9 @@
+"use client";
+
 import { Button } from "@repo/ui/button";
 import { Card } from "@repo/ui/card";
 import { Code } from "@repo/ui/code";
+import { useAtom } from "jotai";
 import Image from "next/image";
 import {
   Accordion,
@@ -9,6 +12,7 @@ import {
   AccordionTrigger
 } from "~/app/core/shared/component/ui/accordion";
 import styles from "~/app/core/shared/page.module.css";
+import { animeAtom } from "~/app/core/shared/store/sample.atom";
 
 export function AccordionDemo() {
   return (
@@ -85,9 +89,29 @@ const LINKS = [
 ];
 
 export default function Page(): JSX.Element {
+  const [anime, setAnime] = useAtom(animeAtom);
+  console.log(anime);
   return (
     <main className={styles.main}>
       <div className={styles.description}>
+        <ul>
+          {anime.map((item) => (
+            <li key={item.title}>{item.title}</li>
+          ))}
+        </ul>
+        <button
+          onClick={() => {
+            setAnime((anime) => [
+              ...anime,
+              {
+                title: "Cowboy Bebop",
+                year: 1998,
+                watched: false
+              }
+            ]);
+          }}>
+          버튼
+        </button>
         <p>
           examples/basic&nbsp;
           <Code className={styles.code}>web</Code>
