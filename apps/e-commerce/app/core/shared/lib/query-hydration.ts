@@ -8,7 +8,7 @@ import {
 
 import { ComponentType, cache } from "react";
 
-import { isEqual } from "~/app/core/shared/util/is-equal";
+import { isEqual } from "~/app/core/shared/lib/is-equal";
 
 export const getQueryClient = cache(() => new QueryClient());
 
@@ -17,7 +17,6 @@ type UnwrapPromise<T> = T extends Promise<infer U> ? U : T;
 
 interface QueryProps<ResponseType = unknown> {
   queryKey: QueryKey;
-
   queryFn: () => Promise<ResponseType>;
 }
 
