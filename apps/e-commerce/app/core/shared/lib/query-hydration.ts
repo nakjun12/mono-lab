@@ -1,12 +1,12 @@
+import type { QueryKey, QueryState } from "@tanstack/react-query";
 import {
 	HydrationBoundary,
 	QueryClient,
-	type QueryKey,
-	type QueryState,
 	dehydrate,
 } from "@tanstack/react-query";
 
-import { type ComponentType, cache } from "react";
+import type { ComponentType } from "react";
+import { cache } from "react";
 
 import { isEqual } from "~/app/core/shared/lib/is-equal";
 

@@ -2,10 +2,10 @@
 "use client";
 
 import { Provider } from "jotai";
-import { PropsWithChildren } from "react";
+import type { PropsWithChildren } from "react";
 
 export default function JotaiProvider({
-  children
+	children,
 }: Readonly<PropsWithChildren<object>>) {
-  return <Provider>{children}</Provider>;
+	return <Provider>{children}</Provider>;
 }
