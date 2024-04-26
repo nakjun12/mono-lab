@@ -1,7 +1,11 @@
+"use client";
+
 import { Button } from "@repo/ui/button";
 import { Card } from "@repo/ui/card";
 import { Code } from "@repo/ui/code";
+import { useAtom } from "jotai";
 import Image from "next/image";
+import { useRecoilState } from "recoil";
 import {
   Accordion,
   AccordionContent,
@@ -9,6 +13,10 @@ import {
   AccordionTrigger
 } from "~/app/core/shared/component/ui/accordion";
 import styles from "~/app/core/shared/page.module.css";
+import {
+  jotaiAnimeAtom,
+  recoilAnimeAtom
+} from "~/app/core/shared/store/sample.atom";
 
 export function AccordionDemo() {
   return (
@@ -16,7 +24,7 @@ export function AccordionDemo() {
       <AccordionItem value="item-1">
         <AccordionTrigger>Is it accessible?</AccordionTrigger>
         <AccordionContent>
-          Yes. It adheres to the WAI-ARIA design pattern.
+          Yes. It adheres to22 the WAI-ARIA design pattern.
         </AccordionContent>
       </AccordionItem>
       <AccordionItem value="item-2">
@@ -85,9 +93,51 @@ const LINKS = [
 ];
 
 export default function Page(): JSX.Element {
+  const [jotaiAnime, setJotaiAnime] = useAtom(jotaiAnimeAtom);
+  const [recoilAnime, setRecoilAnime] = useRecoilState(recoilAnimeAtom);
+
+  // jotai 상태 로그
+  console.log(jotaiAnime);
+  // recoil 상태 로그
+  console.log(recoilAnime);
+  console.log("바이오미 추가 확인");
+
   return (
     <main className={styles.main}>
       <div className={styles.description}>
+        <ul>
+          {/* jotai 상태를 사용하여 리스트 렌더링 */}
+          {jotaiAnime.map((item) => (
+            <li key={item.title}>{item.title}</li>
+          ))}
+          {recoilAnime.map((item) => (
+            <li key={item.title}>{item.title}</li>
+          ))}
+        </ul>
+        <button
+          type="button"
+          onClick={() => {
+            // jotai 상태 업데이트
+            setJotaiAnime((anime) => [
+              ...anime,
+              {
+                title: "Cowboy Bebop",
+                year: 1998,
+                watched: false
+              }
+            ]);
+            // recoil 상태 업데이트
+            setRecoilAnime((anime) => [
+              ...anime,
+              {
+                title: "Cowboy Bebop",
+                year: 1998,
+                watched: false
+              }
+            ]);
+          }}>
+          버튼
+        </button>
         <p>
           examples/basic&nbsp;
           <Code className={styles.code}>web</Code>

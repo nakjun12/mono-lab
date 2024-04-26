@@ -1,10 +1,10 @@
 "use client";
 
-import { PropsWithChildren } from "react";
+import type { PropsWithChildren } from "react";
 import { RecoilRoot } from "recoil";
 
 export default function RecoilProvider({
-  children
+	children,
 }: Readonly<PropsWithChildren<object>>) {
-  return <RecoilRoot>{children}</RecoilRoot>;
+	return <RecoilRoot>{children}</RecoilRoot>;
 }

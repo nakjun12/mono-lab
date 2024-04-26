@@ -1,9 +1,11 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
-import { PropsWithChildren } from "react";
+import type { PropsWithChildren } from "react";
 import "~/app/core/shared/globals.css";
+import JotaiProvider from "~/app/core/shared/hook/provider/jotai-provider";
 import ReactQueryProvider from "~/app/core/shared/hook/provider/react-query-provider";
 import RecoilProvider from "~/app/core/shared/hook/provider/recoil-provider";
+
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
@@ -17,9 +19,11 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={inter.className}>
-        <RecoilProvider>
-          <ReactQueryProvider>{children}</ReactQueryProvider>
-        </RecoilProvider>
+        <JotaiProvider>
+          <RecoilProvider>
+            <ReactQueryProvider>{children}</ReactQueryProvider>
+          </RecoilProvider>
+        </JotaiProvider>
       </body>
     </html>
   );
