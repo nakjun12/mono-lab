@@ -24,7 +24,7 @@ export function AccordionDemo() {
       <AccordionItem value="item-1">
         <AccordionTrigger>Is it accessible?</AccordionTrigger>
         <AccordionContent>
-          Yes. It adheres to the WAI-ARIA design pattern.
+          Yes. It adheres to22 the WAI-ARIA design pattern.
         </AccordionContent>
       </AccordionItem>
       <AccordionItem value="item-2">
@@ -100,6 +100,7 @@ export default function Page(): JSX.Element {
   console.log(jotaiAnime);
   // recoil 상태 로그
   console.log(recoilAnime);
+  console.log("바이오미 추가 확인");
 
   return (
     <main className={styles.main}>
@@ -114,6 +115,7 @@ export default function Page(): JSX.Element {
           ))}
         </ul>
         <button
+          type="button"
           onClick={() => {
             // jotai 상태 업데이트
             setJotaiAnime((anime) => [

@@ -1,12 +1,12 @@
 import {
-  HydrationBoundary,
-  QueryClient,
-  QueryKey,
-  QueryState,
-  dehydrate
+	HydrationBoundary,
+	QueryClient,
+	type QueryKey,
+	type QueryState,
+	dehydrate,
 } from "@tanstack/react-query";
 
-import { ComponentType, cache } from "react";
+import { type ComponentType, cache } from "react";
 
 import { isEqual } from "~/app/core/shared/lib/is-equal";
 
@@ -16,31 +16,31 @@ export const getQueryClient = cache(() => new QueryClient());
 type UnwrapPromise<T> = T extends Promise<infer U> ? U : T;
 
 interface QueryProps<ResponseType = unknown> {
-  queryKey: QueryKey;
-  queryFn: () => Promise<ResponseType>;
+	queryKey: QueryKey;
+	queryFn: () => Promise<ResponseType>;
 }
 
 interface DehydratedQueryExtended<TData = unknown, TError = unknown> {
-  state: QueryState<TData, TError>;
+	state: QueryState<TData, TError>;
 }
 
 export async function getDehydratedQuery<Q extends QueryProps>({
-  queryKey,
-  queryFn
+	queryKey,
+	queryFn,
 }: Q) {
-  const queryClient = getQueryClient();
+	const queryClient = getQueryClient();
 
-  await queryClient.prefetchQuery({ queryKey, queryFn });
+	await queryClient.prefetchQuery({ queryKey, queryFn });
 
-  const { queries } = dehydrate(queryClient);
+	const { queries } = dehydrate(queryClient);
 
-  const [dehydratedQuery] = queries.filter((query) =>
-    isEqual(query.queryKey, queryKey)
-  );
+	const [dehydratedQuery] = queries.filter((query) =>
+		isEqual(query.queryKey, queryKey),
+	);
 
-  return dehydratedQuery as DehydratedQueryExtended<
-    UnwrapPromise<ReturnType<Q["queryFn"]>>
-  >;
+	return dehydratedQuery as DehydratedQueryExtended<
+		UnwrapPromise<ReturnType<Q["queryFn"]>>
+	>;
 }
 
 export const Hydrate: ComponentType = HydrationBoundary;
