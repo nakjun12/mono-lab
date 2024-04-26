@@ -15,7 +15,8 @@ module.exports = {
         "test",
         "revert",
         "docs",
-        "ci"
+        "ci",
+        "merge"
       ]
     ]
   }
