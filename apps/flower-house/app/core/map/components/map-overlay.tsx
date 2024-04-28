@@ -99,12 +99,12 @@ const MapOverlay: FC<MapOverlayProps> = ({}) => {
             <div className="absolute left-0 pl-1">
               <CurrentLocationButton onCurrentLocation={currentLocationMap} />
             </div>
-            <button
+            {/* <button
               className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
               onClick={currentLocationMap}
             >
               현위치 검색
-            </button>
+            </button> */}
           </div>
           <div className={OVERLAY_WIDTH}>
             {markers && markers.length > 0 && (
