@@ -1,7 +1,6 @@
 "use client";
 
 import { INITIAL_CENTER, INITIAL_ZOOM } from "@/app/core/map/hooks/use-map";
-import { FOOTER_HEIGHT_REM } from "@/app/core/shared/components/footer";
 import { NCP_CLIENT_ID } from "@/app/core/shared/constants/config";
 import type { Coordinates, Map } from "@/app/core/shared/types/map-types";
 import Script from "next/script";
@@ -64,10 +63,7 @@ const Map: React.FC<MapProps> = ({
         src={`https://openapi.map.naver.com/openapi/v3/maps.js?ncpClientId=${NCP_CLIENT_ID}&submodules=geocoder`}
         onReady={initializeMap}
       />
-      <div
-        id={mapId}
-        style={{ width: "100%", height: `calc(100vh - ${FOOTER_HEIGHT_REM})` }}
-      />
+      <div id={mapId} style={{ width: "100%", height: "100vh" }} />
     </>
   );
 };
