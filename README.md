@@ -18,4 +18,4 @@
 
 ### 영상
 
-![지도 영상](gif/flower-house.gif)
+![지도 영상](gif/flower-house2.gif)
