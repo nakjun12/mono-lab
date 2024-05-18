@@ -16,7 +16,6 @@
     "e2e:ui": "pnpm exec playwright test --ui",
     "lint": "next lint",
     "mock": "npx tsx watch ./app/shared/mocks/http.ts",
-    "prepare": "husky",
     "prettier": "prettier --write --ignore-unknown .",
     "project": "concurrently \"pnpm dev\" \"pnpm mock\"",
     "show-report": "pnpm exec playwright show-report",
