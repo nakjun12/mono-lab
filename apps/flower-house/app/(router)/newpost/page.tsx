@@ -1,42 +1,63 @@
 "use client";
+import ContentTextareaComponent from "@/app/core/post/components/content-textarea";
+import DatetimeSectionComponent from "@/app/core/post/components/datetime-section";
+import FloweringSectionComponent from "@/app/core/post/components/flowering-section";
 import NewpostHeader from "@/app/core/post/components/newpost-header";
-import Image from "next/image";
-import { useEffect, useState } from "react";
+import PasswordSectionComponent from "@/app/core/post/components/password-section";
+import PreviewImageComponent from "@/app/core/post/components/preview-image";
+import SubmitButtonComponent from "@/app/core/post/components/submit-button";
+import useNewpost from "@/app/core/post/hooks/useNewpost";
 
 export default function NewPostPage() {
-  const [contents, setContents] = useState({
-    image: "",
-    title: "",
-    description: ""
-  });
-
-  // 컴포넌트가 마운트될 때 로컬 스토리지에서 이미지 데이터를 가져와 상태를 업데이트합니다.
-  useEffect(() => {
-    const imgData = localStorage.getItem("prevImgData") || "";
-    setContents((contents) => ({ ...contents, image: imgData }));
-  }, []);
+  const {
+    postDatas,
+    setPostDatas,
+    updatePostData,
+    setSelectedFloweringId,
+    selectedFloweringId,
+    prevPW,
+    updatePW,
+    checkPW,
+    handleButtonClick
+  } = useNewpost();
 
   return (
     <main className="flex flex-col items-center justify-center h-screen md:h-screen">
       <NewpostHeader />
-      <div>
-        <Image
-          src={contents.image}
-          alt="post-preview-img"
-          width={200}
-          height={200}
+      <section className="mt-16 px-8 w-full h-full flex flex-col gap-y-2">
+        <PreviewImageComponent />
+        <ContentTextareaComponent
+          postDatas={postDatas}
+          updatePostData={updatePostData}
         />
-      </div>
-      <div>
-        description
-        <input type="text" defaultValue=";;" />
-      </div>
 
-      <div>위치 추가</div>
-      <div>개화도</div>
-      <div>날짜/시간</div>
-      <div>비밀번호 입력</div>
-      <button type="button">작성 완료</button>
+        {/* TODO: ?? */}
+        <div>
+          <span>위치 추가</span>
+          <div>검색 결과</div>
+        </div>
+        <hr />
+
+        <FloweringSectionComponent
+          setPostDatas={setPostDatas}
+          setSelectedFloweringId={setSelectedFloweringId}
+          selectedFloweringId={selectedFloweringId}
+        />
+        <hr />
+
+        <DatetimeSectionComponent
+          postDatas={postDatas}
+          updatePostData={updatePostData}
+        />
+        <hr />
+
+        <PasswordSectionComponent
+          prevPW={prevPW}
+          updatePW={updatePW}
+          checkPW={checkPW}
+        />
+        <SubmitButtonComponent handleButtonClick={handleButtonClick} />
+      </section>
     </main>
   );
 }

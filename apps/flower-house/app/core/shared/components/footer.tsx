@@ -15,8 +15,8 @@ const Footer: React.FC = () => {
   const router = useRouter();
   const pathname = usePathname();
 
-  const imageNames: IconNames = ["home", "clone", "add-square", "notification"];
-  const tabPaths = ["/", "/feeds", "/newpost", "/notification"];
+  const imageNames: IconNames = ["home", "clone", "add-square"];
+  const tabPaths = ["/", "/feeds", "/newpost"];
 
   const handleTapChange = (idx: number) => {
     if (pathname === tabPaths[idx]) return;
@@ -31,9 +31,8 @@ const Footer: React.FC = () => {
       {imageNames.map((imageName, idx) => (
         <button
           key={imageName}
-          className="relative flex justify-center items-center w-1/4 border-none bg-transparent p-0"
-          onClick={() => handleTapChange(idx)}
-        >
+          className="relative flex justify-center items-center w-1/3 border-none bg-transparent p-0"
+          onClick={() => handleTapChange(idx)}>
           {idx === 2 && <FileInput router={router} />}
           <Image
             src={`/icons/footer-icons/${imageName}-${
@@ -42,6 +41,8 @@ const Footer: React.FC = () => {
             alt={`${imageName}-icon`}
             width={30}
             height={30}
+            style={{ width: 30, height: 30 }}
+            priority
           />
         </button>
       ))}
