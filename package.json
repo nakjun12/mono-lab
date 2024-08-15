@@ -1,5 +1,5 @@
 {
-  "name": "flower-house",
+  "name": "mono-lab",
   "private": true,
   "scripts": {
     "build": "turbo build",
