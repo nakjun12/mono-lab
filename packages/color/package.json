@@ -2,10 +2,26 @@
   "name": "@repo/color",
   "version": "0.0.0",
   "private": true,
+  "scripts": {
+    "build": "pnpm run build:dts && pnpm run build:cjs && pnpm run build:esm",
+    "build:dts": "tsc -p tsconfig.json --emitDeclarationOnly",
+    "build:cjs": "tsc -p tsconfig.cjs.json",
+    "build:esm": "tsc -p tsconfig.esm.json"
+  },
   "exports": {
+    ".": {
+      "types": "./dist/color-tw.d.ts",
+      "import": "./dist/esm/color-tw.js",
+      "require": "./dist/cjs/color-tw.js"
+    },
     "./global.css": "./global.css"
   },
   "files": [
+    "dist",
     "global.css"
   ],
+  "devDependencies": {
+    "typescript": "^5.3.3",
+    "@repo/typescript-config": "workspace:*"
+  }
 }
