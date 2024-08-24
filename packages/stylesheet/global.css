@@ -1,0 +1,71 @@
+:root {
+  --Blue8: #3b7ee3;
+  --Blue7: #609fff;
+  --Blue6: #8ebbff;
+  --Blue5: #cadfff;
+  --Blue4: #e2eeff;
+  --Blue3: #eff7ff;
+  --Blue2: #f6fbff;
+  --Blue1: #fcfeff;
+
+  --Violet8: #826cff;
+  --Violet7: #a090ff;
+  --Violet6: #bbb1ff;
+  --Violet5: #e1dcff;
+  --Violet4: #eae7ff;
+  --Violet3: #f2f0ff;
+  --Violet2: #f4f3fb;
+  --Violet1: #fcfaff;
+
+  --greyScale10: #383852;
+  --greyScale9: #4d4d68;
+  --greyScale8: #7e7e94;
+  --greyScale7: #9f9fb7;
+  --greyScale6: #c0c3d5;
+  --greyScale5: #dadde9;
+  --greyScale4: #edecf7;
+  --greyScale3: #f4f6fb;
+  --greyScale2: #f9fafd;
+  --greyScale1: #ffffff;
+
+  --succeed3: #00d398;
+  --succeed2: #67f1ca;
+  --succeed1: #d2fff2;
+
+  --error3: #ff5a4b;
+  --error2: #ff5a4b;
+  --error1: #ffe3e0;
+
+  --green: #009c92;
+  --green15: rgba(0, 156, 146, 0.1);
+
+  --red: #be3c30;
+  --red15: rgba(207, 46, 31, 0.1);
+
+  --yellow: #ff9500;
+  --yellow15: rgba(255, 149, 0, 0.1);
+
+  --blue: #006fe8;
+  --blue15: rgba(0, 111, 232, 0.1);
+
+  --pink: #ff4568;
+  --pink15: rgba(255, 69, 104, 0.1);
+
+  --purple: #b964e4;
+  --purple15: rgba(185, 100, 228, 0.1);
+
+  --skyBlue: #09b2ff;
+  --skyBlue15: rgba(9, 178, 255, 0.1);
+
+  --lime: #a2a600;
+  --lime15: rgba(162, 166, 0, 0.1);
+
+  --violet: #8f78ee;
+  --violet15: rgba(143, 120, 238, 0.1);
+
+  --lightGreen: #34c759;
+  --lightGreen15: rgba(52, 199, 89, 0.1);
+
+  --background: #e8edf4;
+  --focus: var(--Blue4);
+}
