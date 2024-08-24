@@ -23,7 +23,7 @@ const useDraft = (nickname: string) => {
   return { value, onChangeValue };
 };
 
-const Comp = () => {
+export const Comp = () => {
   const { name, setter } = useExample();
   const { value, onChangeValue: setValue } = useDraft(name);
   return (
