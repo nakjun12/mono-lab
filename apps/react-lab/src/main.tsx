@@ -1,4 +1,4 @@
-import "@repo/stylesheet/global.css";
+import "@repo/color/styles";
 import React from "react";
 import ReactDOM from "react-dom/client";
 import App from "./App.tsx";
