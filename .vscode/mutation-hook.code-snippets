@@ -1,0 +1,43 @@
+{
+  "useMutation Hook": {
+    "prefix": "mhp",
+    "body": [
+      "import { useCallback } from 'react';",
+      "import { toastbarService } from 'components';",
+      "import {",
+      "  ${TM_FILENAME_BASE/^use(.*)$/${1:/pascalcase}/}_${WORKSPACE_NAME/(.*)/${1:/pascalcase}/}Document,",
+      "  type ${TM_FILENAME_BASE/^use(.*)$/${1:/pascalcase}/}_${WORKSPACE_NAME/(.*)/${1:/pascalcase}/}MutationVariables,",
+      "} from 'src/gql-types/api';",
+      "import { gql, useMutation } from '@apollo/client';",
+      "import { GqlMutationResult } from '@utils/gql-util/gql-mutation-result';",
+      "",
+      "export const ${TM_FILENAME_BASE/(.*)/${1:/camelcase}/} = () => {",
+      "  const [mutation] = useMutation(${TM_FILENAME_BASE/^use(.*)$/${1:/pascalcase}/}_${WORKSPACE_NAME/(.*)/${1:/pascalcase}/}Document);",
+      "",
+      "  const ${TM_FILENAME_BASE/^use(.*)$/${1:/camelcase}/} = useCallback(",
+      "    async (variables: ${TM_FILENAME_BASE/^use(.*)$/${1:/pascalcase}/}_${WORKSPACE_NAME/(.*)/${1:/pascalcase}/}MutationVariables, successCallback?: () => void) => {",
+      "      await mutation({",
+      "        variables,",
+      "        onCompleted: (result) => {",
+      "          GqlMutationResult(${2:defaultMessage}}, {",
+      "            defaultMessage: '${3:defaultMessage}',",
+      "            toastbarService,",
+      "            successCallback,",
+      "          });",
+      "        },",
+      "      });",
+      "    },",
+      "  );",
+      "",
+      "  return { ${TM_FILENAME_BASE/^use(.*)$/${1:/camelcase}/} };",
+      "};",
+      "",
+      "gql`",
+      "  mutation ${TM_FILENAME_BASE/^use(.*)$/${1:/pascalcase}/}_${WORKSPACE_NAME/(.*)/${1:/pascalcase}/}($${4:inputVariable}: ${5:InputType}!) {",
+      "    ${6:mutationBody}",
+      "  }",
+      "`;"
+    ],
+    "description": "mutation hook pattern"
+  }
+}
