@@ -1,6 +1,7 @@
-import type { Config } from "tailwindcss";
+/** @type {import('tailwindcss').Config} */
+const colorTw = require("@repo/color");
 
-const config = {
+module.exports = {
   darkMode: ["class"],
   content: [
     "./pages/**/*.{ts,tsx}",
@@ -51,7 +52,8 @@ const config = {
         card: {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))"
-        }
+        },
+        ...colorTw.extendsTheme.colors
       },
       borderRadius: {
         lg: "var(--radius)",
@@ -75,6 +77,4 @@ const config = {
     }
   },
   plugins: [require("tailwindcss-animate")]
-} satisfies Config;
-
-export default config;
+};

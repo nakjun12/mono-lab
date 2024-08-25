@@ -1,3 +1,4 @@
+import "@repo/color/styles";
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import type { PropsWithChildren } from "react";

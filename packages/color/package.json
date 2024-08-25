@@ -14,7 +14,7 @@
       "import": "./dist/esm/color-tw.js",
       "require": "./dist/cjs/color-tw.js"
     },
-    "./global.css": "./global.css"
+    "./styles": "./global.css"
   },
   "files": [
     "dist",
