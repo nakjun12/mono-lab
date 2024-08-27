@@ -1,5 +1,5 @@
-import crypto from "crypto";
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse, type NextRequest } from "next/server";
+import crypto from "node:crypto";
 
 enum CacheType {
   NO_CACHE = "no-cache",
@@ -29,7 +29,7 @@ const CACHE_SETTINGS: Record<CacheType, string> = {
 
 let lastModified = new Date().toUTCString();
 
-let etag = crypto
+const etag = crypto
   .createHash("md5")
   .update(JSON.stringify({ time: new Date().toISOString() }))
   .digest("hex");
