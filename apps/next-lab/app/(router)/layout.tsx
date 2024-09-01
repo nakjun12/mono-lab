@@ -3,9 +3,9 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import type { PropsWithChildren } from "react";
 import "~/app/core/shared/globals.css";
-import JotaiProvider from "~/app/core/shared/hook/provider/jotai-provider";
-import ReactQueryProvider from "~/app/core/shared/hook/provider/react-query-provider";
-import RecoilProvider from "~/app/core/shared/hook/provider/recoil-provider";
+import JotaiProvider from "~/app/core/shared/lib/provider/jotai-provider";
+import ReactQueryProvider from "~/app/core/shared/lib/provider/react-query-provider";
+import RecoilProvider from "~/app/core/shared/lib/provider/recoil-provider";
 
 const inter = Inter({ subsets: ["latin"] });
 
