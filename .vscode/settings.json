@@ -20,6 +20,11 @@
     "source.fixAll": "explicit"
   },
 
+  "explorer.fileNesting.enabled": true,
+  "explorer.fileNesting.patterns": {
+    "*.ts": "${capture}.*.ts"
+  },
+
   // TypeScript 파일의 자동 완성, 오류 검사 등을 활성화합니다.
   "typescript.validate.enable": true,
   // TypeScript 프로젝트에서의 자동 import 시, 절대 경로가 아닌 상대 경로를 사용하도록 설정합니다.
