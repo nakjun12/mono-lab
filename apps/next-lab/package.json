@@ -12,6 +12,7 @@
   "dependencies": {
     "@radix-ui/react-accordion": "^1.1.2",
     "@radix-ui/react-slot": "^1.0.2",
+    "@repo/color": "workspace:*",
     "@repo/ui": "workspace:*",
     "@tanstack/react-query": "^5.17.9",
     "class-variance-authority": "^0.7.0",
@@ -24,7 +25,7 @@
     "recoil": "^0.7.7",
     "tailwind-merge": "^2.2.2",
     "tailwindcss-animate": "^1.0.7",
-    "@repo/color": "workspace:*"
+    "zustand": "^4.4.7"
   },
   "devDependencies": {
     "@biomejs/biome": "1.7.1",
