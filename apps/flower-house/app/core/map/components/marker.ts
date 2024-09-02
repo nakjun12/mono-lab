@@ -36,7 +36,7 @@ const Marker: React.FC<MarkerProps> = ({
     return () => {
       marker?.setMap(null);
     };
-  }, [map]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [map]);
   return null;
 };
 
