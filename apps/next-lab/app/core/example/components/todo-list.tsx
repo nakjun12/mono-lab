@@ -1,3 +1,5 @@
+"use client";
+
 import { useState, type ChangeEvent } from "react";
 import type { Task } from "~/app/core/shared/lib/provider/reducer-and-context"; // Assuming Task interface is exported from TasksContext
 import {
@@ -22,12 +24,12 @@ export function AddTask(): JSX.Element {
   };
 
   return (
-    <>
+    <div className="flex">
       <input placeholder="Add task" value={text} onChange={handleChange} />
       <button type="button" onClick={handleAddTask}>
         Add
       </button>
-    </>
+    </div>
   );
 }
 

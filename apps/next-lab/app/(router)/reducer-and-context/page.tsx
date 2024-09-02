@@ -4,9 +4,11 @@ import { TasksProvider } from "~/app/core/shared/lib/provider/reducer-and-contex
 export default function TaskApp() {
   return (
     <TasksProvider>
-      <h1>Day off in Kyoto</h1>
-      <AddTask />
-      <TaskList />
+      <div className="w-[100vw] h-[100vh] flex flex-col justify-center items-center">
+        <h1>Day off in Kyoto</h1>
+        <AddTask />
+        <TaskList />
+      </div>
     </TasksProvider>
   );
 }
