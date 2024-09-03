@@ -277,12 +277,18 @@ importers:
       eslint:
         specifier: ^8.56.0
         version: 8.57.0
+      eslint-plugin-turbo:
+        specifier: ^2.1.1
+        version: 2.1.1(eslint@8.57.0)
       jsdom:
         specifier: ^24.0.0
         version: 24.1.1
       postcss:
         specifier: ^8
         version: 8.4.40
+      styled-jsx:
+        specifier: ^5.1.6
+        version: 5.1.6(@babel/core@7.24.5)(react@18.3.1)
       tailwindcss:
         specifier: ^3.4.3
         version: 3.4.3(ts-node@10.9.2)
@@ -4889,6 +4895,11 @@ packages:
     peerDependencies:
       eslint: '>6.6.0'
 
+  eslint-plugin-turbo@2.1.1:
+    resolution: {integrity: sha512-E/34kdQd0n3RP18+e0DSV0f3YTSCOojUh1p4X0Xrho2PBYmJ3umSnNo9FhkZt6UDACl+nBQcYTFkRHMz76lJdw==}
+    peerDependencies:
+      eslint: '>6.6.0'
+
   eslint-plugin-unicorn@48.0.1:
     resolution: {integrity: sha512-FW+4r20myG/DqFcCSzoumaddKBicIPeFnTrifon2mWIzlfyvzwyqZjqVP7m4Cqr/ZYisS2aiLghkUWaPg6vtCw==}
     engines: {node: '>=16'}
@@ -7661,6 +7672,19 @@ packages:
       '@babel/core': '*'
       babel-plugin-macros: '*'
       react: '>= 16.8.0 || 17.x.x || ^18.0.0-0'
+    peerDependenciesMeta:
+      '@babel/core':
+        optional: true
+      babel-plugin-macros:
+        optional: true
+
+  styled-jsx@5.1.6:
+    resolution: {integrity: sha512-qSVyDTeMotdvQYoHWLNGwRFJHC+i+ZvdBRYosOFgC+Wg1vx4frN2/RG/NA7SYqqvKNLf39P2LSRA2pu6n0XYZA==}
+    engines: {node: '>= 12.0.0'}
+    peerDependencies:
+      '@babel/core': '*'
+      babel-plugin-macros: '*'
+      react: '>= 16.8.0 || 17.x.x || ^18.0.0-0 || ^19.0.0-0'
     peerDependenciesMeta:
       '@babel/core':
         optional: true
@@ -14085,6 +14109,11 @@ snapshots:
       dotenv: 16.0.3
       eslint: 8.57.0
 
+  eslint-plugin-turbo@2.1.1(eslint@8.57.0):
+    dependencies:
+      dotenv: 16.0.3
+      eslint: 8.57.0
+
   eslint-plugin-unicorn@48.0.1(eslint@8.57.0):
     dependencies:
       '@babel/helper-validator-identifier': 7.24.5
@@ -17394,6 +17423,13 @@ snapshots:
       webpack: 5.93.0(@swc/core@1.5.7(@swc/helpers@0.5.5))(esbuild@0.18.20)
 
   styled-jsx@5.1.1(@babel/core@7.24.5)(react@18.3.1):
+    dependencies:
+      client-only: 0.0.1
+      react: 18.3.1
+    optionalDependencies:
+      '@babel/core': 7.24.5
+
+  styled-jsx@5.1.6(@babel/core@7.24.5)(react@18.3.1):
     dependencies:
       client-only: 0.0.1
       react: 18.3.1
