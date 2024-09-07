@@ -118,7 +118,7 @@ jobs:
           NEW_DESCRIPTION+=$(echo "${{ steps.changes.outputs.commit_messages }}" | sed 's/^/- /' | sed 's/^- - /- /')
 
           NEW_DESCRIPTION+=$'\n\n### 관련 이슈\n'
-          NEW_DESCRIPTION+=$'아래 목록에서 이 PR과 관련된 이슈를 선택해주세요. 선택한 이슈는 자동으로 할당됩니다:\n\n'
+          NEW_DESCRIPTION+=$'아래 목록에서 이 PR과 관련된 이슈를 선택해주세요. 선택한 이슈는 자동으로 PR과 연결됩니다:\n\n'
           NEW_DESCRIPTION+=$(echo "${{ steps.open_issues.outputs.open_issues }}")
 
           NEW_DESCRIPTION+=$'\n\n---\n\n'
@@ -135,7 +135,7 @@ jobs:
           # Update the PR description
           gh pr edit $PR_NUMBER --body "${FULL_DESCRIPTION}"
 
-      - name: Check and Assign Issues
+      - name: Link Issues to PR
         if: github.event_name == 'issue_comment'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -159,18 +159,15 @@ jobs:
           # Find checked issues
           CHECKED_ISSUES=$(echo "$ISSUE_SECTION" | grep -oP "(?<=- \[x\] $ORG/$REPO#)\d+")
 
-          # Get PR author
-          PR_AUTHOR=$(gh pr view $PR_NUMBER --json author -q .author.login)
-
-          # Assign issues
+          # Link issues to PR
           for ISSUE in $CHECKED_ISSUES
           do
-            gh issue edit $ISSUE --add-assignee $PR_AUTHOR
-            echo "Assigned issue #$ISSUE to $PR_AUTHOR"
+            gh pr edit $PR_NUMBER --add-project "Issue #$ISSUE"
+            echo "Linked issue #$ISSUE to PR #$PR_NUMBER"
           done
 
-          # Update PR description to reflect assigned issues
-          UPDATED_ISSUE_SECTION=$(echo "$ISSUE_SECTION" | sed "s/- \[x\] $ORG\/$REPO#\($CHECKED_ISSUES\)/- [x] $ORG\/$REPO#\1 (할당됨)/g")
+          # Update PR description to reflect linked issues
+          UPDATED_ISSUE_SECTION=$(echo "$ISSUE_SECTION" | sed "s/- \[x\] $ORG\/$REPO#\($CHECKED_ISSUES\)/- [x] $ORG\/$REPO#\1 (연결됨)/g")
           UPDATED_PR_BODY="${PR_BODY//$ISSUE_SECTION/$UPDATED_ISSUE_SECTION}"
 
           gh pr edit $PR_NUMBER --body "$UPDATED_PR_BODY"
