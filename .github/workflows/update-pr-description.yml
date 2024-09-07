@@ -24,10 +24,26 @@ jobs:
           echo "Changed files:"
           echo "$CHANGED_FILES"
 
-          # Get package names from package.json files
-          CHANGED_PACKAGES=$(echo "$CHANGED_FILES" | grep -oP '.*(?=/package\.json)' | xargs -I {} jq -r .name {}/package.json 2>/dev/null | sort | uniq)
+          # Function to find the nearest package.json or parent directory name
+          find_package() {
+            local dir=$(dirname "$1")
+            while [[ "$dir" != "." && "$dir" != "/" ]]; do
+              if [[ -f "$dir/package.json" ]]; then
+                echo $(jq -r .name "$dir/package.json")
+                return 0
+              elif [[ -d "$dir/src" ]]; then
+                echo $(basename "$dir")
+                return 0
+              fi
+              dir=$(dirname "$dir")
+            done
+            echo "Unknown"
+          }
+
+          # Get package names
+          CHANGED_PACKAGES=$(echo "$CHANGED_FILES" | while read file; do find_package "$file"; done | sort | uniq)
           if [ -z "$CHANGED_PACKAGES" ]; then
-            CHANGED_PACKAGES="No package.json files were modified"
+            CHANGED_PACKAGES="No packages detected"
           fi
           echo "Changed packages:"
           echo "$CHANGED_PACKAGES"
@@ -58,7 +74,7 @@ jobs:
           # Prepare the new PR description
           NEW_DESCRIPTION="## 🤖 자동 생성된 PR 정보\n\n"
           NEW_DESCRIPTION+="### 📦 변경된 패키지\n"
-          if [ "${{ steps.changes.outputs.changed_packages }}" == "No package.json files were modified" ]; then
+          if [ "${{ steps.changes.outputs.changed_packages }}" == "No packages detected" ]; then
             NEW_DESCRIPTION+="패키지 변경 없음\n"
           else
             NEW_DESCRIPTION+=$(echo "${{ steps.changes.outputs.changed_packages }}" | sed 's/^/- /')
