@@ -91,7 +91,7 @@ jobs:
                 }
               }
             }
-          ' -F org=$ORG -F repo=$REPO --jq '.data.repository.issues.nodes[] | "- [ ] #\(.number) \(.title)"')
+          ' -F org=$ORG -F repo=$REPO --jq '.data.repository.issues.nodes[] | "- [ ] \($ORG)/\($REPO)#\(.number) \(.title)"')
 
           echo "open_issues<<EOF" >> $GITHUB_OUTPUT
           echo "$OPEN_ISSUES" >> $GITHUB_OUTPUT
@@ -141,6 +141,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           PR_NUMBER: ${{ github.event.issue.number }}
           COMMENT_BODY: ${{ github.event.comment.body }}
+          ORG: "my-type-world-cup"
+          REPO: "my-type-world-cup-frontend"
         run: |
           # Check if the comment is on a PR
           if ! gh pr view $PR_NUMBER &> /dev/null; then
@@ -155,7 +157,7 @@ jobs:
           ISSUE_SECTION=$(echo "$PR_BODY" | sed -n '/^### 관련 이슈/,/^---/p')
 
           # Find checked issues
-          CHECKED_ISSUES=$(echo "$ISSUE_SECTION" | grep -oP '(?<=- \[x\] #)\d+')
+          CHECKED_ISSUES=$(echo "$ISSUE_SECTION" | grep -oP "(?<=- \[x\] $ORG/$REPO#)\d+")
 
           # Get PR author
           PR_AUTHOR=$(gh pr view $PR_NUMBER --json author -q .author.login)
@@ -168,7 +170,7 @@ jobs:
           done
 
           # Update PR description to reflect assigned issues
-          UPDATED_ISSUE_SECTION=$(echo "$ISSUE_SECTION" | sed "s/- \[x\] #\($CHECKED_ISSUES\)/- [x] #\1 (할당됨)/g")
+          UPDATED_ISSUE_SECTION=$(echo "$ISSUE_SECTION" | sed "s/- \[x\] $ORG\/$REPO#\($CHECKED_ISSUES\)/- [x] $ORG\/$REPO#\1 (할당됨)/g")
           UPDATED_PR_BODY="${PR_BODY//$ISSUE_SECTION/$UPDATED_ISSUE_SECTION}"
 
           gh pr edit $PR_NUMBER --body "$UPDATED_PR_BODY"
