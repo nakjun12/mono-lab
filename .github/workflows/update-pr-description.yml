@@ -3,6 +3,8 @@ name: Update PR Description
 on:
   pull_request:
     types: [opened, synchronize]
+  issue_comment:
+    types: [created, edited]
 
 permissions:
   contents: read
@@ -70,17 +72,18 @@ jobs:
           echo "$COMMIT_MESSAGES" >> $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT
 
-      - name: Fetch Open Issues
+      - name: Fetch Open Issues for PR Creator
         id: open_issues
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           ORG: "my-type-world-cup"
           REPO: "my-type-world-cup-frontend"
         run: |
+          PR_CREATOR=$(gh pr view ${{ github.event.pull_request.number }} --json author --jq .author.login)
           OPEN_ISSUES=$(gh api graphql -f query='
-            query($org: String!, $repo: String!) {
+            query($org: String!, $repo: String!, $creator: String!) {
               repository(owner: $org, name: $repo) {
-                issues(states: OPEN, first: 20) {
+                issues(states: OPEN, first: 20, filterBy: {assignee: $creator}) {
                   nodes {
                     number
                     title
@@ -89,7 +92,7 @@ jobs:
                 }
               }
             }
-          ' -F org=$ORG -F repo=$REPO --jq '.data.repository.issues.nodes[] | "- [ ] \(env.ORG)/\(env.REPO)#\(.number) \(.title)"')
+          ' -F org=$ORG -F repo=$REPO -F creator=$PR_CREATOR --jq '.data.repository.issues.nodes[] | "- [ ] \(env.ORG)/\(env.REPO)#\(.number) \(.title)"')
 
           echo "open_issues<<EOF" >> $GITHUB_OUTPUT
           echo "$OPEN_ISSUES" >> $GITHUB_OUTPUT
@@ -133,26 +136,47 @@ jobs:
           # Update the PR description
           gh pr edit $PR_NUMBER --body "${FULL_DESCRIPTION}"
 
-          # Find checked issues and link them to the PR
-          CHECKED_ISSUES=$(echo "$FULL_DESCRIPTION" | sed -n '/^### 관련 이슈/,/^---/p' | grep -oP "(?<=- \[x\] $ORG/$REPO#)\d+")
+      - name: Link Issues to PR
+        if: github.event_name == 'issue_comment'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_NUMBER: ${{ github.event.issue.number }}
+          COMMENT_BODY: ${{ github.event.comment.body }}
+          ORG: "my-type-world-cup"
+          REPO: "my-type-world-cup-frontend"
+        run: |
+          # Check if the comment is on a PR
+          if ! gh pr view $PR_NUMBER &> /dev/null; then
+            echo "This comment is not on a PR. Skipping."
+            exit 0
+          fi
 
+          # Get the current PR description
+          PR_BODY=$(gh pr view $PR_NUMBER --json body -q .body)
+
+          # Extract the issue section
+          ISSUE_SECTION=$(echo "$PR_BODY" | sed -n '/^### 관련 이슈/,/^---/p')
+
+          # Find checked issues
+          CHECKED_ISSUES=$(echo "$ISSUE_SECTION" | grep -oP "(?<=- \[x\] $ORG/$REPO#)\d+")
+
+          # Unlink previously linked issues
+          CURRENT_LINKED_ISSUES=$(gh pr view $PR_NUMBER --json projectItems --jq '.projectItems[].content.number')
+          for ISSUE in $CURRENT_LINKED_ISSUES
+          do
+            gh pr edit $PR_NUMBER --remove-project "Issue #$ISSUE"
+            echo "Unlinked issue #$ISSUE from PR #$PR_NUMBER"
+          done
+
+          # Link newly checked issues to PR
           for ISSUE in $CHECKED_ISSUES
           do
             gh pr edit $PR_NUMBER --add-project "Issue #$ISSUE"
             echo "Linked issue #$ISSUE to PR #$PR_NUMBER"
-
-            # Update PR description to reflect linked issues
-            FULL_DESCRIPTION=$(echo "$FULL_DESCRIPTION" | sed "s/- \[x\] $ORG\/$REPO#$ISSUE/- [x] $ORG\/$REPO#$ISSUE (연결됨)/g")
           done
 
-          # Update PR description again with linked issue status
-          gh pr edit $PR_NUMBER --body "$FULL_DESCRIPTION"
+          # Update PR description to reflect linked issues
+          UPDATED_ISSUE_SECTION=$(echo "$ISSUE_SECTION" | sed "s/- \[x\] $ORG\/$REPO#\($CHECKED_ISSUES\)/- [x] $ORG\/$REPO#\1 (연결됨)/g")
+          UPDATED_PR_BODY="${PR_BODY//$ISSUE_SECTION/$UPDATED_ISSUE_SECTION}"
 
-          # Remove links for unchecked issues
-          UNCHECKED_ISSUES=$(echo "$FULL_DESCRIPTION" | sed -n '/^### 관련 이슈/,/^---/p' | grep -oP "(?<=- \[ \] $ORG/$REPO#)\d+")
-
-          for ISSUE in $UNCHECKED_ISSUES
-          do
-            gh pr edit $PR_NUMBER --remove-project "Issue #$ISSUE"
-            echo "Removed link for issue #$ISSUE from PR #$PR_NUMBER"
-          done
+          gh pr edit $PR_NUMBER --body "$UPDATED_PR_BODY"
