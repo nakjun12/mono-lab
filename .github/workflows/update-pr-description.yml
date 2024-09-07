@@ -70,18 +70,17 @@ jobs:
           echo "$COMMIT_MESSAGES" >> $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT
 
-      - name: Fetch Related Issues
-        id: related_issues
+      - name: Fetch Open Issues
+        id: open_issues
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           ORG: "my-type-world-cup"
           REPO: "my-type-world-cup-frontend"
-          PR_AUTHOR: ${{ github.event.pull_request.user.login }}
         run: |
-          RELATED_ISSUES=$(gh api graphql -f query='
-            query($org: String!, $repo: String!, $author: String!) {
+          OPEN_ISSUES=$(gh api graphql -f query='
+            query($org: String!, $repo: String!) {
               repository(owner: $org, name: $repo) {
-                issues(filterBy: {assignee: $author, states: OPEN}, first: 10) {
+                issues(states: OPEN, first: 20) {
                   nodes {
                     number
                     title
@@ -90,11 +89,19 @@ jobs:
                 }
               }
             }
-          ' -F org=$ORG -F repo=$REPO -F author=$PR_AUTHOR --jq '.data.repository.issues.nodes[] | "- [#\(.number) \(.title)](\(.url))"')
+          ' -F org=$ORG -F repo=$REPO --jq '.data.repository.issues.nodes[] | "- [ ] [\#\(.number) \(.title)](\(.url))"')
 
-          echo "related_issues<<EOF" >> $GITHUB_OUTPUT
-          echo "$RELATED_ISSUES" >> $GITHUB_OUTPUT
+          echo "open_issues<<EOF" >> $GITHUB_OUTPUT
+          echo "$OPEN_ISSUES" >> $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT
+
+      - name: Add Issue Selection Comment
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: |
+          COMMENT="## 관련 이슈 선택\n\n아래 목록에서 이 PR과 관련된 이슈를 선택해주세요:\n\n${{ steps.open_issues.outputs.open_issues }}\n\n선택한 이슈는 PR 설명에 자동으로 추가됩니다."
+          gh pr comment $PR_NUMBER --body "$COMMENT"
 
       - name: Update PR Description
         env:
@@ -118,11 +125,7 @@ jobs:
           NEW_DESCRIPTION+=$(echo "${{ steps.changes.outputs.commit_messages }}" | sed 's/^/- /' | sed 's/^- - /- /')
 
           NEW_DESCRIPTION+=$'\n\n### 관련 이슈\n'
-          if [ -z "${{ steps.related_issues.outputs.related_issues }}" ]; then
-            NEW_DESCRIPTION+=$'PR 작성자에게 할당된 관련 이슈 없음\n'
-          else
-            NEW_DESCRIPTION+=$'${{ steps.related_issues.outputs.related_issues }}\n'
-          fi
+          NEW_DESCRIPTION+=$'PR 설명에 추가할 이슈를 위 코멘트에서 선택해주세요.\n'
 
           NEW_DESCRIPTION+=$'\n\n---\n\n'
 
