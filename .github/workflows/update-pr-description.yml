@@ -74,8 +74,8 @@ jobs:
         id: related_issues
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          ORG: "medibloc"
-          REPO: "drpalette-design"
+          ORG: "my-type-world-cup"
+          REPO: "my-type-world-cup-frontend"
           PR_AUTHOR: ${{ github.event.pull_request.user.login }}
         run: |
           RELATED_ISSUES=$(gh api graphql -f query='
