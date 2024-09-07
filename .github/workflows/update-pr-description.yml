@@ -89,7 +89,7 @@ jobs:
                 }
               }
             }
-          ' -F org=$ORG -F repo=$REPO --jq '.data.repository.issues.nodes[] | "- [ ] [\#\(.number) \(.title)](\(.url))"')
+          ' -F org=$ORG -F repo=$REPO --jq '.data.repository.issues.nodes[] | "- [ ] [#\(.number) \(.title)](\(.url))"')
 
           echo "open_issues<<EOF" >> $GITHUB_OUTPUT
           echo "$OPEN_ISSUES" >> $GITHUB_OUTPUT
