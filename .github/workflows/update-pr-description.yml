@@ -117,11 +117,11 @@ jobs:
           NEW_DESCRIPTION+=$'\n\n### 📝 커밋 내역\n'
           NEW_DESCRIPTION+=$(echo "${{ steps.changes.outputs.commit_messages }}" | sed 's/^/- /' | sed 's/^- - /- /')
 
-          NEW_DESCRIPTION+=$'\n\n### 관련 이슈 (PR 작성자에게 할당된 이슈)\n'
+          NEW_DESCRIPTION+=$'\n\n### 관련 이슈\n'
           if [ -z "${{ steps.related_issues.outputs.related_issues }}" ]; then
-            NEW_DESCRIPTION+="PR 작성자에게 할당된 관련 이슈 없음\n"
+            NEW_DESCRIPTION+=$'PR 작성자에게 할당된 관련 이슈 없음\n'
           else
-            NEW_DESCRIPTION+="${{ steps.related_issues.outputs.related_issues }}\n"
+            NEW_DESCRIPTION+=$'${{ steps.related_issues.outputs.related_issues }}\n'
           fi
 
           NEW_DESCRIPTION+=$'\n\n---\n\n'
