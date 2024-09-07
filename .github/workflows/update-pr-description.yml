@@ -32,13 +32,10 @@ jobs:
           echo "Changed packages:"
           echo "$CHANGED_PACKAGES"
 
-          # Get specific commit message
-          COMMIT_MESSAGE=$(git log --format="%s" ${{ github.event.pull_request.base.sha }}..${{ github.event.pull_request.head.sha }} | grep "fix: github action pr 권한 추가" | head -n 1)
-          if [ -z "$COMMIT_MESSAGE" ]; then
-            COMMIT_MESSAGE="No matching commit message found"
-          fi
-          echo "Commit message:"
-          echo "$COMMIT_MESSAGE"
+          # Get all commit messages
+          COMMIT_MESSAGES=$(git log --format="- %h %s" ${{ github.event.pull_request.base.sha }}..${{ github.event.pull_request.head.sha }})
+          echo "Commit messages:"
+          echo "$COMMIT_MESSAGES"
 
           # Set outputs
           echo "changed_files<<EOF" >> $GITHUB_OUTPUT
@@ -49,8 +46,8 @@ jobs:
           echo "$CHANGED_PACKAGES" >> $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT
 
-          echo "commit_message<<EOF" >> $GITHUB_OUTPUT
-          echo "$COMMIT_MESSAGE" >> $GITHUB_OUTPUT
+          echo "commit_messages<<EOF" >> $GITHUB_OUTPUT
+          echo "$COMMIT_MESSAGES" >> $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT
 
       - name: Update PR Description
@@ -59,15 +56,17 @@ jobs:
           PR_NUMBER: ${{ github.event.pull_request.number }}
         run: |
           # Prepare the new PR description
-          NEW_DESCRIPTION="## 자동 생성된 PR 정보\n\n"
-          NEW_DESCRIPTION+="## 변경 사항 요약\n"
-          NEW_DESCRIPTION+="### 수정된 패키지:\n"
-          NEW_DESCRIPTION+=$(echo "${{ steps.changes.outputs.changed_packages }}" | sed 's/^/- /')
-          NEW_DESCRIPTION+="\n\n## 변경 내용\n"
-          NEW_DESCRIPTION+="### 변경된 파일:\n"
+          NEW_DESCRIPTION="## 🤖 자동 생성된 PR 정보\n\n"
+          NEW_DESCRIPTION+="### 📦 변경된 패키지\n"
+          if [ "${{ steps.changes.outputs.changed_packages }}" == "No package.json files were modified" ]; then
+            NEW_DESCRIPTION+="패키지 변경 없음\n"
+          else
+            NEW_DESCRIPTION+=$(echo "${{ steps.changes.outputs.changed_packages }}" | sed 's/^/- /')
+          fi
+          NEW_DESCRIPTION+="\n### 📄 변경된 파일\n"
           NEW_DESCRIPTION+=$(echo "${{ steps.changes.outputs.changed_files }}" | sed 's/^/- /')
-          NEW_DESCRIPTION+="\n\n### 커밋 내역:\n"
-          NEW_DESCRIPTION+="${{ steps.changes.outputs.commit_message }}"
+          NEW_DESCRIPTION+="\n\n### 📝 커밋 내역\n"
+          NEW_DESCRIPTION+=$(echo "${{ steps.changes.outputs.commit_messages }}" | sed 's/^//')
           NEW_DESCRIPTION+="\n\n---\n\n"
 
           # Get the current PR description
