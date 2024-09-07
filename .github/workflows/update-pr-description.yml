@@ -3,6 +3,13 @@ name: Update PR Description
 on:
   pull_request:
     types: [opened, synchronize]
+  issue_comment:
+    types: [created, edited]
+
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
 
 jobs:
   update-pr-description:
@@ -12,7 +19,7 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Get changed files and commits
+      - name: Get changed files, packages, and commits
         id: changes
         run: |
           # Get changed files
@@ -20,13 +27,35 @@ jobs:
           echo "Changed files:"
           echo "$CHANGED_FILES"
 
-          # Get unique top-level directories (packages)
-          CHANGED_PACKAGES=$(echo "$CHANGED_FILES" | awk -F'/' '{print $1}' | sort | uniq)
+          # Function to find the nearest package.json or parent directory name
+          find_package() {
+            local dir=$(dirname "$1")
+            while [[ "$dir" != "." && "$dir" != "/" ]]; do
+              if [[ -f "$dir/package.json" ]]; then
+                echo $(jq -r .name "$dir/package.json")
+                return 0
+              fi
+              dir=$(dirname "$dir")
+            done
+
+              if [[ -f "./package.json" ]]; then
+                echo $(jq -r .name "./package.json")
+                return 0
+              fi
+
+            echo "Unknown"
+          }
+
+          # Get package names
+          CHANGED_PACKAGES=$(echo "$CHANGED_FILES" | while read file; do find_package "$file"; done | sort | uniq)
+          if [ -z "$CHANGED_PACKAGES" ]; then
+            CHANGED_PACKAGES="No packages detected"
+          fi
           echo "Changed packages:"
           echo "$CHANGED_PACKAGES"
 
-          # Get commit messages
-          COMMIT_MESSAGES=$(git log --format="%h - %s" ${{ github.event.pull_request.base.sha }}..${{ github.event.pull_request.head.sha }})
+          # Get all commit messages
+          COMMIT_MESSAGES=$(git log --format="- %s%n%b" ${{ github.event.pull_request.base.sha }}..${{ github.event.pull_request.head.sha }} | sed '/./s/^$//' | sed -e '/^$/d' -e '/^- $/d')
           echo "Commit messages:"
           echo "$COMMIT_MESSAGES"
 
@@ -43,25 +72,105 @@ jobs:
           echo "$COMMIT_MESSAGES" >> $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT
 
+      - name: Fetch Open Issues
+        id: open_issues
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          ORG: "my-type-world-cup"
+          REPO: "my-type-world-cup-frontend"
+        run: |
+          OPEN_ISSUES=$(gh api graphql -f query='
+            query($org: String!, $repo: String!) {
+              repository(owner: $org, name: $repo) {
+                issues(states: OPEN, first: 20) {
+                  nodes {
+                    number
+                    title
+                    url
+                  }
+                }
+              }
+            }
+          ' -F org=$ORG -F repo=$REPO --jq '.data.repository.issues.nodes[] | "- [ ] \(env.ORG)/\(env.REPO)#\(.number) \(.title)"')
+
+          echo "open_issues<<EOF" >> $GITHUB_OUTPUT
+          echo "$OPEN_ISSUES" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
       - name: Update PR Description
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
         run: |
           # Prepare the new PR description
-          NEW_DESCRIPTION="## 자동 생성된 PR 정보\n\n"
-          NEW_DESCRIPTION+="### 수정된 패키지:\n"
-          NEW_DESCRIPTION+=$(echo "${{ steps.changes.outputs.changed_packages }}" | sed 's/^/- /')
-          NEW_DESCRIPTION+="\n\n### 변경된 파일:\n"
-          NEW_DESCRIPTION+=$(echo "${{ steps.changes.outputs.changed_files }}" | sed 's/^/- /')
-          NEW_DESCRIPTION+="\n\n### 커밋 메시지:\n"
-          NEW_DESCRIPTION+=$(echo "${{ steps.changes.outputs.commit_messages }}" | sed 's/^/- /')
+          NEW_DESCRIPTION=$'## 🤖 자동 생성된 PR 정보\n\n'
+          NEW_DESCRIPTION+=$'### 📦 변경된 패키지\n'
+          if [ "${{ steps.changes.outputs.changed_packages }}" == "No packages detected" ]; then
+            NEW_DESCRIPTION+=$'패키지 변경 없음\n'
+          else
+            NEW_DESCRIPTION+=$(echo "${{ steps.changes.outputs.changed_packages }}" | sed 's/^/- /' | sed 's/*/-/g')
+          fi
+
+          NEW_DESCRIPTION+=$'\n### 📄 변경된 파일\n'
+          NEW_DESCRIPTION+=$(echo "${{ steps.changes.outputs.changed_files }}" | sed 's/^/- /' | sed 's/*/-/g')
+
+          NEW_DESCRIPTION+=$'\n\n### 📝 커밋 내역\n'
+          NEW_DESCRIPTION+=$(echo "${{ steps.changes.outputs.commit_messages }}" | sed 's/^/- /' | sed 's/^- - /- /')
+
+          NEW_DESCRIPTION+=$'\n\n### 관련 이슈\n'
+          NEW_DESCRIPTION+=$'아래 목록에서 이 PR과 관련된 이슈를 선택해주세요. 선택한 이슈는 자동으로 할당됩니다:\n\n'
+          NEW_DESCRIPTION+=$(echo "${{ steps.open_issues.outputs.open_issues }}")
+
+          NEW_DESCRIPTION+=$'\n\n---\n\n'
 
           # Get the current PR description
           CURRENT_DESCRIPTION=$(gh pr view $PR_NUMBER --json body -q .body)
 
-          # Combine the new and current descriptions
-          FULL_DESCRIPTION="${NEW_DESCRIPTION}\n\n---\n\n${CURRENT_DESCRIPTION}"
+          # Extract the manual part of the description (everything after the auto-generated part)
+          MANUAL_DESCRIPTION=$(echo "$CURRENT_DESCRIPTION" | sed -n '/^---$/,$p' | tail -n +2)
+
+          # Combine the new auto-generated part with the manual part
+          FULL_DESCRIPTION="${NEW_DESCRIPTION}${MANUAL_DESCRIPTION}"
 
           # Update the PR description
           gh pr edit $PR_NUMBER --body "${FULL_DESCRIPTION}"
+
+      - name: Check and Assign Issues
+        if: github.event_name == 'issue_comment'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_NUMBER: ${{ github.event.issue.number }}
+          COMMENT_BODY: ${{ github.event.comment.body }}
+          ORG: "my-type-world-cup"
+          REPO: "my-type-world-cup-frontend"
+        run: |
+          # Check if the comment is on a PR
+          if ! gh pr view $PR_NUMBER &> /dev/null; then
+            echo "This comment is not on a PR. Skipping."
+            exit 0
+          fi
+
+          # Get the current PR description
+          PR_BODY=$(gh pr view $PR_NUMBER --json body -q .body)
+
+          # Extract the issue section
+          ISSUE_SECTION=$(echo "$PR_BODY" | sed -n '/^### 관련 이슈/,/^---/p')
+
+          # Find checked issues
+          CHECKED_ISSUES=$(echo "$ISSUE_SECTION" | grep -oP "(?<=- \[x\] $ORG/$REPO#)\d+")
+
+          # Get PR author
+          PR_AUTHOR=$(gh pr view $PR_NUMBER --json author -q .author.login)
+
+          # Assign issues
+          for ISSUE in $CHECKED_ISSUES
+          do
+            gh issue edit $ISSUE --add-assignee $PR_AUTHOR
+            echo "Assigned issue #$ISSUE to $PR_AUTHOR"
+          done
+
+          # Update PR description to reflect assigned issues
+          UPDATED_ISSUE_SECTION=$(echo "$ISSUE_SECTION" | sed "s/- \[x\] $ORG\/$REPO#\($CHECKED_ISSUES\)/- [x] $ORG\/$REPO#\1 (할당됨)/g")
+          UPDATED_PR_BODY="${PR_BODY//$ISSUE_SECTION/$UPDATED_ISSUE_SECTION}"
+
+          gh pr edit $PR_NUMBER --body "$UPDATED_PR_BODY"
