@@ -31,14 +31,12 @@ jobs:
               if [[ -f "$dir/package.json" ]]; then
                 echo $(jq -r .name "$dir/package.json")
                 return 0
-              elif [[ -d "$dir/src" ]]; then
-                echo $(basename "$dir")
-                return 0
               fi
               dir=$(dirname "$dir")
             done
             echo "Unknown"
           }
+
 
           # Get package names
           CHANGED_PACKAGES=$(echo "$CHANGED_FILES" | while read file; do find_package "$file"; done | sort | uniq)
