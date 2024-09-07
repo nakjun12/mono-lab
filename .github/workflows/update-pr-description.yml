@@ -1,0 +1,67 @@
+name: Update PR Description
+
+on:
+  pull_request:
+    types: [opened, synchronize]
+
+jobs:
+  update-pr-description:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
+      - name: Get changed files and commits
+        id: changes
+        run: |
+          # Get changed files
+          CHANGED_FILES=$(git diff --name-only ${{ github.event.pull_request.base.sha }} ${{ github.event.pull_request.head.sha }} | sort | uniq)
+          echo "Changed files:"
+          echo "$CHANGED_FILES"
+
+          # Get unique top-level directories (packages)
+          CHANGED_PACKAGES=$(echo "$CHANGED_FILES" | awk -F'/' '{print $1}' | sort | uniq)
+          echo "Changed packages:"
+          echo "$CHANGED_PACKAGES"
+
+          # Get commit messages
+          COMMIT_MESSAGES=$(git log --format="%h - %s" ${{ github.event.pull_request.base.sha }}..${{ github.event.pull_request.head.sha }})
+          echo "Commit messages:"
+          echo "$COMMIT_MESSAGES"
+
+          # Set outputs
+          echo "changed_files<<EOF" >> $GITHUB_OUTPUT
+          echo "$CHANGED_FILES" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+          echo "changed_packages<<EOF" >> $GITHUB_OUTPUT
+          echo "$CHANGED_PACKAGES" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+          echo "commit_messages<<EOF" >> $GITHUB_OUTPUT
+          echo "$COMMIT_MESSAGES" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+      - name: Update PR Description
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: |
+          # Prepare the new PR description
+          NEW_DESCRIPTION="## 자동 생성된 PR 정보\n\n"
+          NEW_DESCRIPTION+="### 수정된 패키지:\n"
+          NEW_DESCRIPTION+=$(echo "${{ steps.changes.outputs.changed_packages }}" | sed 's/^/- /')
+          NEW_DESCRIPTION+="\n\n### 변경된 파일:\n"
+          NEW_DESCRIPTION+=$(echo "${{ steps.changes.outputs.changed_files }}" | sed 's/^/- /')
+          NEW_DESCRIPTION+="\n\n### 커밋 메시지:\n"
+          NEW_DESCRIPTION+=$(echo "${{ steps.changes.outputs.commit_messages }}" | sed 's/^/- /')
+
+          # Get the current PR description
+          CURRENT_DESCRIPTION=$(gh pr view $PR_NUMBER --json body -q .body)
+
+          # Combine the new and current descriptions
+          FULL_DESCRIPTION="${NEW_DESCRIPTION}\n\n---\n\n${CURRENT_DESCRIPTION}"
+
+          # Update the PR description
+          gh pr edit $PR_NUMBER --body "${FULL_DESCRIPTION}"
