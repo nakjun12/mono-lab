@@ -3,8 +3,6 @@ name: Update PR Description
 on:
   pull_request:
     types: [opened, synchronize]
-  issue_comment:
-    types: [created, edited]
 
 permissions:
   contents: read
@@ -135,39 +133,26 @@ jobs:
           # Update the PR description
           gh pr edit $PR_NUMBER --body "${FULL_DESCRIPTION}"
 
-      - name: Link Issues to PR
-        if: github.event_name == 'issue_comment'
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          PR_NUMBER: ${{ github.event.issue.number }}
-          COMMENT_BODY: ${{ github.event.comment.body }}
-          ORG: "my-type-world-cup"
-          REPO: "my-type-world-cup-frontend"
-        run: |
-          # Check if the comment is on a PR
-          if ! gh pr view $PR_NUMBER &> /dev/null; then
-            echo "This comment is not on a PR. Skipping."
-            exit 0
-          fi
+          # Find checked issues and link them to the PR
+          CHECKED_ISSUES=$(echo "$FULL_DESCRIPTION" | sed -n '/^### 관련 이슈/,/^---/p' | grep -oP "(?<=- \[x\] $ORG/$REPO#)\d+")
 
-          # Get the current PR description
-          PR_BODY=$(gh pr view $PR_NUMBER --json body -q .body)
-
-          # Extract the issue section
-          ISSUE_SECTION=$(echo "$PR_BODY" | sed -n '/^### 관련 이슈/,/^---/p')
-
-          # Find checked issues
-          CHECKED_ISSUES=$(echo "$ISSUE_SECTION" | grep -oP "(?<=- \[x\] $ORG/$REPO#)\d+")
-
-          # Link issues to PR
           for ISSUE in $CHECKED_ISSUES
           do
             gh pr edit $PR_NUMBER --add-project "Issue #$ISSUE"
             echo "Linked issue #$ISSUE to PR #$PR_NUMBER"
+
+            # Update PR description to reflect linked issues
+            FULL_DESCRIPTION=$(echo "$FULL_DESCRIPTION" | sed "s/- \[x\] $ORG\/$REPO#$ISSUE/- [x] $ORG\/$REPO#$ISSUE (연결됨)/g")
           done
 
-          # Update PR description to reflect linked issues
-          UPDATED_ISSUE_SECTION=$(echo "$ISSUE_SECTION" | sed "s/- \[x\] $ORG\/$REPO#\($CHECKED_ISSUES\)/- [x] $ORG\/$REPO#\1 (연결됨)/g")
-          UPDATED_PR_BODY="${PR_BODY//$ISSUE_SECTION/$UPDATED_ISSUE_SECTION}"
+          # Update PR description again with linked issue status
+          gh pr edit $PR_NUMBER --body "$FULL_DESCRIPTION"
 
-          gh pr edit $PR_NUMBER --body "$UPDATED_PR_BODY"
+          # Remove links for unchecked issues
+          UNCHECKED_ISSUES=$(echo "$FULL_DESCRIPTION" | sed -n '/^### 관련 이슈/,/^---/p' | grep -oP "(?<=- \[ \] $ORG/$REPO#)\d+")
+
+          for ISSUE in $UNCHECKED_ISSUES
+          do
+            gh pr edit $PR_NUMBER --remove-project "Issue #$ISSUE"
+            echo "Removed link for issue #$ISSUE from PR #$PR_NUMBER"
+          done
