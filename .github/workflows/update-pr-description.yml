@@ -21,7 +21,7 @@ jobs:
         id: changes
         run: |
           # Get changed files
-          CHANGED_FILES=$(git diff --name-only ${{ github.event.pull_request.base.sha }} ${{ github.event.pull_request.head.sha }} | sort | uniq)
+          CHANGED_FILES=$(git diff --name-only ${{ github.event.pull_request.base.sha }} ${{ github.event.pull_request.head.sha }} | sort)
           echo "Changed files:"
           echo "$CHANGED_FILES"
 
@@ -53,7 +53,7 @@ jobs:
           echo "$CHANGED_PACKAGES"
 
           # Get all commit messages
-          COMMIT_MESSAGES=$(git log --format="- %s%n%b" ${{ github.event.pull_request.base.sha }}..${{ github.event.pull_request.head.sha }} | sed '/./s/^$//' | sed -e '/^$/d' -e '/^- $/d')
+          COMMIT_MESSAGES=$(git log --format="- %s%n%b" ${{ github.event.pull_request.base.sha }}..${{ github.event.pull_request.head.sha }} | sed -e '/^$/d' -e '/^- $/d')
           echo "Commit messages:"
           echo "$COMMIT_MESSAGES"
 
@@ -114,38 +114,24 @@ jobs:
           NEW_DESCRIPTION+=$(echo "${{ steps.changes.outputs.changed_files }}" | sed 's/^/- /' | sed 's/*/-/g')
 
           NEW_DESCRIPTION+=$'\n\n### 📝 커밋 내역\n'
-          NEW_DESCRIPTION+=$(echo "${{ steps.changes.outputs.commit_messages }}" | sed 's/^/- /' | sed 's/^- - /- /')
+          NEW_DESCRIPTION+=$(echo "${{ steps.changes.outputs.commit_messages }}" | sed 's/^/- /' ')
 
           NEW_DESCRIPTION+=$'\n\n### 관련 이슈\n'
           NEW_DESCRIPTION+=$'아래 목록에서 이 PR과 관련된 이슈를 선택해주세요. 선택한 이슈는 자동으로 PR과 연결됩니다:\n\n'
           NEW_DESCRIPTION+=$(echo "${{ steps.open_issues.outputs.open_issues }}")
 
-          NEW_DESCRIPTION+=$'\n\n---\n\n'
-
-          # Get the current PR description
-          CURRENT_DESCRIPTION=$(gh pr view $PR_NUMBER --json body -q .body)
-
-          # Extract the manual part of the description (everything after the auto-generated part)
-          MANUAL_DESCRIPTION=$(echo "$CURRENT_DESCRIPTION" | sed -n '/^---$/,$p' | tail -n +2)
-
-          # Combine the new auto-generated part with the manual part
-          FULL_DESCRIPTION="${NEW_DESCRIPTION}${MANUAL_DESCRIPTION}"
-
           # Update the PR description
-          gh pr edit $PR_NUMBER --body "${FULL_DESCRIPTION}"
+          gh pr edit $PR_NUMBER --body "${NEW_DESCRIPTION}"
 
       - name: Link Issues to PR
-        if: github.event_name == 'issue_comment'
+        if: github.event.action == 'edited' && github.event.changes.body
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          PR_NUMBER: ${{ github.event.issue.number }}
-          COMMENT_BODY: ${{ github.event.comment.body }}
-          ORG: "my-type-world-cup"
-          REPO: "my-type-world-cup-frontend"
+          PR_NUMBER: ${{ github.event.pull_request.number }}
         run: |
           # Check if the comment is on a PR
           if ! gh pr view $PR_NUMBER &> /dev/null; then
-            echo "This comment is not on a PR. Skipping."
+            echo "This is not a PR. Skipping."
             exit 0
           fi
 
@@ -153,28 +139,28 @@ jobs:
           PR_BODY=$(gh pr view $PR_NUMBER --json body -q .body)
 
           # Extract the issue section
-          ISSUE_SECTION=$(echo "$PR_BODY" | sed -n '/^### 관련 이슈/,/^---/p')
+          ISSUE_SECTION=$(echo "$PR_BODY" | sed -n '/^### 관련 이슈/,$p')
 
-          # Find checked issues
-          CHECKED_ISSUES=$(echo "$ISSUE_SECTION" | grep -oP "(?<=- \[x\] $ORG/$REPO#)\d+")
+          # Find checked issues (now includes org/repo)
+          CHECKED_ISSUES=$(echo "$ISSUE_SECTION" | grep -oP "(?<=- \[x\] )[a-zA-Z0-9-]+/[a-zA-Z0-9-]+#\d+")
 
           # Unlink previously linked issues
-          CURRENT_LINKED_ISSUES=$(gh pr view $PR_NUMBER --json projectItems --jq '.projectItems[].content.number')
+          CURRENT_LINKED_ISSUES=$(gh pr view $PR_NUMBER --json projectItems --jq '.projectItems[].content.title')
           for ISSUE in $CURRENT_LINKED_ISSUES
           do
-            gh pr edit $PR_NUMBER --remove-project "Issue #$ISSUE"
-            echo "Unlinked issue #$ISSUE from PR #$PR_NUMBER"
+            gh pr edit $PR_NUMBER --remove-project "$ISSUE"
+            echo "Unlinked issue $ISSUE from PR #$PR_NUMBER"
           done
 
           # Link newly checked issues to PR
           for ISSUE in $CHECKED_ISSUES
           do
-            gh pr edit $PR_NUMBER --add-project "Issue #$ISSUE"
-            echo "Linked issue #$ISSUE to PR #$PR_NUMBER"
+            gh pr edit $PR_NUMBER --add-project "$ISSUE"
+            echo "Linked issue $ISSUE to PR #$PR_NUMBER"
           done
 
           # Update PR description to reflect linked issues
-          UPDATED_ISSUE_SECTION=$(echo "$ISSUE_SECTION" | sed "s/- \[x\] $ORG\/$REPO#\($CHECKED_ISSUES\)/- [x] $ORG\/$REPO#\1 (연결됨)/g")
+          UPDATED_ISSUE_SECTION=$(echo "$ISSUE_SECTION" | sed -E "s/- \[x\] ([a-zA-Z0-9-]+\/[a-zA-Z0-9-]+#[0-9]+)/- [x] \1 (연결됨)/g")
           UPDATED_PR_BODY="${PR_BODY//$ISSUE_SECTION/$UPDATED_ISSUE_SECTION}"
 
           gh pr edit $PR_NUMBER --body "$UPDATED_PR_BODY"
