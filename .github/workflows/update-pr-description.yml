@@ -20,8 +20,19 @@ jobs:
       - name: Get changed files, packages, and commits
         id: changes
         run: |
+          # Determine if this is a new PR or an update
+          if [ "${{ github.event.action }}" == "opened" ]; then
+            # For new PRs, get all changes
+            BASE_SHA=${{ github.event.pull_request.base.sha }}
+            HEAD_SHA=${{ github.event.pull_request.head.sha }}
+          else
+            # For updates, get only the new changes
+            BASE_SHA=${{ github.event.before }}
+            HEAD_SHA=${{ github.event.after }}
+          fi
+
           # Get changed files
-          CHANGED_FILES=$(git diff --name-only ${{ github.event.pull_request.base.sha }} ${{ github.event.pull_request.head.sha }} | sort)
+          CHANGED_FILES=$(git diff --name-only $BASE_SHA $HEAD_SHA | sort)
           echo "Changed files:"
           echo "$CHANGED_FILES"
 
@@ -36,24 +47,39 @@ jobs:
               dir=$(dirname "$dir")
             done
 
-              if [[ -f "./package.json" ]]; then
-                echo $(jq -r .name "./package.json")
-                return 0
-              fi
+            if [[ -f "./package.json" ]]; then
+              echo $(jq -r .name "./package.json")
+              return 0
+            fi
 
             echo "Unknown"
           }
 
           # Get package names
-          CHANGED_PACKAGES=$(echo "$CHANGED_FILES" | while read file; do find_package "$file"; done | sort | uniq)
+          if [ "${{ github.event.action }}" == "opened" ]; then
+            # For new PRs, get all changed packages
+            CHANGED_PACKAGES=$(echo "$CHANGED_FILES" | while read file; do find_package "$file"; done | sort | uniq)
+          else
+            # For updates, get only new changed packages
+            EXISTING_PACKAGES=$(gh pr view ${{ github.event.pull_request.number }} --json body -q '.body' | sed -n '/^### 📦 변경된 패키지/,/^###/p' | grep '^- ' | sed 's/^- //')
+            NEW_PACKAGES=$(echo "$CHANGED_FILES" | while read file; do find_package "$file"; done | sort | uniq)
+            CHANGED_PACKAGES=$(comm -23 <(echo "$NEW_PACKAGES" | sort) <(echo "$EXISTING_PACKAGES" | sort))
+          fi
+
           if [ -z "$CHANGED_PACKAGES" ]; then
-            CHANGED_PACKAGES="No packages detected"
+            CHANGED_PACKAGES="No new packages detected"
           fi
           echo "Changed packages:"
           echo "$CHANGED_PACKAGES"
 
-          # Get all commit messages
-          COMMIT_MESSAGES=$(git log --format="- %s%n%b" ${{ github.event.pull_request.base.sha }}..${{ github.event.pull_request.head.sha }} | sed -e '/^$/d' -e '/^- $/d')
+          # Get commit messages
+          if [ "${{ github.event.action }}" == "opened" ]; then
+            # For new PRs, get all commit messages
+            COMMIT_MESSAGES=$(git log --format="- %s%n%b" $BASE_SHA..$HEAD_SHA | sed -e '/^$/d' -e '/^- $/d')
+          else
+            # For updates, get only new commit messages
+            COMMIT_MESSAGES=$(git log --format="- %s%n%b" $BASE_SHA..$HEAD_SHA | sed -e '/^$/d' -e '/^- $/d')
+          fi
 
           echo "Commit messages:"
           echo "$COMMIT_MESSAGES"
@@ -102,27 +128,56 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
         run: |
-          # Prepare the new PR description
-          NEW_DESCRIPTION=$'## 🤖 자동 생성된 PR 정보\n\n'
-          NEW_DESCRIPTION+=$'### 📦 변경된 패키지\n'
-          if [ "${{ steps.changes.outputs.changed_packages }}" == "No packages detected" ]; then
-            NEW_DESCRIPTION+=$'패키지 변경 없음\n'
-          else
-            NEW_DESCRIPTION+=$(echo "${{ steps.changes.outputs.changed_packages }}" | sed 's/^/- /' | sed 's/*/-/g')
-          fi
+          # Get the current PR description
+           CURRENT_DESCRIPTION=$(gh pr view $PR_NUMBER --json body -q .body)
 
-          NEW_DESCRIPTION+=$'\n### 📄 변경된 파일\n'
-          NEW_DESCRIPTION+=$(echo "${{ steps.changes.outputs.changed_files }}" | sed 's/^/- /' | sed 's/*/-/g')
+           # Check if this is a new PR or an update
+           if [ "${{ github.event.action }}" == "opened" ]; then
+             # This is a new PR, create the initial description
+             NEW_DESCRIPTION=$'### 📦 변경된 패키지\n'
+             if [ "${{ steps.changes.outputs.changed_packages }}" == "No packages detected" ]; then
+               NEW_DESCRIPTION+=$'패키지 변경 없음\n'
+             else
+               NEW_DESCRIPTION+=$(echo "${{ steps.changes.outputs.changed_packages }}" | sed 's/^/- /' | sed 's/*/-/g')
+             fi
 
-          NEW_DESCRIPTION+=$'\n\n### 📝 커밋 내역\n'
-          NEW_DESCRIPTION+=$(echo "${{ steps.changes.outputs.commit_messages }}")
+             NEW_DESCRIPTION+=$'\n### 📄 변경된 파일\n'
+             NEW_DESCRIPTION+=$(echo "${{ steps.changes.outputs.changed_files }}" | sed 's/^/- /' | sed 's/*/-/g')
 
-          NEW_DESCRIPTION+=$'\n\n### 관련 이슈\n'
-          NEW_DESCRIPTION+=$'아래 목록에서 이 PR과 관련된 이슈를 선택해주세요. 선택한 이슈는 자동으로 PR과 연결됩니다:\n\n'
-          NEW_DESCRIPTION+=$(echo "${{ steps.open_issues.outputs.open_issues }}")
+             NEW_DESCRIPTION+=$'\n\n### 📝 커밋 내역\n'
+             NEW_DESCRIPTION+=$(echo "${{ steps.changes.outputs.commit_messages }}")
 
-          # Update the PR description
-          gh pr edit $PR_NUMBER --body "${NEW_DESCRIPTION}"
+             NEW_DESCRIPTION+=$'\n\n### 관련 이슈\n'
+             NEW_DESCRIPTION+=$'아래 목록에서 이 PR과 관련된 이슈를 선택해주세요. 선택한 이슈는 자동으로 PR과 연결됩니다:\n\n'
+             NEW_DESCRIPTION+=$(echo "${{ steps.open_issues.outputs.open_issues }}")
+           else
+             # This is an update to an existing PR
+             # Extract the existing sections
+             PACKAGES_SECTION=$(echo "$CURRENT_DESCRIPTION" | sed -n '/^### 📦 변경된 패키지/,/^###/p' | sed '$d')
+             FILES_SECTION=$(echo "$CURRENT_DESCRIPTION" | sed -n '/^### 📄 변경된 파일/,/^###/p' | sed '$d')
+             COMMITS_SECTION=$(echo "$CURRENT_DESCRIPTION" | sed -n '/^### 📝 커밋 내역/,/^###/p' | sed '$d')
+             ISSUES_SECTION=$(echo "$CURRENT_DESCRIPTION" | sed -n '/^### 관련 이슈/,$p')
+
+             # Update the packages section
+             if [ "${{ steps.changes.outputs.changed_packages }}" != "No packages detected" ]; then
+               PACKAGES_SECTION+=$'\n'
+               PACKAGES_SECTION+=$(echo "${{ steps.changes.outputs.changed_packages }}" | sed 's/^/- /' | sed 's/*/-/g')
+             fi
+
+             # Update the files section
+             FILES_SECTION+=$'\n'
+             FILES_SECTION+=$(echo "${{ steps.changes.outputs.changed_files }}" | sed 's/^/- /' | sed 's/*/-/g')
+
+             # Update the commits section
+             COMMITS_SECTION+=$'\n'
+             COMMITS_SECTION+=$(echo "${{ steps.changes.outputs.commit_messages }}")
+
+             # Combine the updated sections
+             NEW_DESCRIPTION="${PACKAGES_SECTION}\n\n${FILES_SECTION}\n\n${COMMITS_SECTION}\n\n${ISSUES_SECTION}"
+           fi
+
+           # Update the PR description
+           gh pr edit $PR_NUMBER --body "${NEW_DESCRIPTION}"
 
       - name: Link Issues to PR
         if: github.event.action == 'edited' && github.event.changes.body
