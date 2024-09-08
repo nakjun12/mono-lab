@@ -2,7 +2,7 @@ name: Update PR Description
 
 on:
   pull_request:
-    types: [opened, synchronize, edited]
+    types: [opened]
 
 permissions:
   contents: read
@@ -102,8 +102,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
         run: |
-          # Prepare the new PR description
-          NEW_DESCRIPTION=$'## 🤖 자동 생성된 PR 정보\n\n'
+
+
           NEW_DESCRIPTION+=$'### 📦 변경된 패키지\n'
           if [ "${{ steps.changes.outputs.changed_packages }}" == "No packages detected" ]; then
             NEW_DESCRIPTION+=$'패키지 변경 없음\n'
