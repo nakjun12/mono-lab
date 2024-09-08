@@ -130,7 +130,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
         run: |
-          set -x  # 디버그 모드 활성화
 
           echo "Starting Link Issues to PR process for PR #$PR_NUMBER"
 
@@ -140,13 +139,9 @@ jobs:
             exit 0
           fi
 
-          echo "Successfully verified that this is a PR"
 
           # Get the current PR description
           PR_BODY=$(gh pr view $PR_NUMBER --json body -q .body)
-          echo "Current PR body length: ${#PR_BODY}"
-          echo "PR body content:"
-          echo "$PR_BODY"
 
           # Extract the issue section
           ISSUE_SECTION=$(echo "$PR_BODY" | sed -n '/^### 관련 이슈/,$p')
@@ -155,7 +150,7 @@ jobs:
           echo "$ISSUE_SECTION"
 
           # Find checked issues (now includes org/repo and handles both [x] and [X])
-          CHECKED_ISSUES=$(echo "$ISSUE_SECTION" | grep -oP '(?<=- \[[xX]\] )[a-zA-Z0-9-]+/[a-zA-Z0-9-]+#\d+')
+          CHECKED_ISSUES=$(echo "$ISSUE_SECTION" | grep -oP '(?<=- \[[xX]\] )[a-zA-Z0-9-]+/[a-zA-Z0-9-]+#\d+' || true)
           echo "Checked issues:"
           echo "$CHECKED_ISSUES"
 
