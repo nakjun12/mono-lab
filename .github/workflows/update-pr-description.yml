@@ -151,13 +151,13 @@ jobs:
 
           # Find checked issues (now includes org/repo and handles both [x] and [X])
           CHECKED_ISSUES=$(echo "$ISSUE_SECTION" | grep -oP '(?<=- \[[xX]\] )[a-zA-Z0-9-]+/[a-zA-Z0-9-]+#\d+' || true)
-          echo "Checked issues:"
-          echo "$CHECKED_ISSUES"
-
-          # If no checked issues, exit
+          echo -n "Checked issues: "
           if [ -z "$CHECKED_ISSUES" ]; then
+            echo "none"
             echo "No checked issues found. Exiting."
             exit 0
+          else
+            echo "$CHECKED_ISSUES"
           fi
 
           # Unlink previously linked issues
