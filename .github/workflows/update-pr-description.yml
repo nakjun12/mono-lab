@@ -53,7 +53,8 @@ jobs:
           echo "$CHANGED_PACKAGES"
 
           # Get all commit messages
-          COMMIT_MESSAGES=$(git log --format="- %s%n%b" ${{ github.event.pull_request.base.sha }}..${{ github.event.pull_request.head.sha }} | sed -e '/^$/d' -e '/^- $/d')
+          COMMIT_MESSAGES=$(git log --format="%s%n%b" ${{ github.event.pull_request.base.sha }}..${{ github.event.pull_request.head.sha }} | sed -e '/^$/d')
+
           echo "Commit messages:"
           echo "$COMMIT_MESSAGES"
 
