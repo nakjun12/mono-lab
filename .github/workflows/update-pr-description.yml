@@ -144,15 +144,25 @@ jobs:
           # Get the current PR description
           PR_BODY=$(gh pr view $PR_NUMBER --json body -q .body)
           echo "Current PR body length: ${#PR_BODY}"
+          echo "PR body content:"
+          echo "$PR_BODY"
 
           # Extract the issue section
           ISSUE_SECTION=$(echo "$PR_BODY" | sed -n '/^### 관련 이슈/,$p')
           echo "Extracted issue section length: ${#ISSUE_SECTION}"
+          echo "Issue section content:"
+          echo "$ISSUE_SECTION"
 
-          # Find checked issues (now includes org/repo)
-          CHECKED_ISSUES=$(echo "$ISSUE_SECTION" | grep -oP "(?<=- \[x\] )[a-zA-Z0-9-]+/[a-zA-Z0-9-]+#\d+")
+          # Find checked issues (now includes org/repo and handles both [x] and [X])
+          CHECKED_ISSUES=$(echo "$ISSUE_SECTION" | grep -oP '(?<=- \[[xX]\] )[a-zA-Z0-9-]+/[a-zA-Z0-9-]+#\d+')
           echo "Checked issues:"
           echo "$CHECKED_ISSUES"
+
+          # If no checked issues, exit
+          if [ -z "$CHECKED_ISSUES" ]; then
+            echo "No checked issues found. Exiting."
+            exit 0
+          fi
 
           # Unlink previously linked issues
           echo "Fetching currently linked issues..."
@@ -183,10 +193,12 @@ jobs:
 
           # Update PR description to reflect linked issues
           echo "Updating PR description to reflect linked issues"
-          UPDATED_ISSUE_SECTION=$(echo "$ISSUE_SECTION" | sed -E "s/- \[x\] ([a-zA-Z0-9-]+\/[a-zA-Z0-9-]+#[0-9]+)/- [x] \1 (연결됨)/g")
+          UPDATED_ISSUE_SECTION=$(echo "$ISSUE_SECTION" | sed -E "s/- \[[xX]\] ([a-zA-Z0-9-]+\/[a-zA-Z0-9-]+#[0-9]+)/- [x] \1 (연결됨)/g")
           UPDATED_PR_BODY="${PR_BODY//$ISSUE_SECTION/$UPDATED_ISSUE_SECTION}"
 
           echo "Updated PR body length: ${#UPDATED_PR_BODY}"
+          echo "Updated PR body content:"
+          echo "$UPDATED_PR_BODY"
 
           if gh pr edit $PR_NUMBER --body "$UPDATED_PR_BODY"; then
             echo "Successfully updated PR description"
