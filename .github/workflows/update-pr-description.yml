@@ -2,9 +2,7 @@ name: Update PR Description
 
 on:
   pull_request:
-    types: [opened, synchronize]
-  issue_comment:
-    types: [created, edited]
+    types: [opened]
 
 permissions:
   contents: read
@@ -23,7 +21,7 @@ jobs:
         id: changes
         run: |
           # Get changed files
-          CHANGED_FILES=$(git diff --name-only ${{ github.event.pull_request.base.sha }} ${{ github.event.pull_request.head.sha }} | sort | uniq)
+          CHANGED_FILES=$(git diff --name-only ${{ github.event.pull_request.base.sha }} ${{ github.event.pull_request.head.sha }} | sort)
           echo "Changed files:"
           echo "$CHANGED_FILES"
 
@@ -55,7 +53,8 @@ jobs:
           echo "$CHANGED_PACKAGES"
 
           # Get all commit messages
-          COMMIT_MESSAGES=$(git log --format="- %s%n%b" ${{ github.event.pull_request.base.sha }}..${{ github.event.pull_request.head.sha }} | sed '/./s/^$//' | sed -e '/^$/d' -e '/^- $/d')
+          COMMIT_MESSAGES=$(git log --format="- %s%n%b" ${{ github.event.pull_request.base.sha }}..${{ github.event.pull_request.head.sha }} | sed -e '/^$/d' -e '/^- $/d')
+
           echo "Commit messages:"
           echo "$COMMIT_MESSAGES"
 
@@ -72,17 +71,18 @@ jobs:
           echo "$COMMIT_MESSAGES" >> $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT
 
-      - name: Fetch Open Issues
+      - name: Fetch Open Issues for PR Creator
         id: open_issues
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           ORG: "my-type-world-cup"
           REPO: "my-type-world-cup-frontend"
         run: |
+          PR_CREATOR=$(gh pr view ${{ github.event.pull_request.number }} --json author --jq .author.login)
           OPEN_ISSUES=$(gh api graphql -f query='
-            query($org: String!, $repo: String!) {
+            query($org: String!, $repo: String!, $creator: String!) {
               repository(owner: $org, name: $repo) {
-                issues(states: OPEN, first: 20) {
+                issues(states: OPEN, first: 20, filterBy: {assignee: $creator}) {
                   nodes {
                     number
                     title
@@ -91,7 +91,7 @@ jobs:
                 }
               }
             }
-          ' -F org=$ORG -F repo=$REPO --jq '.data.repository.issues.nodes[] | "- [ ] \(env.ORG)/\(env.REPO)#\(.number) \(.title)"')
+          ' -F org=$ORG -F repo=$REPO -F creator=$PR_CREATOR --jq '.data.repository.issues.nodes[] | "- [ ] \(env.ORG)/\(env.REPO)#\(.number) \(.title)"')
 
           echo "open_issues<<EOF" >> $GITHUB_OUTPUT
           echo "$OPEN_ISSUES" >> $GITHUB_OUTPUT
@@ -102,8 +102,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
         run: |
-          # Prepare the new PR description
-          NEW_DESCRIPTION=$'## 🤖 자동 생성된 PR 정보\n\n'
+
+
           NEW_DESCRIPTION+=$'### 📦 변경된 패키지\n'
           if [ "${{ steps.changes.outputs.changed_packages }}" == "No packages detected" ]; then
             NEW_DESCRIPTION+=$'패키지 변경 없음\n'
@@ -115,62 +115,93 @@ jobs:
           NEW_DESCRIPTION+=$(echo "${{ steps.changes.outputs.changed_files }}" | sed 's/^/- /' | sed 's/*/-/g')
 
           NEW_DESCRIPTION+=$'\n\n### 📝 커밋 내역\n'
-          NEW_DESCRIPTION+=$(echo "${{ steps.changes.outputs.commit_messages }}" | sed 's/^/- /' | sed 's/^- - /- /')
+          NEW_DESCRIPTION+=$(echo "${{ steps.changes.outputs.commit_messages }}")
 
           NEW_DESCRIPTION+=$'\n\n### 관련 이슈\n'
-          NEW_DESCRIPTION+=$'아래 목록에서 이 PR과 관련된 이슈를 선택해주세요. 선택한 이슈는 자동으로 할당됩니다:\n\n'
+          NEW_DESCRIPTION+=$'아래 목록에서 이 PR과 관련된 이슈를 선택해주세요. 선택한 이슈는 자동으로 PR과 연결됩니다:\n\n'
           NEW_DESCRIPTION+=$(echo "${{ steps.open_issues.outputs.open_issues }}")
 
-          NEW_DESCRIPTION+=$'\n\n---\n\n'
-
-          # Get the current PR description
-          CURRENT_DESCRIPTION=$(gh pr view $PR_NUMBER --json body -q .body)
-
-          # Extract the manual part of the description (everything after the auto-generated part)
-          MANUAL_DESCRIPTION=$(echo "$CURRENT_DESCRIPTION" | sed -n '/^---$/,$p' | tail -n +2)
-
-          # Combine the new auto-generated part with the manual part
-          FULL_DESCRIPTION="${NEW_DESCRIPTION}${MANUAL_DESCRIPTION}"
-
           # Update the PR description
-          gh pr edit $PR_NUMBER --body "${FULL_DESCRIPTION}"
+          gh pr edit $PR_NUMBER --body "${NEW_DESCRIPTION}"
 
-      - name: Check and Assign Issues
-        if: github.event_name == 'issue_comment'
+      - name: Link Issues to PR
+        if: github.event.action == 'edited' && github.event.changes.body
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          PR_NUMBER: ${{ github.event.issue.number }}
-          COMMENT_BODY: ${{ github.event.comment.body }}
-          ORG: "my-type-world-cup"
-          REPO: "my-type-world-cup-frontend"
+          PR_NUMBER: ${{ github.event.pull_request.number }}
         run: |
+
+          echo "Starting Link Issues to PR process for PR #$PR_NUMBER"
+
           # Check if the comment is on a PR
           if ! gh pr view $PR_NUMBER &> /dev/null; then
-            echo "This comment is not on a PR. Skipping."
+            echo "This is not a PR. Skipping."
             exit 0
           fi
+
 
           # Get the current PR description
           PR_BODY=$(gh pr view $PR_NUMBER --json body -q .body)
 
           # Extract the issue section
-          ISSUE_SECTION=$(echo "$PR_BODY" | sed -n '/^### 관련 이슈/,/^---/p')
+          ISSUE_SECTION=$(echo "$PR_BODY" | sed -n '/^### 관련 이슈/,$p')
+          echo "Extracted issue section length: ${#ISSUE_SECTION}"
+          echo "Issue section content:"
+          echo "$ISSUE_SECTION"
 
-          # Find checked issues
-          CHECKED_ISSUES=$(echo "$ISSUE_SECTION" | grep -oP "(?<=- \[x\] $ORG/$REPO#)\d+")
+          # Find checked issues (now includes org/repo and handles both [x] and [X])
+          CHECKED_ISSUES=$(echo "$ISSUE_SECTION" | grep -oP '(?<=- \[[xX]\] )[a-zA-Z0-9-]+/[a-zA-Z0-9-]+#\d+' || true)
+          echo -n "Checked issues: "
+          if [ -z "$CHECKED_ISSUES" ]; then
+            echo "none"
+            echo "No checked issues found. Exiting."
+            exit 0
+          else
+            echo "$CHECKED_ISSUES"
+          fi
 
-          # Get PR author
-          PR_AUTHOR=$(gh pr view $PR_NUMBER --json author -q .author.login)
+          # Unlink previously linked issues
+          echo "Fetching currently linked issues..."
+          CURRENT_LINKED_ISSUES=$(gh pr view $PR_NUMBER --json projectItems --jq '.projectItems[].content.title')
+          echo "Currently linked issues:"
+          echo "$CURRENT_LINKED_ISSUES"
 
-          # Assign issues
-          for ISSUE in $CHECKED_ISSUES
+          for ISSUE in $CURRENT_LINKED_ISSUES
           do
-            gh issue edit $ISSUE --add-assignee $PR_AUTHOR
-            echo "Assigned issue #$ISSUE to $PR_AUTHOR"
+            echo "Attempting to unlink issue $ISSUE from PR #$PR_NUMBER"
+            if gh pr edit $PR_NUMBER --remove-project "$ISSUE"; then
+              echo "Successfully unlinked issue $ISSUE from PR #$PR_NUMBER"
+            else
+              echo "Failed to unlink issue $ISSUE from PR #$PR_NUMBER"
+            fi
           done
 
-          # Update PR description to reflect assigned issues
-          UPDATED_ISSUE_SECTION=$(echo "$ISSUE_SECTION" | sed "s/- \[x\] $ORG\/$REPO#\($CHECKED_ISSUES\)/- [x] $ORG\/$REPO#\1 (할당됨)/g")
+          # Link newly checked issues to PR
+          for ISSUE in $CHECKED_ISSUES
+          do
+            echo "Attempting to link issue $ISSUE to PR #$PR_NUMBER"
+            if gh pr edit $PR_NUMBER --add-project "$ISSUE"; then
+              echo "Successfully linked issue $ISSUE to PR #$PR_NUMBER"
+            else
+              echo "Failed to link issue $ISSUE to PR #$PR_NUMBER"
+            fi
+          done
+
+          # Update PR description to reflect linked issues
+          echo "Updating PR description to reflect linked issues"
+          UPDATED_ISSUE_SECTION=$(echo "$ISSUE_SECTION" | sed -E "s/- \[[xX]\] ([a-zA-Z0-9-]+\/[a-zA-Z0-9-]+#[0-9]+)/- [x] \1 (연결됨)/g")
           UPDATED_PR_BODY="${PR_BODY//$ISSUE_SECTION/$UPDATED_ISSUE_SECTION}"
 
-          gh pr edit $PR_NUMBER --body "$UPDATED_PR_BODY"
+          echo "Updated PR body length: ${#UPDATED_PR_BODY}"
+          echo "Updated PR body content:"
+          echo "$UPDATED_PR_BODY"
+
+          if gh pr edit $PR_NUMBER --body "$UPDATED_PR_BODY"; then
+            echo "Successfully updated PR description"
+          else
+            echo "Failed to update PR description"
+            exit 1
+          fi
+
+          echo "Link Issues to PR process completed successfully"
+        shell: bash
