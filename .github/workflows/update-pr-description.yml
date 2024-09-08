@@ -129,38 +129,71 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
         run: |
+          set -x  # 디버그 모드 활성화
+
+          echo "Starting Link Issues to PR process for PR #$PR_NUMBER"
+
           # Check if the comment is on a PR
           if ! gh pr view $PR_NUMBER &> /dev/null; then
             echo "This is not a PR. Skipping."
             exit 0
           fi
 
+          echo "Successfully verified that this is a PR"
+
           # Get the current PR description
           PR_BODY=$(gh pr view $PR_NUMBER --json body -q .body)
+          echo "Current PR body length: ${#PR_BODY}"
 
           # Extract the issue section
           ISSUE_SECTION=$(echo "$PR_BODY" | sed -n '/^### 관련 이슈/,$p')
+          echo "Extracted issue section length: ${#ISSUE_SECTION}"
 
           # Find checked issues (now includes org/repo)
           CHECKED_ISSUES=$(echo "$ISSUE_SECTION" | grep -oP "(?<=- \[x\] )[a-zA-Z0-9-]+/[a-zA-Z0-9-]+#\d+")
+          echo "Checked issues:"
+          echo "$CHECKED_ISSUES"
 
           # Unlink previously linked issues
+          echo "Fetching currently linked issues..."
           CURRENT_LINKED_ISSUES=$(gh pr view $PR_NUMBER --json projectItems --jq '.projectItems[].content.title')
+          echo "Currently linked issues:"
+          echo "$CURRENT_LINKED_ISSUES"
+
           for ISSUE in $CURRENT_LINKED_ISSUES
           do
-            gh pr edit $PR_NUMBER --remove-project "$ISSUE"
-            echo "Unlinked issue $ISSUE from PR #$PR_NUMBER"
+            echo "Attempting to unlink issue $ISSUE from PR #$PR_NUMBER"
+            if gh pr edit $PR_NUMBER --remove-project "$ISSUE"; then
+              echo "Successfully unlinked issue $ISSUE from PR #$PR_NUMBER"
+            else
+              echo "Failed to unlink issue $ISSUE from PR #$PR_NUMBER"
+            fi
           done
 
           # Link newly checked issues to PR
           for ISSUE in $CHECKED_ISSUES
           do
-            gh pr edit $PR_NUMBER --add-project "$ISSUE"
-            echo "Linked issue $ISSUE to PR #$PR_NUMBER"
+            echo "Attempting to link issue $ISSUE to PR #$PR_NUMBER"
+            if gh pr edit $PR_NUMBER --add-project "$ISSUE"; then
+              echo "Successfully linked issue $ISSUE to PR #$PR_NUMBER"
+            else
+              echo "Failed to link issue $ISSUE to PR #$PR_NUMBER"
+            fi
           done
 
           # Update PR description to reflect linked issues
+          echo "Updating PR description to reflect linked issues"
           UPDATED_ISSUE_SECTION=$(echo "$ISSUE_SECTION" | sed -E "s/- \[x\] ([a-zA-Z0-9-]+\/[a-zA-Z0-9-]+#[0-9]+)/- [x] \1 (연결됨)/g")
           UPDATED_PR_BODY="${PR_BODY//$ISSUE_SECTION/$UPDATED_ISSUE_SECTION}"
 
-          gh pr edit $PR_NUMBER --body "$UPDATED_PR_BODY"
+          echo "Updated PR body length: ${#UPDATED_PR_BODY}"
+
+          if gh pr edit $PR_NUMBER --body "$UPDATED_PR_BODY"; then
+            echo "Successfully updated PR description"
+          else
+            echo "Failed to update PR description"
+            exit 1
+          fi
+
+          echo "Link Issues to PR process completed successfully"
+        shell: bash
