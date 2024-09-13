@@ -10,6 +10,7 @@
     "preview": "rsbuild preview"
   },
   "dependencies": {
+    "@module-federation/enhanced": "^0.6.3",
     "react": "19.0.0-rc-fb9a90fa48-20240614",
     "react-dom": "19.0.0-rc-fb9a90fa48-20240614"
   },
