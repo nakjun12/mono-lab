@@ -1,0 +1,56 @@
+{
+  "fc": {
+    "prefix": "fc",
+    "body": [
+      "interface ${TM_FILENAME_BASE/^(.*?)(\\.component.*)?$/${1:/pascalcase}/}Props {",
+      "",
+      "}",
+      "",
+      "export function ${TM_FILENAME_BASE/^(.*?)(\\.component.*)?$/${1:/pascalcase}/}({ ",
+      "",
+      "}: ${TM_FILENAME_BASE/^(.*?)(\\.component.*)?$/${1:/pascalcase}/}Props) {",
+      "  return <div>${1}</div>;",
+      "}",
+      "",
+    ],
+    "description": "component",
+    "scope": "typescriptreact",
+  },
+  "fcp": {
+    "prefix": "fcp",
+    "body": [
+      "export function ${TM_FILENAME_BASE/^(.*?)(\\.component.*)?$/${1:/pascalcase}/}() {",
+      "  return <div>${1}</div>;",
+      "}",
+      "",
+    ],
+    "description": "component without props",
+    "scope": "typescriptreact",
+  },
+  "hk": {
+    "prefix": "hk",
+    "body": [
+      "interface ${TM_FILENAME_BASE/^(.*?)(\\.component.*)?$/${1:/pascalcase}/}Props {",
+      "",
+      "}",
+      "",
+      "export const ${TM_FILENAME_BASE/^(.*?)(\\.component.*)?$/${1:/camelcase}/} = ({",
+      "",
+      "}: ${TM_FILENAME_BASE/^(.*?)(\\.component.*)?$/${1:/pascalcase}/}Props) => {",
+      "",
+      "}",
+    ],
+    "description": "hooks for tsx",
+    "scope": "typescript,typescriptreact",
+  },
+  "hkp": {
+    "prefix": "hkp",
+    "body": [
+      "export const ${TM_FILENAME_BASE/^(.*?)(\\.component.*)?$/${1:/camelcase}/} = () => {",
+      "",
+      "}",
+    ],
+    "description": "hooks for tsx without props",
+    "scope": "typescript, typescriptreact",
+  },
+}
