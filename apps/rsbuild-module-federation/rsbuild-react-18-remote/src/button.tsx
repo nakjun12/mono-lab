@@ -1,3 +1,3 @@
 export default function Button() {
-  return <div>Provider button222</div>;
+  return <button type="button">rsbuild-react-18-remote</button>;
 }

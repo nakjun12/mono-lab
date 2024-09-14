@@ -23,7 +23,7 @@ export default defineConfig({
           },
           remotes: {
             rsbuild_react_18_host:
-              "rsbuild_react_18_host@http://localhost:2000/mf-manifest.json"
+              "rsbuild_react_18_host@http://localhost:3000/mf-manifest.json"
           },
           shared: ["react", "react-dom"]
         })
