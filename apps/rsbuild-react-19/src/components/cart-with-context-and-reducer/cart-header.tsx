@@ -1,4 +1,4 @@
-import { useCartState } from "src/components/cart/hooks/useCart";
+import { useCartState } from "./hooks/useCart";
 
 export const CartHeader = () => {
   const { items } = useCartState();
