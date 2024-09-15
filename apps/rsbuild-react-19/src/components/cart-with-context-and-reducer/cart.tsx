@@ -1,5 +1,5 @@
 import { CartHeader } from "./cart-header";
-import { CartItem } from "./cart-item";
+import { CartItems } from "./cart-items";
 import { CartPayment } from "./cart-payment";
 import { CartProvider } from "./contexts/cart-context";
 import type { CartItemType } from "./model/cart.type";
@@ -11,9 +11,9 @@ type CartProps = {
 export function Cart({ initialItems }: CartProps) {
   return (
     <CartProvider initialItems={initialItems}>
-      <div>
+      <div className="px-80">
         <CartHeader />
-        <CartItem />
+        <CartItems />
         <CartPayment />
       </div>
     </CartProvider>
