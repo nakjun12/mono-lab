@@ -1,12 +1,11 @@
-import React18Button from "rsbuild_react_18_remote/button";
 import "./App.css";
+import { Home } from "./pages/home";
+
 const App = () => {
   return (
-    <div className="content">
-      <React18Button />
-      <h1>Rsbuild with React</h1>
-      <p>Start building amazing things with Rsbuild.</p>
-    </div>
+    <main className="content">
+      <Home />
+    </main>
   );
 };
 
