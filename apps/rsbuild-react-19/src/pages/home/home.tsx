@@ -1,9 +1,7 @@
-import { dummyCartItems } from "../../__mock__/dummy-data";
-import { Cart } from "../../components/cart";
+import { dummyCartItems } from "src/__mock__/dummy-data";
+import { Cart } from "src/components/cart-with-context-and-reducer";
 
-type HomeProps = {};
-
-export function Home({}: HomeProps) {
+export function Home() {
   return (
     <div>
       <Cart initialItems={dummyCartItems} />

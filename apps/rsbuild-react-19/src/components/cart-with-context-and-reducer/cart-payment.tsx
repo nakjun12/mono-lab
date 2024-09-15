@@ -1,5 +1,5 @@
 import type React from "react";
-import { useCartState } from "src/components/cart/hooks/useCart";
+import { useCartState } from "./hooks/useCart";
 
 export const CartPayment: React.FC = () => {
   const { items } = useCartState();

@@ -11,7 +11,7 @@ type CartProps = {
 export function Cart({ initialItems }: CartProps) {
   return (
     <CartProvider initialItems={initialItems}>
-      <div className="px-80">
+      <div className="px-40">
         <CartHeader />
         <CartItems />
         <CartPayment />
