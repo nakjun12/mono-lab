@@ -1,5 +1,5 @@
 type CartHeaderProps = {};
 
 export function CartHeader({}: CartHeaderProps) {
-  return <div>header</div>;
+  return <div>head2er</div>;
 }
