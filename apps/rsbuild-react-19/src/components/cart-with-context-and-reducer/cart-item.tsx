@@ -48,6 +48,7 @@ export const CartItem = ({
     <div className="flex items-center justify-between p-4 border rounded">
       <ItemInfo name={item.name} price={item.price} />
       <div className="flex flex-col gap-2">
+        <ExpensiveCalculation quantity={item.quantity} />
         <div className="flex justify-center items-center gap-2">
           <span className="w-40">Closure-based:</span>
           <CartItemButton onClick={handleNoUpdateClosure}>
@@ -81,6 +82,19 @@ const ItemInfo = ({ name, price }: { name: string; price: number }) => (
     <p> {price.toLocaleString()}원 </p>
   </div>
 );
+
+const calculateExpensiveFibonacci = (n: number): number => {
+  if (n <= 1) return n;
+  return (
+    calculateExpensiveFibonacci(n - 1) + calculateExpensiveFibonacci(n - 2)
+  );
+};
+
+const ExpensiveCalculation = ({ quantity }: { quantity: number }) => {
+  const expensiveResult = calculateExpensiveFibonacci(quantity + 20);
+
+  return <div>비용이 많이 드는 계산 결과: {expensiveResult}</div>;
+};
 
 const CartItemButton = ({
   onClick,

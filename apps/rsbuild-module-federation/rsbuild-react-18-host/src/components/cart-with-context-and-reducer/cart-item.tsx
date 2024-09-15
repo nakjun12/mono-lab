@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useCartDispatch } from "src/components/cart-with-context-and-reducer/hooks/useCart";
 import type { CartItemType } from "./model/cart.type";
 
@@ -15,6 +16,7 @@ export const CartItem = ({
   onNoUpdate
 }: Readonly<CartItemProps>) => {
   const dispatch = useCartDispatch();
+  const [isExpensiveCalculation, setIsExpensiveCalculation] = useState(false);
 
   const handleUpdatePlusClosure = () => {
     dispatch({
@@ -47,7 +49,18 @@ export const CartItem = ({
   return (
     <div className="flex items-center justify-between p-4 border rounded">
       <ItemInfo name={item.name} price={item.price} />
-      <div className="flex flex-col gap-2">
+      <div className="flex flex-col gap-4">
+        <div>
+          <button
+            type="button"
+            className="border-1 bg-gray-200 p-2 "
+            onClick={() => setIsExpensiveCalculation(!isExpensiveCalculation)}>
+            비용이 많이 드는 계산 테스트하기
+          </button>
+          {isExpensiveCalculation && (
+            <ExpensiveCalculation quantity={item.quantity} />
+          )}
+        </div>
         <div className="flex justify-center items-center gap-2">
           <span className="w-40">Closure-based:</span>
           <CartItemButton onClick={handleNoUpdateClosure}>
@@ -81,6 +94,19 @@ const ItemInfo = ({ name, price }: { name: string; price: number }) => (
     <p> {price.toLocaleString()}원 </p>
   </div>
 );
+
+const calculateExpensiveFibonacci = (n: number): number => {
+  if (n <= 1) return n;
+  return (
+    calculateExpensiveFibonacci(n - 1) + calculateExpensiveFibonacci(n - 2)
+  );
+};
+
+const ExpensiveCalculation = ({ quantity }: { quantity: number }) => {
+  const expensiveResult = calculateExpensiveFibonacci(quantity + 20);
+
+  return <div>비용이 많이 드는 계산 결과: {expensiveResult}</div>;
+};
 
 const CartItemButton = ({
   onClick,
