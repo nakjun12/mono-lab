@@ -1,5 +1,6 @@
-name: Update PR Description
-
+name:
+  Update PR Description
+  # 무거워서 사용할 수 없음
 on:
   pull_request:
     types: [opened]
@@ -13,7 +14,7 @@ jobs:
   update-pr-description:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
