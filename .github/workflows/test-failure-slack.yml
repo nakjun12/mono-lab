@@ -1,8 +1,6 @@
 name: Test Failure Workflow
 
 on:
-  push:
-    branches: [main]
   pull_request:
     branches: [main]
   workflow_dispatch:
@@ -29,7 +27,7 @@ jobs:
           PR_AUTHOR_LOGIN="${{ github.event.pull_request.user.login }}"
 
            # Build the message
-          MESSAGE="Github Action이 실패했습니다. \n\n*PR 링크:* $PR_URL\n*PR 제목:* $PR_TITLE\n*PR "
+          MESSAGE="Github Action이 실패했습니다. \n\n*PR 링크:* $PR_URL\n*PR 제목:* $PR_TITLE\n *PR 작성자:* @$PR_AUTHOR_LOGIN\n "
 
           # Send the message to Slack
           curl -X POST -H 'Content-type: application/json' --data "{\"text\": \"$MESSAGE\"}" $SLACK_WEBHOOK_URL
