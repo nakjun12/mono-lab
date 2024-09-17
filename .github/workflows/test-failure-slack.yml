@@ -32,4 +32,6 @@ jobs:
           MESSAGE="Github Action이 실패했습니다. \n\n*PR 링크:* $PR_URL\n*PR 제목:* $PR_TITLE\n*PR "
 
           # Send the message to Slack
-          curl -X POST -H 'Content-type: application/json' --data "{\"text\": \"$MESSAGE\"}" $SLACK_WEBHOOK_URL
+          curl -X POST -H 'Content-type: application/json' --data "{\"text\": \"$MESSAGE\"}" $SLACK_WEBHOOK_
+
+          # 주석 추가
