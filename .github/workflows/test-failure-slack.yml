@@ -48,7 +48,7 @@ jobs:
 
           # Mapping GitHub usernames to Slack Id
           declare -A author_slack_id=(
-
+          [nakjun12]="U0768APFN0L"
           )
 
           # Check if the PR author is in the author_slack_id array
