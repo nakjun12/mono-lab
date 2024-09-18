@@ -63,7 +63,7 @@ jobs:
           OVERALL_STATUS="success"
 
           # Check all jobs in the needs context using jq
-          if echo "$NEEDS_JSON" | jq -e '.[] | select(.result != "success")' > /dev/null; then
+          if echo "$NEEDS_JSON" | jq -e '.[] | select(.result == "failure")' > /dev/null; then
             OVERALL_STATUS="failure"
           fi
 
