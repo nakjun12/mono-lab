@@ -17,10 +17,15 @@ jobs:
         run: |
           echo "This step will fail"
           exit 1
-      - name: Notify Slack on Failure
-        if: failure()
+
+  notify-on-failure:
+    name: Notify Slack on Workflow Failure
+    if: failure()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Notify Slack
         env:
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          SLACK_WEBHOOK_URL: ${{secrets.SLACK_WEBHOOK_URL}}
         run: |
           PR_URL="${{ github.event.pull_request.html_url }}"
           PR_TITLE="${{ github.event.pull_request.title }}"
@@ -34,7 +39,7 @@ jobs:
             [nakjun12]="U0768APFN0L"
             [halswla]="U07E5UU7G9H"
           )
-           # Build the message
+          # Build the message
           MESSAGE="Github Action이 실패했습니다. \n\n*PR 링크:* $PR_URL\n*PR 제목:* $PR_TITLE\n*PR 작성자:*  <@${author_slack_id[$PR_AUTHOR_LOGIN]}>\n "
 
           # Send the message to Slack
