@@ -3,7 +3,6 @@ name: Test Failure Workflow
 on:
   pull_request:
     branches: [main]
-  workflow_dispatch:
 
 jobs:
   test_job:
@@ -32,7 +31,7 @@ jobs:
           echo "이 단계는 실패합니다"
           exit 1
 
-  notify-on-completion:
+ notify-on-completion:
     name: Notify Slack on Job Completion
     needs: [test_job, success_job, failure_job]
     if: always()
@@ -59,20 +58,36 @@ jobs:
 
           AUTHOR_MENTION="<@${author_slack_id[$PR_AUTHOR_LOGIN]}>"
 
-          # Determine the status and set the appropriate emoji
-          if [[ "${{ job.status }}" == "success" ]]; then
-            STATUS="성공"
+          # Initialize variables
+          OVERALL_STATUS="success"
+          JOB_STATUSES=""
+
+          # Loop through all jobs in the needs context
+          for job in ${{ toJson(needs) }}; do
+            job_status="${needs[$job].result}"
+            JOB_STATUSES+="- $job: $job_status"$'\n'
+
+            # If any job is not successful, mark the overall status as failed
+            if [ "$job_status" != "success" ]; then
+              OVERALL_STATUS="failure"
+            fi
+          done
+
+          # Set emoji based on overall status
+          if [ "$OVERALL_STATUS" == "success" ]; then
             EMOJI=":white_check_mark:"
           else
-            STATUS="실패"
             EMOJI=":x:"
           fi
 
           # Build the message
-          MESSAGE="Github Action 워크플로우가 ${STATUS}했습니다. ${EMOJI}
+          MESSAGE="Github Action 워크플로우가 ${OVERALL_STATUS}했습니다. ${EMOJI}
           *PR:* <$PR_URL|$PR_TITLE>
           *작성자:* $AUTHOR_MENTION
-          *워크플로우 실행 URL:* ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          *워크플로우 실행 URL:* ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+
+          *작업 상태:*
+          ${JOB_STATUSES}"
 
           # Send the message to Slack
           curl -X POST -H 'Content-type: application/json' --data "{\"text\": \"$MESSAGE\"}" $SLACK_WEBHOOK_URL
