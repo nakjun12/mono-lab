@@ -14,12 +14,18 @@ jobs:
         with:
           fetch-depth: 2
 
-      # - name: 성공하는 단계
-      #   id: success_step
-      #   run: |
-      #     echo "이 단계는 성공합니다"
-      #     exit 0
+  success_job:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 성공하는 단계
+        id: success_step
+        run: |
+          echo "이 단계는 성공합니다"
+          exit 0
 
+  failure_job:
+    runs-on: ubuntu-latest
+    steps:
       - name: 실패하는 단계
         id: failure_step
         run: |
@@ -28,7 +34,7 @@ jobs:
 
   notify-on-completion:
     name: Notify Slack on Job Completion
-    needs: [test_job]
+    needs: [test_job, success_job, failure_job]
     if: always()
     runs-on: ubuntu-latest
     steps:
