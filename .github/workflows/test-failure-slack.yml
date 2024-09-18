@@ -20,7 +20,7 @@ jobs:
         id: failing_step
         run: |
           echo "This step will fail"
-
+          exit 1  # 이 줄을 추가하여 실제로 실패하도록 합니다.
         continue-on-error: true
 
       - name: Set failure reason
@@ -28,7 +28,10 @@ jobs:
         if: steps.failing_step.outcome == 'failure'
         run: |
           echo "failure_reason=Step 'Run a failing step' failed with exit code ${{ steps.failing_step.exitcode }}" >> $GITHUB_OUTPUT
-          exit 1
+
+      - name: Fail the job if the failing step failed
+        if: steps.failing_step.outcome == 'failure'
+        run: exit 1
 
   notify-on-failure:
     name: Notify Slack on Job Failure
