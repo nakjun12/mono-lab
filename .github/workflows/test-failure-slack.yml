@@ -20,6 +20,7 @@ jobs:
 
   notify-on-failure:
     name: Notify Slack on Workflow Failure
+    needs: [test_failure]
     if: failure()
     runs-on: ubuntu-latest
     steps:
