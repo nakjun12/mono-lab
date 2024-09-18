@@ -17,8 +17,7 @@ jobs:
       - name: Run a failing step
         id: failing_step
         run: |
-          echo "This step will fail"
-          exit 1  # 이 줄을 추가하여 실제로 실패하도록 합니다.
+          echo "This step will success"
 
   notify-on-completion:
     name: Notify Slack on Job Completion
