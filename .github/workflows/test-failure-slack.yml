@@ -17,6 +17,16 @@ jobs:
         run: |
           echo "This step will fail"
           exit 1
+      - name: Save job status
+        if: failure()
+        run: |
+          echo "Job 'check-reviewers-and-notify' failed" > job_status.txt
+          echo "Error: ${{ job.status }}" >> job_status.txt
+      - uses: actions/upload-artifact@v2
+        if: failure()
+        with:
+          name: job-status
+          path: job_status.txt
 
   notify-on-failure:
     name: Notify Slack on Workflow Failure
@@ -31,6 +41,7 @@ jobs:
           PR_URL="${{ github.event.pull_request.html_url }}"
           PR_TITLE="${{ github.event.pull_request.title }}"
           PR_AUTHOR_LOGIN="${{ github.event.pull_request.user.login }}"
+          FAILURE_REASON=$(cat job_status.txt)
 
           declare -A author_slack_id=(
             [Siwon-medi]="US6EHTXN0"
@@ -41,13 +52,13 @@ jobs:
             [halswla]="U07E5UU7G9H"
           )
           # Build the message
-          MESSAGE="Github Action이 실패했습니다. \n\n*PR 링크:* $PR_URL\n*PR 제목:* $PR_TITLE\n*PR 작성자:*  <@${author_slack_id[$PR_AUTHOR_LOGIN]}>\n "
-          FAILED_JOBS=$(echo '${{ toJson(needs) }}' | jq -r 'to_entries | map(select(.value.result == "failure")) | map(.key) | join(", ")')
-
           MESSAGE="Github Action 워크플로우가 실패했습니다. :crown-sw:
           *PR:* <$PR_URL|$PR_TITLE>
           *작성자:* $PR_AUTHOR
-          *실패 원인:* \`\`\`$FAILURE_STEP\`\`\`"
+          *실패 원인:*
+          \`\`\`
+          $FAILURE_REASON
+          \`\`\`"
 
           curl -X POST -H 'Content-type: application/json' \
             --data "{\"text\": \"$MESSAGE\"}" $SLACK_WEBHOOK_URL
