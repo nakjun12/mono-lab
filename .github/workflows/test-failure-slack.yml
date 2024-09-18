@@ -40,7 +40,6 @@ jobs:
       - name: Notify Slack
         env:
           SLACK_WEBHOOK_URL: ${{secrets.SLACK_WEBHOOK_URL}}
-          NEEDS_JSON: ${{ toJson(needs) }}
         run: |
           PR_URL="${{ github.event.pull_request.html_url }}"
           PR_TITLE="${{ github.event.pull_request.title }}"
@@ -63,9 +62,13 @@ jobs:
           OVERALL_STATUS="success"
 
           # Check all jobs in the needs context using jq
-          if echo "$NEEDS_JSON" | jq -e '.[] | select(.result != "success")' > /dev/null; then
+          for job in ${!needs[@]}; do
+          job_status="${needs[$job]_result}"
+          if [[ "${!job_status}" != "success" ]]; then
             OVERALL_STATUS="failure"
+            break
           fi
+          done
 
           # Set emoji based on overall status
           if [ "$OVERALL_STATUS" == "success" ]; then
