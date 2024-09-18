@@ -8,8 +8,6 @@ on:
 jobs:
   test_job:
     runs-on: ubuntu-latest
-    outputs:
-      failure_reason: ${{ steps.set_failure.outputs.failure_reason }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -22,10 +20,10 @@ jobs:
           echo "This step will fail"
           exit 1  # 이 줄을 추가하여 실제로 실패하도록 합니다.
 
-  notify-on-failure:
-    name: Notify Slack on Job Failure
+  notify-on-completion:
+    name: Notify Slack on Job Completion
     needs: [test_job]
-    if: failure()
+    if: always()
     runs-on: ubuntu-latest
     steps:
       - name: Notify Slack
@@ -36,24 +34,33 @@ jobs:
           PR_TITLE="${{ github.event.pull_request.title }}"
           PR_AUTHOR_LOGIN="${{ github.event.pull_request.user.login }}"
 
-          FAILURE_REASON="${{ needs.test_job.outputs.failure_reason }}"
-
+          # Mapping GitHub usernames to Slack Id
           declare -A author_slack_id=(
-            [Siwon-medi]="US6EHTXN0"
-            [Bigstar1108]="U04BBKYDHHV"
-            [kimyumi1]="U06FSQ3DME3"
-            [Spandyandy]="U0750BH1RS4"
             [nakjun12]="U0768APFN0L"
-            [halswla]="U07E5UU7G9H"
           )
 
-          AUTHOR_MENTION="<@${author_slack_id[$PR_AUTHOR_LOGIN]:-$PR_AUTHOR_LOGIN}>"
+          # Check if the PR author is in the author_slack_id array
+          if [[ ! " ${!author_slack_id[@]} " =~ " ${PR_AUTHOR_LOGIN} " ]]; then
+            echo "PR author ${PR_AUTHOR_LOGIN} is not in the notification list. Skipping notification."
+            exit 0
+          fi
+
+          AUTHOR_MENTION="<@${author_slack_id[$PR_AUTHOR_LOGIN]}>"
+
+          # Determine the status and set the appropriate emoji
+          if [[ "${{ github.event.workflow_run.conclusion }}" == "success" ]]; then
+            STATUS="성공"
+            EMOJI=":white_check_mark:"
+          else
+            STATUS="실패"
+            EMOJI=":x:"
+          fi
 
           # Build the message
-          MESSAGE="Github Action 워크플로우가 실패했습니다. :crown-sw:
+          MESSAGE="Github Action 워크플로우가 ${STATUS}했습니다. ${EMOJI}
           *PR:* <$PR_URL|$PR_TITLE>
           *작성자:* $AUTHOR_MENTION
           *워크플로우 실행 URL:* ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
 
-          curl -X POST -H 'Content-type: application/json' \
-            --data "{\"text\": \"$MESSAGE\"}" $SLACK_WEBHOOK_URL
+          # Send the message to Slack
+          curl -X POST -H 'Content-type: application/json' --data "{\"text\": \"$MESSAGE\"}" $SLACK_WEBHOOK_URL
