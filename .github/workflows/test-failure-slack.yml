@@ -33,7 +33,7 @@ jobs:
 
   notify-on-completion:
     name: Notify Slack on Job Completion
-    needs: [test_job, success_job]
+    needs: [test_job, success_job, failure_job]
     if: always()
     runs-on: ubuntu-latest
     steps:
@@ -62,15 +62,13 @@ jobs:
           # Initialize overall status
           OVERALL_STATUS="success"
 
+          # Initialize overall status
+          OVERALL_STATUS="success"
+          EMOJI=":white_check_mark:"
+
           # Check all jobs in the needs context using jq
           if echo "$NEEDS_JSON" | jq -e '.[] | select(.result == "failure")' > /dev/null; then
             OVERALL_STATUS="failure"
-          fi
-
-          # Set emoji based on overall status
-          if [ "$OVERALL_STATUS" == "success" ]; then
-            EMOJI=":white_check_mark:"
-          else
             EMOJI=":x:"
           fi
 
