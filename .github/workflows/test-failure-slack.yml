@@ -47,7 +47,7 @@ jobs:
           AUTHOR_MENTION="<@${author_slack_id[$PR_AUTHOR_LOGIN]}>"
 
           # Determine the status and set the appropriate emoji
-          if [[ "${{ github.event.workflow_run.conclusion }}" == "success" ]]; then
+          if [[ "${{ job.status }}" == "success" ]]; then
             STATUS="성공"
             EMOJI=":white_check_mark:"
           else
