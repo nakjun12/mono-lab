@@ -6,31 +6,32 @@ on:
   workflow_dispatch:
 
 jobs:
-  test_failure:
+  test_job:
     runs-on: ubuntu-latest
+    outputs:
+      failure_reason: ${{ steps.set_failure.outputs.failure_reason }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
           fetch-depth: 2
+
       - name: Run a failing step
+        id: failing_step
         run: |
           echo "This step will fail"
           exit 1
-      - name: Save job status
-        if: failure()
+        continue-on-error: true
+
+      - name: Set failure reason
+        id: set_failure
+        if: steps.failing_step.outcome == 'failure'
         run: |
-          echo "Job 'check-reviewers-and-notify' failed" > job_status.txt
-          echo "Error: ${{ job.status }}" >> job_status.txt
-      - uses: actions/upload-artifact@v2
-        if: failure()
-        with:
-          name: job-status
-          path: job_status.txt
+          echo "failure_reason=Step 'Run a failing step' failed with exit code ${{ steps.failing_step.exitcode }}" >> $GITHUB_OUTPUT
 
   notify-on-failure:
-    name: Notify Slack on Workflow Failure
-    needs: [test_failure]
+    name: Notify Slack on Job Failure
+    needs: [test_job]
     if: failure()
     runs-on: ubuntu-latest
     steps:
@@ -41,7 +42,8 @@ jobs:
           PR_URL="${{ github.event.pull_request.html_url }}"
           PR_TITLE="${{ github.event.pull_request.title }}"
           PR_AUTHOR_LOGIN="${{ github.event.pull_request.user.login }}"
-          FAILURE_REASON=$(cat job_status.txt)
+
+          FAILURE_REASON="${{ needs.test_job.outputs.failure_reason }}"
 
           declare -A author_slack_id=(
             [Siwon-medi]="US6EHTXN0"
@@ -51,14 +53,15 @@ jobs:
             [nakjun12]="U0768APFN0L"
             [halswla]="U07E5UU7G9H"
           )
+
+          AUTHOR_MENTION="<@${author_slack_id[$PR_AUTHOR_LOGIN]:-$PR_AUTHOR_LOGIN}>"
+
           # Build the message
           MESSAGE="Github Action 워크플로우가 실패했습니다. :crown-sw:
           *PR:* <$PR_URL|$PR_TITLE>
-          *작성자:* $PR_AUTHOR
-          *실패 원인:*
-          \`\`\`
-          $FAILURE_REASON
-          \`\`\`"
+          *작성자:* $AUTHOR_MENTION
+          *실패 원인:* $FAILURE_REASON
+          *워크플로우 실행 URL:* ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
 
           curl -X POST -H 'Content-type: application/json' \
             --data "{\"text\": \"$MESSAGE\"}" $SLACK_WEBHOOK_URL
