@@ -29,8 +29,53 @@ jobs:
           declare -A author_slack_id=(
             [nakjun12]="U0768APFN0L" # 황낙준
           )
-           # Build the message
-          MESSAGE="Github Action이 실패했습니다. \n\n*PR 링크:* $PR_URL\n*PR 제목:* $PR_TITLE\n*PR 작성자:*  <@${author_slack_id[$PR_AUTHOR_LOGIN]}>\n "
+
+          read -r -d '' PAYLOAD << EOM
+          {
+            "blocks": [
+              {
+                "type": "header",
+                "text": {
+                  "type": "plain_text",
+                  "text": "⚠️ GitHub Action 실패 알림",
+                  "emoji": true
+                }
+              },
+              {
+                "type": "section",
+                "text": {
+                  "type": "mrkdwn",
+                  "text": "*PR 제목:* $PR_TITLE"
+                }
+              },
+              {
+                "type": "section",
+                "fields": [
+                  {
+                    "type": "mrkdwn",
+                    "text": "*PR 작성자:* <@${author_slack_id[$PR_AUTHOR_LOGIN]}>"
+                  },
+                  {
+                    "type": "mrkdwn",
+                    "text": "*PR 링크:* <$PR_URL|GitHub에서 보기>"
+                  }
+                ]
+              },
+              {
+                "type": "divider"
+              },
+              {
+                "type": "context",
+                "elements": [
+                  {
+                    "type": "mrkdwn",
+                    "text": "이 메시지는 자동으로 생성되었습니다. 문제가 있다면 개발팀에 문의해주세요."
+                  }
+                ]
+              }
+            ]
+          }
+          EOM
 
           # Send the message to Slack
-          curl -X POST -H 'Content-type: application/json' --data "{\"text\": \"$MESSAGE\"}" $SLACK_WEBHOOK_URL
+          curl -X POST -H 'Content-type: application/json' --data "$PAYLOAD" $SLACK_WEBHOOK_URL
