@@ -21,17 +21,6 @@ jobs:
         run: |
           echo "This step will fail"
           exit 1  # 이 줄을 추가하여 실제로 실패하도록 합니다.
-        continue-on-error: true
-
-      - name: Set failure reason
-        id: set_failure
-        if: steps.failing_step.outcome == 'failure'
-        run: |
-          echo "failure_reason=Step 'Run a failing step' failed with exit code ${{ steps.failing_step }}" >> $GITHUB_OUTPUT
-
-      - name: Fail the job if the failing step failed
-        if: steps.failing_step.outcome == 'failure'
-        run: exit 1
 
   notify-on-failure:
     name: Notify Slack on Job Failure
@@ -64,7 +53,6 @@ jobs:
           MESSAGE="Github Action 워크플로우가 실패했습니다. :crown-sw:
           *PR:* <$PR_URL|$PR_TITLE>
           *작성자:* $AUTHOR_MENTION
-          *실패 원인:* $FAILURE_REASON
           *워크플로우 실행 URL:* ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
 
           curl -X POST -H 'Content-type: application/json' \
