@@ -59,19 +59,13 @@ jobs:
 
           AUTHOR_MENTION="<@${author_slack_id[$PR_AUTHOR_LOGIN]}>"
 
-          # Initialize variables
+          # Initialize overall status
           OVERALL_STATUS="success"
-          JOB_STATUSES=""
 
-          # Loop through all jobs in the needs context using jq
-          while IFS="=" read -r job_name job_result; do
-            JOB_STATUSES+="- $job_name: $job_result"$'\n'
-
-            # If any job is not successful, mark the overall status as failed
-            if [ "$job_result" != "success" ]; then
-              OVERALL_STATUS="failure"
-            fi
-          done < <(echo "$NEEDS_JSON" | jq -r 'to_entries[] | "\(.key)=\(.value.result)"')
+          # Check all jobs in the needs context using jq
+          if echo "$NEEDS_JSON" | jq -e '.[] | select(.result != "success")' > /dev/null; then
+            OVERALL_STATUS="failure"
+          fi
 
           # Set emoji based on overall status
           if [ "$OVERALL_STATUS" == "success" ]; then
@@ -84,10 +78,7 @@ jobs:
           MESSAGE="Github Action 워크플로우가 ${OVERALL_STATUS}했습니다. ${EMOJI}
           *PR:* <$PR_URL|$PR_TITLE>
           *작성자:* $AUTHOR_MENTION
-          *워크플로우 실행 URL:* ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
-
-          *작업 상태:*
-          ${JOB_STATUSES}"
+          *워크플로우 실행 URL:* ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
 
           # Send the message to Slack
           curl -X POST -H 'Content-type: application/json' --data "{\"text\": \"$MESSAGE\"}" $SLACK_WEBHOOK_URL
