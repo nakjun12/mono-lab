@@ -47,7 +47,7 @@ jobs:
           PR_AUTHOR_LOGIN="${{ github.event.pull_request.user.login }}"
 
           # Mapping GitHub usernames to Slack Id
-          USER_DATA=$(cat user_data.json)
+          USER_DATA=$(cat .github/workflows/member/user.json)
 
           # Check if the PR author is in the author_slack_id array
           if ! echo "$USER_DATA" | jq -e --arg login "$PR_AUTHOR_LOGIN" '.[$login]'; then
