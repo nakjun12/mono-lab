@@ -47,17 +47,21 @@ jobs:
           PR_AUTHOR_LOGIN="${{ github.event.pull_request.user.login }}"
 
           # Mapping GitHub usernames to Slack Id
-          USER_DATA=$(cat .github/workflows/member/user.json)
+          declare -A author_slack_id=(
+          [nakjun12]="U0768APFN0L"
+          )
+
+          declare -A author_names=(
+            [nakjun12]="황낙준"
+          )
 
           # Check if the PR author is in the author_slack_id array
-          if ! echo "$USER_DATA" | jq -e --arg login "$PR_AUTHOR_LOGIN" '.[$login]'; then
+          if [[ ! " ${!author_slack_id[@]} " =~ " ${PR_AUTHOR_LOGIN} " ]]; then
             echo "PR author ${PR_AUTHOR_LOGIN} is not in the notification list. Skipping notification."
             exit 0
           fi
 
-          AUTHOR_SLACK_ID=$(echo "$USER_DATA" | jq -r --arg login "$PR_AUTHOR_LOGIN" '.[$login].slack_id')
-          AUTHOR_NAME=$(echo "$USER_DATA" | jq -r --arg login "$PR_AUTHOR_LOGIN" '.[$login].name')
-          AUTHOR_MENTION="<@${AUTHOR_SLACK_ID}>"
+          AUTHOR_MENTION="<@${author_slack_id[$PR_AUTHOR_LOGIN]}>"
 
 
           # Initialize overall status
