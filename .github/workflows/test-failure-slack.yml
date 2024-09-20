@@ -33,7 +33,7 @@ jobs:
 
   notify-on-completion:
     name: Notify Slack on Job Completion
-    needs: [test_job, success_job, failure_job]
+    needs: [test_job, success_job]
     if: always()
     runs-on: ubuntu-latest
     steps:
@@ -47,21 +47,17 @@ jobs:
           PR_AUTHOR_LOGIN="${{ github.event.pull_request.user.login }}"
 
           # Mapping GitHub usernames to Slack Id
-          declare -A author_slack_id=(
-          [nakjun12]="U0768APFN0L"
-          )
-
-          declare -A author_names=(
-            [nakjun12]="황낙준"
-          )
+          USER_DATA=$(cat user_data.json)
 
           # Check if the PR author is in the author_slack_id array
-          if [[ ! " ${!author_slack_id[@]} " =~ " ${PR_AUTHOR_LOGIN} " ]]; then
+          if ! echo "$USER_DATA" | jq -e --arg login "$PR_AUTHOR_LOGIN" '.[$login]'; then
             echo "PR author ${PR_AUTHOR_LOGIN} is not in the notification list. Skipping notification."
             exit 0
           fi
 
-          AUTHOR_MENTION="<@${author_slack_id[$PR_AUTHOR_LOGIN]}>"
+          AUTHOR_SLACK_ID=$(echo "$USER_DATA" | jq -r --arg login "$PR_AUTHOR_LOGIN" '.[$login].slack_id')
+          AUTHOR_NAME=$(echo "$USER_DATA" | jq -r --arg login "$PR_AUTHOR_LOGIN" '.[$login].name')
+          AUTHOR_MENTION="<@${AUTHOR_SLACK_ID}>"
 
 
           # Initialize overall status
