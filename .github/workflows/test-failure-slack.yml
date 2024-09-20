@@ -51,6 +51,10 @@ jobs:
           [nakjun12]="U0768APFN0L"
           )
 
+          declare -A author_names=(
+            [nakjun12]="황낙준"
+          )
+
           # Check if the PR author is in the author_slack_id array
           if [[ ! " ${!author_slack_id[@]} " =~ " ${PR_AUTHOR_LOGIN} " ]]; then
             echo "PR author ${PR_AUTHOR_LOGIN} is not in the notification list. Skipping notification."
@@ -68,7 +72,7 @@ jobs:
           if echo "$NEEDS_JSON" | jq -e '.[] | select(.result == "failure")' > /dev/null; then
             OVERALL_STATUS="failure"
             EMOJI=":x:"
-            GITHUB_URL= ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+            GITHUB_URL="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
           fi
 
 
