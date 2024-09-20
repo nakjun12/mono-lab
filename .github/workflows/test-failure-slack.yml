@@ -59,8 +59,6 @@ jobs:
 
           AUTHOR_MENTION="<@${author_slack_id[$PR_AUTHOR_LOGIN]}>"
 
-          # Initialize overall status
-          OVERALL_STATUS="success"
 
           # Initialize overall status
           OVERALL_STATUS="success"
@@ -70,13 +68,24 @@ jobs:
           if echo "$NEEDS_JSON" | jq -e '.[] | select(.result == "failure")' > /dev/null; then
             OVERALL_STATUS="failure"
             EMOJI=":x:"
+            GITHUB_URL= ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
           fi
 
+
           # Build the message
-          MESSAGE="Github Action 워크플로우가 ${OVERALL_STATUS}했습니다. ${EMOJI}
-          *PR:* <$PR_URL|$PR_TITLE>
-          *작성자:* $AUTHOR_MENTION
-          *워크플로우 실행 URL:* ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          MESSAGE="<$PR_URL|$PR_TITLE> - ${EMOJI}
+          *작성자:* $AUTHOR_MENTION"
+
+          if [ "$OVERALL_STATUS" = "failure" ]; then
+          MESSAGE="$MESSAGE
+          *Github Action:* $GITHUB_URL"
+          fi
+
+          MESSAGE="$MESSAGE
+
+          <$PR_URL|$PR_TITLE> :crown-sw:
+          *작성자:* ${author_names[$PR_AUTHOR_LOGIN]}쌤
+          *리뷰어:* <!subteam^S06RV0M0C3S|palette-fe-web>"
 
           # Send the message to Slack
           curl -X POST -H 'Content-type: application/json' --data "{\"text\": \"$MESSAGE\"}" $SLACK_WEBHOOK_URL
