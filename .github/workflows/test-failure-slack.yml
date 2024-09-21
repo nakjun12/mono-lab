@@ -96,7 +96,6 @@ jobs:
           curl -X POST -H 'Content-type: application/json' --data '{
           "text": "'"$MESSAGE1"'",
           "username": "GitHub PR Status",
-          "icon_emoji": ":github:",
           "icon_url": "https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png"
           }' $SLACK_WEBHOOK_URL
 
@@ -104,5 +103,4 @@ jobs:
           curl -X POST -H 'Content-type: application/json' --data '{
           "text": "'"$MESSAGE2"'",
           "username": "GitHub PR Reviewers",
-          "icon_emoji": ":crown:"
           }' $SLACK_WEBHOOK_URL
