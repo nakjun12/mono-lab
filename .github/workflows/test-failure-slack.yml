@@ -51,7 +51,7 @@ jobs:
           PR_TITLE="${{ github.event.pull_request.title }}"
           PR_AUTHOR_LOGIN="${{ github.event.pull_request.user.login }}"
 
-          TEAM_MEMBERS=$(cat team-config/team_members.json)
+          TEAM_MEMBERS=$(cat .github/workflows/team-config/team_members.json)
 
           get_member_info() {
             echo "$TEAM_MEMBERS" | jq -r --arg github_id "$1" '.members[] | select(.github_id == $github_id) | .'$2''
