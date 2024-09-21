@@ -2,23 +2,23 @@
   "members": [
     {
       "github_id": "nakjun12",
-      "name": "김테스트",
-      "slack_id": "U123TEST1"
+      "name": "황낙준",
+      "slack_id": "U0768APFN0L"
     },
     {
       "github_id": "test-user2",
       "name": "이테스트",
-      "slack_id": "U123TEST2"
+      "slack_id": "U0768APFN0L"
     },
     {
       "github_id": "test-user3",
       "name": "박테스트",
-      "slack_id": "U123TEST3"
+      "slack_id": "U0768APFN0L"
     },
     {
       "github_id": "test-user4",
       "name": "최테스트",
-      "slack_id": "U123TEST4"
+      "slack_id": "U0768APFN0L"
     }
   ]
 }

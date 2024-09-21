@@ -42,55 +42,43 @@ jobs:
           fetch-depth: 2
 
       - name: Notify Slack
-
         env:
           SLACK_WEBHOOK_URL: ${{secrets.SLACK_WEBHOOK_URL}}
           NEEDS_JSON: ${{ toJson(needs) }}
         run: |
+          # 헬퍼 함수들을 포함하는 스크립트 불러오기
+          source .github/script/team_review_helpers.sh
+
           PR_URL="${{ github.event.pull_request.html_url }}"
           PR_TITLE="${{ github.event.pull_request.title }}"
           PR_AUTHOR_LOGIN="${{ github.event.pull_request.user.login }}"
 
-          TEAM_MEMBERS=$(cat .github/workflows/team-config/team_members.json)
+          TEAM_MEMBERS=$(cat .github/config/team_members.json)
 
-          get_member_info() {
-            echo "$TEAM_MEMBERS" | jq -r --arg github_id "$1" '.members[] | select(.github_id == $github_id) | .'$2''
-          }
-
-          AUTHOR_NAME=$(get_member_info "$PR_AUTHOR_LOGIN" "name")
-          AUTHOR_SLACK_ID=$(get_member_info "$PR_AUTHOR_LOGIN" "slack_id")
-
-          REVIEWERS=$(echo "$TEAM_MEMBERS" | jq -r --arg author "$PR_AUTHOR_LOGIN" '.members[] | select(.github_id != $author) | .github_id' | shuf -n 2)
-
-          REVIEWER_MENTIONS=""
-          for reviewer_github_id in $REVIEWERS; do
-            reviewer_slack_id=$(get_member_info "$reviewer_github_id" "slack_id")
-            REVIEWER_MENTIONS+="(<@${reviewer_slack_id}>) "
-          done
-          REVIEWER_MENTIONS=${REVIEWER_MENTIONS% }
-
-          # Check if the PR author is in the author_slack_id array
-          if ! echo "$TEAM_MEMBERS" | jq -e --arg author "$PR_AUTHOR_LOGIN" '.members[] | select(.github_id == $author)' > /dev/null; then
-          echo "PR author ${PR_AUTHOR_LOGIN} is not in the notification list. Skipping notification."
-          exit 0
+          # 작성자 확인
+          if ! check_author "$TEAM_MEMBERS" "$PR_AUTHOR_LOGIN"; then
+              exit 0
           fi
 
+          # 작성자 정보 가져오기
+          AUTHOR_NAME=$(get_member_info "$TEAM_MEMBERS" "$PR_AUTHOR_LOGIN" "name")
+          AUTHOR_SLACK_ID=$(get_member_info "$TEAM_MEMBERS" "$PR_AUTHOR_LOGIN" "slack_id")
           AUTHOR_MENTION="<@${AUTHOR_SLACK_ID}>"
 
+          # 리뷰어 선택 및 멘션 생성
+          REVIEWER_MENTIONS=$(select_reviewers_and_create_mentions "$TEAM_MEMBERS" "$PR_AUTHOR_LOGIN")
 
-          # Initialize overall status
+          # GitHub Actions 상태 확인
           OVERALL_STATUS="success"
           EMOJI=":white_check_mark:"
+          GITHUB_URL="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
 
-          # Check all jobs in the needs context using jq
           if echo "$NEEDS_JSON" | jq -e '.[] | select(.result == "failure")' > /dev/null; then
             OVERALL_STATUS="failure"
             EMOJI=":x:"
-            GITHUB_URL="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
           fi
 
-
-          # Build the message
+          # 메시지 구성
           MESSAGE="<$PR_URL|$PR_TITLE> - ${EMOJI}
           *작성자:* $AUTHOR_MENTION"
 
@@ -105,5 +93,5 @@ jobs:
           *작성자:* ${AUTHOR_NAME}쌤
           *리뷰어:* $REVIEWER_MENTIONS"
 
-          # Send the message to Slack
+          # Slack에 메시지 전송
           curl -X POST -H 'Content-type: application/json' --data "{\"text\": \"$MESSAGE\"}" $SLACK_WEBHOOK_URL
