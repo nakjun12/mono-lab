@@ -19,7 +19,7 @@ select_reviewers_and_create_mentions() {
     local reviewer_mentions=""
     for reviewer_github_id in $reviewers; do
         local reviewer_slack_id=$(get_member_info "$team_members" "$reviewer_github_id" "slack_id")
-        reviewer_mentions+="(<@${reviewer_slack_id}>) "
+        reviewer_mentions+="<@${reviewer_slack_id}> "
     done
 
     echo "$reviewer_mentions"
