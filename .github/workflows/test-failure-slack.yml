@@ -46,7 +46,7 @@ jobs:
           PR_TITLE="${{ github.event.pull_request.title }}"
           PR_AUTHOR_LOGIN="${{ github.event.pull_request.user.login }}"
 
-          ls -al
+
 
           # Mapping GitHub usernames to Slack Id
           declare -A author_slack_id=(
@@ -95,3 +95,5 @@ jobs:
 
           # Send the message to Slack
           curl -X POST -H 'Content-type: application/json' --data "{\"text\": \"$MESSAGE\"}" $SLACK_WEBHOOK_URL
+      - name: "checkout test"
+        run: ls -al
