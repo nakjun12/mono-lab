@@ -1,0 +1,24 @@
+{
+  "members": [
+    {
+      "github_id": "test-user1",
+      "name": "김테스트",
+      "slack_id": "U123TEST1"
+    },
+    {
+      "github_id": "test-user2",
+      "name": "이테스트",
+      "slack_id": "U123TEST2"
+    },
+    {
+      "github_id": "test-user3",
+      "name": "박테스트",
+      "slack_id": "U123TEST3"
+    },
+    {
+      "github_id": "test-user4",
+      "name": "최테스트",
+      "slack_id": "U123TEST4"
+    }
+  ]
+}

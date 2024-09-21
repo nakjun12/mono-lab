@@ -12,7 +12,6 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 2
-      - run: ls -al
   success_job:
     runs-on: ubuntu-latest
     steps:
@@ -37,7 +36,13 @@ jobs:
     if: always()
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
       - name: Notify Slack
+
         env:
           SLACK_WEBHOOK_URL: ${{secrets.SLACK_WEBHOOK_URL}}
           NEEDS_JSON: ${{ toJson(needs) }}
@@ -46,16 +51,22 @@ jobs:
           PR_TITLE="${{ github.event.pull_request.title }}"
           PR_AUTHOR_LOGIN="${{ github.event.pull_request.user.login }}"
 
+          TEAM_MEMBERS=$(cat team-config/team_members.json)
 
+          get_member_info() {
+            echo "$TEAM_MEMBERS" | jq -r --arg github_id "$1" '.members[] | select(.github_id == $github_id) | .'$2''
+          }
 
-          # Mapping GitHub usernames to Slack Id
-          declare -A author_slack_id=(
-          [nakjun12]="U0768APFN0L"
-          )
+          AUTHOR_NAME=$(get_member_info "$PR_AUTHOR_LOGIN" "name")
 
-          declare -A author_names=(
-            [nakjun12]="황낙준"
-          )
+          REVIEWERS=$(echo "$TEAM_MEMBERS" | jq -r --arg author "$PR_AUTHOR_LOGIN" '.members[] | select(.github_id != $author) | .github_id' | shuf -n 2)
+
+          REVIEWER_MENTIONS=""
+          for reviewer_github_id in $REVIEWERS; do
+            reviewer_slack_id=$(get_member_info "$reviewer_github_id" "slack_id")
+            REVIEWER_MENTIONS+="(<@${reviewer_slack_id}>) "
+          done
+          REVIEWER_MENTIONS=${REVIEWER_MENTIONS% }
 
           # Check if the PR author is in the author_slack_id array
           if [[ ! " ${!author_slack_id[@]} " =~ " ${PR_AUTHOR_LOGIN} " ]]; then
@@ -90,10 +101,8 @@ jobs:
           MESSAGE="$MESSAGE
 
           <$PR_URL|$PR_TITLE> :crown-sw:
-          *작성자:* ${author_names[$PR_AUTHOR_LOGIN]}쌤
-          *리뷰어:* <!subteam^S06RV0M0C3S|palette-fe-web>"
+          *작성자:* ${AUTHOR_NAME}쌤
+          *리뷰어:* $REVIEWER_MENTIONS
 
           # Send the message to Slack
           curl -X POST -H 'Content-type: application/json' --data "{\"text\": \"$MESSAGE\"}" $SLACK_WEBHOOK_URL
-      - name: "checkout test"
-        run: ls -al
