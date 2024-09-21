@@ -32,7 +32,7 @@ jobs:
 
   notify-on-completion:
     name: Notify Slack on Job Completion
-    needs: [test_job, success_job]
+    needs: [test_job, success_job, failure_job]
     if: always()
     runs-on: ubuntu-latest
     steps:
@@ -78,20 +78,31 @@ jobs:
             EMOJI=":x:"
           fi
 
-          # 메시지 구성
-          MESSAGE="<$PR_URL|$PR_TITLE> - ${EMOJI}
+          # 첫 번째 메시지 구성 (PR 상태)
+          MESSAGE1="<$PR_URL|$PR_TITLE> - ${EMOJI}
           *작성자:* $AUTHOR_MENTION"
 
           if [ "$OVERALL_STATUS" = "failure" ]; then
-          MESSAGE="$MESSAGE
+          MESSAGE1="$MESSAGE1
           *Github Action:* $GITHUB_URL"
           fi
 
-          MESSAGE="$MESSAGE
-
-          <$PR_URL|$PR_TITLE> :crown-sw:
+          # 두 번째 메시지 구성 (리뷰어 정보)
+          MESSAGE2="<$PR_URL|$PR_TITLE> :crown-sw:
           *작성자:* ${AUTHOR_NAME}쌤
           *리뷰어:* $REVIEWER_MENTIONS"
 
-          # Slack에 메시지 전송
-          curl -X POST -H 'Content-type: application/json' --data "{\"text\": \"$MESSAGE\"}" $SLACK_WEBHOOK_URL
+          # 첫 번째 메시지 Slack에 전송
+          curl -X POST -H 'Content-type: application/json' --data '{
+          "text": "'"$MESSAGE1"'",
+          "username": "GitHub PR Status",
+          "icon_emoji": ":github:",
+          "icon_url": "https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png"
+          }' $SLACK_WEBHOOK_URL
+
+          # 두 번째 메시지 Slack에 전송
+          curl -X POST -H 'Content-type: application/json' --data '{
+          "text": "'"$MESSAGE2"'",
+          "username": "GitHub PR Reviewers",
+          "icon_emoji": ":crown:"
+          }' $SLACK_WEBHOOK_URL
