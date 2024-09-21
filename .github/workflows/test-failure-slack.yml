@@ -103,7 +103,7 @@ jobs:
 
           <$PR_URL|$PR_TITLE> :crown-sw:
           *작성자:* ${AUTHOR_NAME}쌤
-          *리뷰어:* $REVIEWER_MENTIONS
+          *리뷰어:* $REVIEWER_MENTIONS"
 
           # Send the message to Slack
           curl -X POST -H 'Content-type: application/json' --data "{\"text\": \"$MESSAGE\"}" $SLACK_WEBHOOK_URL
