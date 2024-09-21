@@ -58,6 +58,7 @@ jobs:
           }
 
           AUTHOR_NAME=$(get_member_info "$PR_AUTHOR_LOGIN" "name")
+          AUTHOR_SLACK_ID=$(get_member_info "$PR_AUTHOR_LOGIN" "slack_id")
 
           REVIEWERS=$(echo "$TEAM_MEMBERS" | jq -r --arg author "$PR_AUTHOR_LOGIN" '.members[] | select(.github_id != $author) | .github_id' | shuf -n 2)
 
@@ -69,12 +70,12 @@ jobs:
           REVIEWER_MENTIONS=${REVIEWER_MENTIONS% }
 
           # Check if the PR author is in the author_slack_id array
-          if [[ ! " ${!author_slack_id[@]} " =~ " ${PR_AUTHOR_LOGIN} " ]]; then
-            echo "PR author ${PR_AUTHOR_LOGIN} is not in the notification list. Skipping notification."
-            exit 0
+          if ! echo "$TEAM_MEMBERS" | jq -e --arg author "$PR_AUTHOR_LOGIN" '.members[] | select(.github_id == $author)' > /dev/null; then
+          echo "PR author ${PR_AUTHOR_LOGIN} is not in the notification list. Skipping notification."
+          exit 0
           fi
 
-          AUTHOR_MENTION="<@${author_slack_id[$PR_AUTHOR_LOGIN]}>"
+          AUTHOR_MENTION="<@${AUTHOR_SLACK_ID}>"
 
 
           # Initialize overall status
