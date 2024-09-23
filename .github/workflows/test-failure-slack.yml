@@ -101,15 +101,15 @@ jobs:
           *작성자:* ${AUTHOR_NAME}쌤
           *리뷰어:* $REVIEWER_MENTIONS"
 
-          # 첫 번째 메시지 Slack에 전송
-          curl -X POST -H 'Content-type: application/json' --data '{
-          "text": "'"$MESSAGE1"'",
-          "username": "GitHub PR Status",
-          "icon_url": "https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png"
-          }' $SLACK_WEBHOOK_URL
+          ## 첫 번째 메시지 Slack에 전송
+          #curl -X POST -H 'Content-type: application/json' --data '{
+          #"text": "'"$MESSAGE1"'",
+          #"username": "GitHub PR Status",
+          #"icon_url": "https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png"
+          #}' $SLACK_WEBHOOK_URL
 
-          # 두 번째 메시지 Slack에 전송
-          curl -X POST -H 'Content-type: application/json' --data '{
-          "text": "'"$MESSAGE2"'",
-          "username": "GitHub PR Reviewers",
-          }' $SLACK_WEBHOOK_URL
+          ## 두 번째 메시지 Slack에 전송
+          #curl -X POST -H 'Content-type: application/json' --data '{
+          #"text": "'"$MESSAGE2"'",
+          #"username": "GitHub PR Reviewers",
+          #}' $SLACK_WEBHOOK_URL
