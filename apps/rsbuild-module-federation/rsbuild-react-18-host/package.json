@@ -10,17 +10,17 @@
     "preview": "rsbuild preview"
   },
   "dependencies": {
-    "@module-federation/enhanced": "^0.6.3",
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1"
+    "@module-federation/enhanced": "^0.6.6",
+    "react": "^19.0.0-rc.0",
+    "react-dom": "^19.0.0-rc.0"
   },
   "devDependencies": {
-    "@biomejs/biome": "^1.8.3",
-    "@rsbuild/core": "^1.0.1",
-    "@rsbuild/plugin-react": "^1.0.1",
-    "@types/react": "^18.3.5",
+    "@biomejs/biome": "^1.9.2",
+    "@rsbuild/core": "^1.0.5",
+    "@rsbuild/plugin-react": "^1.0.2",
+    "@types/react": "^18.3.8",
     "@types/react-dom": "^18.3.0",
-    "tailwindcss": "^3.4.10",
+    "tailwindcss": "^3.4.13",
     "typescript": "^5.5.2"
   }
 }
