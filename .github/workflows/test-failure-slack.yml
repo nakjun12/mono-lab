@@ -49,15 +49,6 @@ jobs:
           # 헬퍼 함수들을 포함하는 스크립트 불러오기
           source .github/script/team_review_helpers.sh
 
-          echo "github.event.pull_request:"
-          echo '${{ toJson(github.event.pull_request) }}' | jq .
-
-          echo "github.event:"
-          echo '${{ toJson(github.event) }}' | jq .
-
-          echo "github:"
-          echo '${{ toJson(github) }}' | jq .
-
           PR_URL="${{ github.event.pull_request.html_url }}"
           PR_TITLE="${{ github.event.pull_request.title }}"
           PR_AUTHOR_LOGIN="${{ github.event.pull_request.user.login }}"
