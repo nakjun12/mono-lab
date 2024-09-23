@@ -1,35 +1,115 @@
 name: Test Failure Workflow
 
 on:
-  push:
-    branches: [main]
   pull_request:
     branches: [main]
-  workflow_dispatch:
 
 jobs:
-  test_failure:
+  test_job:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
           fetch-depth: 2
-      - name: Run a failing step
+  success_job:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 성공하는 단계
+        id: success_step
         run: |
-          echo "This step will fail"
+          echo "이 단계는 성공합니다"
+          exit 0
+
+  failure_job:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 실패하는 단계
+        id: failure_step
+        run: |
+          echo "이 단계는 실패합니다"
           exit 1
-      - name: Notify Slack on Failure
-        if: failure()
+
+  notify-on-completion:
+    name: Notify Slack on Job Completion
+    needs: [test_job, success_job, failure_job]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: Notify Slack
         env:
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          SLACK_WEBHOOK_URL: ${{secrets.SLACK_WEBHOOK_URL}}
+          NEEDS_JSON: ${{ toJson(needs) }}
         run: |
+          # 헬퍼 함수들을 포함하는 스크립트 불러오기
+          source .github/script/team_review_helpers.sh
+
+          echo "github.event.pull_request:"
+          echo '${{ toJson(github.event.pull_request) }}' | jq .
+
+          echo "github.event:"
+          echo '${{ toJson(github.event) }}' | jq .
+
+          echo "github:"
+          echo '${{ toJson(github) }}' | jq .
+
           PR_URL="${{ github.event.pull_request.html_url }}"
           PR_TITLE="${{ github.event.pull_request.title }}"
           PR_AUTHOR_LOGIN="${{ github.event.pull_request.user.login }}"
 
-           # Build the message
-          MESSAGE="Github Action이 실패했습니다. \n\n*PR 링크:* $PR_URL\n*PR 제목:* $PR_TITLE\n*PR "
+          TEAM_MEMBERS=$(cat .github/config/team_members.json)
 
-          # Send the message to Slack
-          curl -X POST -H 'Content-type: application/json' --data "{\"text\": \"$MESSAGE\"}" $SLACK_WEBHOOK_URL
+          # 작성자 확인
+          if ! check_author "$TEAM_MEMBERS" "$PR_AUTHOR_LOGIN"; then
+              exit 0
+          fi
+
+          # 작성자 정보 가져오기
+          AUTHOR_NAME=$(get_member_info "$TEAM_MEMBERS" "$PR_AUTHOR_LOGIN" "name")
+          AUTHOR_SLACK_ID=$(get_member_info "$TEAM_MEMBERS" "$PR_AUTHOR_LOGIN" "slack_id")
+          AUTHOR_MENTION="<@${AUTHOR_SLACK_ID}>"
+
+          # 리뷰어 선택 및 멘션 생성
+          REVIEWER_MENTIONS=$(select_reviewers_and_create_mentions "$TEAM_MEMBERS" "$PR_AUTHOR_LOGIN")
+
+          # GitHub Actions 상태 확인
+          OVERALL_STATUS="success"
+          EMOJI=":white_check_mark:"
+          GITHUB_URL="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+
+          if echo "$NEEDS_JSON" | jq -e '.[] | select(.result == "failure")' > /dev/null; then
+            OVERALL_STATUS="failure"
+            EMOJI=":x:"
+          fi
+
+          # 첫 번째 메시지 구성 (PR 상태)
+          MESSAGE1="<$PR_URL|$PR_TITLE> - ${EMOJI}
+          *작성자:* $AUTHOR_MENTION"
+
+          if [ "$OVERALL_STATUS" = "failure" ]; then
+          MESSAGE1="$MESSAGE1
+          *Github Action:* $GITHUB_URL"
+          fi
+
+          # 두 번째 메시지 구성 (리뷰어 정보)
+          MESSAGE2="<$PR_URL|$PR_TITLE> :crown-sw:
+          *작성자:* ${AUTHOR_NAME}쌤
+          *리뷰어:* $REVIEWER_MENTIONS"
+
+          # 첫 번째 메시지 Slack에 전송
+          curl -X POST -H 'Content-type: application/json' --data '{
+          "text": "'"$MESSAGE1"'",
+          "username": "GitHub PR Status",
+          "icon_url": "https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png"
+          }' $SLACK_WEBHOOK_URL
+
+          # 두 번째 메시지 Slack에 전송
+          curl -X POST -H 'Content-type: application/json' --data '{
+          "text": "'"$MESSAGE2"'",
+          "username": "GitHub PR Reviewers",
+          }' $SLACK_WEBHOOK_URL
