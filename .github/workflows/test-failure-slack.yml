@@ -32,7 +32,7 @@ jobs:
 
   notify-on-completion:
     name: Notify Slack on Job Completion
-    needs: [test_job, success_job, failure_job]
+    needs: [test_job, success_job]
     if: always()
     runs-on: ubuntu-latest
     steps:
