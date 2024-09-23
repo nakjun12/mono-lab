@@ -1,0 +1,124 @@
+version: 2
+updates:
+  # Apps
+  - package-ecosystem: "npm"
+    directory: "/apps/next-lab"
+    schedule:
+      interval: "weekly"
+    groups:
+      next-lab-dependencies:
+        patterns:
+          - "*"
+    labels:
+      - "area: apps"
+    open-pull-requests-limit: 1
+
+  - package-ecosystem: "npm"
+    directory: "/apps/react-lab"
+    schedule:
+      interval: "weekly"
+    groups:
+      react-lab-dependencies:
+        patterns:
+          - "*"
+    labels:
+      - "area: apps"
+    open-pull-requests-limit: 1
+
+  - package-ecosystem: "npm"
+    directory: "/apps/rsbuild-module-federation"
+    schedule:
+      interval: "weekly"
+    groups:
+      rsbuild-module-federation-dependencies:
+        patterns:
+          - "*"
+    labels:
+      - "area: apps"
+    open-pull-requests-limit: 1
+
+  - package-ecosystem: "npm"
+    directory: "/apps/rsbuild-react-19"
+    schedule:
+      interval: "weekly"
+    groups:
+      rsbuild-react-19-dependencies:
+        patterns:
+          - "*"
+    labels:
+      - "area: apps"
+    open-pull-requests-limit: 1
+
+  # Packages
+  - package-ecosystem: "npm"
+    directory: "/packages/eslint-config"
+    schedule:
+      interval: "weekly"
+    groups:
+      eslint-config-dependencies:
+        patterns:
+          - "*"
+    labels:
+      - "area: packages"
+    open-pull-requests-limit: 1
+
+  - package-ecosystem: "npm"
+    directory: "/packages/jest-presets"
+    schedule:
+      interval: "weekly"
+    groups:
+      jest-presets-dependencies:
+        patterns:
+          - "*"
+    labels:
+      - "area: packages"
+    open-pull-requests-limit: 1
+
+  - package-ecosystem: "npm"
+    directory: "/packages/tailwind-config"
+    schedule:
+      interval: "weekly"
+    groups:
+      tailwind-config-dependencies:
+        patterns:
+          - "*"
+    labels:
+      - "area: packages"
+    open-pull-requests-limit: 1
+
+  - package-ecosystem: "npm"
+    directory: "/packages/typescript-config"
+    schedule:
+      interval: "weekly"
+    groups:
+      typescript-config-dependencies:
+        patterns:
+          - "*"
+    labels:
+      - "area: packages"
+    open-pull-requests-limit: 1
+
+  - package-ecosystem: "npm"
+    directory: "/packages/ui"
+    schedule:
+      interval: "weekly"
+    groups:
+      ui-dependencies:
+        patterns:
+          - "*"
+    labels:
+      - "area: packages"
+    open-pull-requests-limit: 1
+
+  # Root package.json
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    groups:
+      root-dependencies:
+        patterns:
+          - "*"
+    labels:
+      - "area: root"
+    open-pull-requests-limit: 1
