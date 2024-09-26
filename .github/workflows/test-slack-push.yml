@@ -1,0 +1,94 @@
+name: Push Notification Workflow
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  test_job:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+  success_job:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 성공하는 단계
+        id: success_step
+        run: |
+          echo "이 단계는 성공합니다"
+          exit 0
+
+  failure_job:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 실패하는 단계
+        id: failure_step
+        run: |
+          echo "이 단계는 실패합니다"
+          exit 1
+
+  notify-on-completion:
+    name: Notify Slack on Push Completion
+    needs: [test_job, success_job, failure_job]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: Notify Slack
+        env:
+          SLACK_WEBHOOK_URL: ${{secrets.SLACK_WEBHOOK_URL}}
+          NEEDS_JSON: ${{ toJson(needs) }}
+        run: |
+          # 헬퍼 함수들을 포함하는 스크립트 불러오기
+          source .github/script/team_review_helpers.sh
+
+          COMMIT_URL="${{ github.event.head_commit.url }}"
+          COMMIT_MESSAGE="${{ github.event.head_commit.message }}"
+          AUTHOR_USERNAME="${{ github.event.head_commit.author.username }}"
+
+          TEAM_MEMBERS=$(cat .github/config/team_members.json)
+
+          # 작성자 확인
+          if ! check_author "$TEAM_MEMBERS" "$AUTHOR_USERNAME"; then
+              exit 0
+          fi
+
+          # 작성자 정보 가져오기
+          AUTHOR_NAME=$(get_member_info "$TEAM_MEMBERS" "$AUTHOR_USERNAME" "name")
+          AUTHOR_SLACK_ID=$(get_member_info "$TEAM_MEMBERS" "$AUTHOR_USERNAME" "slack_id")
+          AUTHOR_MENTION="<@${AUTHOR_SLACK_ID}>"
+
+          # GitHub Actions 상태 확인
+          OVERALL_STATUS="success"
+          EMOJI=":rocket:"
+          GITHUB_URL="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+
+          if echo "$NEEDS_JSON" | jq -e '.[] | select(.result == "failure")' > /dev/null; then
+            OVERALL_STATUS="failure"
+            EMOJI=":x:"
+          fi
+
+          # 메시지 구성
+          MESSAGE="Push to main ${EMOJI}
+          *커밋:* <$COMMIT_URL|$COMMIT_MESSAGE>
+          *작성자:* $AUTHOR_MENTION (${AUTHOR_NAME})"
+
+          if [ "$OVERALL_STATUS" = "failure" ]; then
+          MESSAGE="$MESSAGE
+          *Github Action:* $GITHUB_URL"
+          fi
+
+          # Slack에 메시지 전송
+          curl -X POST -H 'Content-type: application/json' --data '{
+          "text": "'"$MESSAGE"'",
+          "username": "GitHub Push Notification",
+          "icon_url": "https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png"
+          }' $SLACK_WEBHOOK_URL
