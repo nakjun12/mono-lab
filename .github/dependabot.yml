@@ -12,6 +12,10 @@ updates:
     labels:
       - "area: apps"
     open-pull-requests-limit: 1
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-patch"]
+        versions: ["*-beta", "*-alpha", "*-rc*", "*-experimental"]
 
   - package-ecosystem: "npm"
     directory: "/apps/react-lab"
@@ -24,6 +28,10 @@ updates:
     labels:
       - "area: apps"
     open-pull-requests-limit: 1
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-patch"]
+        versions: ["*-beta", "*-alpha", "*-rc*", "*-experimental"]
 
   - package-ecosystem: "npm"
     directory: "/apps/rsbuild-module-federation"
@@ -36,6 +44,10 @@ updates:
     labels:
       - "area: apps"
     open-pull-requests-limit: 1
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-patch"]
+        versions: ["*-beta", "*-alpha", "*-rc*", "*-experimental"]
 
   - package-ecosystem: "npm"
     directory: "/apps/rsbuild-react-19"
@@ -48,6 +60,10 @@ updates:
     labels:
       - "area: apps"
     open-pull-requests-limit: 1
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-patch"]
+        versions: ["*-beta", "*-alpha", "*-rc*", "*-experimental"]
 
   # Packages
   - package-ecosystem: "npm"
@@ -61,6 +77,10 @@ updates:
     labels:
       - "area: packages"
     open-pull-requests-limit: 1
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-patch"]
+        versions: ["*-beta", "*-alpha", "*-rc*", "*-experimental"]
 
   - package-ecosystem: "npm"
     directory: "/packages/jest-presets"
@@ -73,6 +93,10 @@ updates:
     labels:
       - "area: packages"
     open-pull-requests-limit: 1
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-patch"]
+        versions: ["*-beta", "*-alpha", "*-rc*", "*-experimental"]
 
   - package-ecosystem: "npm"
     directory: "/packages/tailwind-config"
@@ -85,6 +109,10 @@ updates:
     labels:
       - "area: packages"
     open-pull-requests-limit: 1
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-patch"]
+        versions: ["*-beta", "*-alpha", "*-rc*", "*-experimental"]
 
   - package-ecosystem: "npm"
     directory: "/packages/typescript-config"
@@ -97,6 +125,10 @@ updates:
     labels:
       - "area: packages"
     open-pull-requests-limit: 1
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-patch"]
+        versions: ["*-beta", "*-alpha", "*-rc*", "*-experimental"]
 
   - package-ecosystem: "npm"
     directory: "/packages/ui"
@@ -109,6 +141,10 @@ updates:
     labels:
       - "area: packages"
     open-pull-requests-limit: 1
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-patch"]
+        versions: ["*-beta", "*-alpha", "*-rc*", "*-experimental"]
 
   # Root package.json
   - package-ecosystem: "npm"
@@ -122,3 +158,7 @@ updates:
     labels:
       - "area: root"
     open-pull-requests-limit: 1
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-patch"]
+        versions: ["*-beta", "*-alpha", "*-rc*", "*-experimental"]
