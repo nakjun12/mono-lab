@@ -1,6 +1,7 @@
 import "./App.css";
 import { Home } from "./pages/home";
 
+//test
 const App = () => {
   return (
     <main className="content">
