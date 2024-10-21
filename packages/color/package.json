@@ -21,7 +21,7 @@
     "global.css"
   ],
   "devDependencies": {
-    "typescript": "^5.3.3",
+    "typescript": "^5.6.3",
     "@repo/typescript-config": "workspace:*"
   }
 }
