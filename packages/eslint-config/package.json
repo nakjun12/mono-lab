@@ -5,6 +5,8 @@
   "files": [
     "library.js",
     "next.js",
+    "nest.js",
+    "prettier-base.js",
     "react-internal.js"
   ],
   "devDependencies": {
