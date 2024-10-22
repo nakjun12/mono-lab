@@ -1,4 +1,5 @@
 packages:
   - "apps/*"
+  - "apps/full-stack/*"
   - "apps/rsbuild-module-federation/*"
   - "packages/*"
