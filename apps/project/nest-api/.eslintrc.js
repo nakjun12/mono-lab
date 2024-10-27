@@ -7,6 +7,7 @@ module.exports = {
   },
   plugins: ['@typescript-eslint/eslint-plugin'],
   extends: [
+    '@repo/eslint-config/nest.js',
     'plugin:@typescript-eslint/recommended',
     'plugin:prettier/recommended',
   ],
