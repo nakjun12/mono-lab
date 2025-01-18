@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { count, countInc, setStateFunctions } from "./custom-store";
+import { count, increment, setStateFunctions } from "./custom-store";
 
 export function CounterWithModule() {
   const [state, setState] = useState(count);
@@ -11,8 +11,8 @@ export function CounterWithModule() {
   }, []);
 
   const inc = () => {
-    //가져오기 이슈로 인하여 함수로 변경
-    const count = countInc(2);
+    //✅ import 이슈로 인하여 함수로 변경
+    const count = increment(2);
     setStateFunctions.forEach((fn) => {
       fn(count);
     });
