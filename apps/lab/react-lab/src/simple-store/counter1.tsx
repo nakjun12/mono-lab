@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
-import { count, increment, setStateFunctions } from "./custom-store";
+import { count, increment, setStateFunctions } from "./simple-store";
 
-export function CounterWithModule2() {
+export function Counter1() {
   const [state, setState] = useState(count);
   useEffect(() => {
     setStateFunctions.add(setState);
@@ -20,7 +20,7 @@ export function CounterWithModule2() {
 
   return (
     <div>
-      {state} <button onClick={inc}>+1</button>
+      Simple Store Count1: {state} <button onClick={inc}>+1</button>
     </div>
   );
 }
