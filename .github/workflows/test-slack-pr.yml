@@ -135,7 +135,7 @@ jobs:
           # 첫 번째 메시지 구성
           MESSAGE1="<$PR_URL|$PR_TITLE> - ${EMOJI}
           *작성자:* $AUTHOR_MENTION
-          *코드 변경:* \`+${ADDITIONS} / -${DELETIONS}\`"
+          *변경된 파일 (${TOTAL_FILES_COUNT}개):* \`:large_green_circle:+${ADDITIONS} :red_circle:-${DELETIONS}\`"
 
           if [ "$TOTAL_FILES_COUNT" -gt 0 ] && [ ! -z "$CHANGED_FILES_FORMATTED" ]; then
             MESSAGE1="$MESSAGE1
