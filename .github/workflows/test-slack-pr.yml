@@ -39,19 +39,43 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
+          # PR의 base와 head를 모두 가져오기 위해 fetch-depth를 2로 설정한 것은 매우 잘하셨습니다.
+          # 파일 변경 목록을 가져오는 데 필수적입니다.
           fetch-depth: 2
 
       - name: Notify Slack
         env:
           SLACK_WEBHOOK_URL: ${{secrets.SLACK_WEBHOOK_URL}}
           NEEDS_JSON: ${{ toJson(needs) }}
+          # PR 이벤트 컨텍스트를 직접 env로 주입하면 더 안정적으로 정보를 가져올 수 있습니다.
+          PR_JSON: ${{ toJson(github.event.pull_request) }}
         run: |
           # 헬퍼 함수들을 포함하는 스크립트 불러오기
           source .github/script/team_review_helpers.sh
 
-          PR_URL="${{ github.event.pull_request.html_url }}"
-          PR_TITLE="${{ github.event.pull_request.title }}"
-          PR_AUTHOR_LOGIN="${{ github.event.pull_request.user.login }}"
+          PR_URL=$(echo "$PR_JSON" | jq -r .html_url)
+          PR_TITLE=$(echo "$PR_JSON" | jq -r .title)
+          PR_AUTHOR_LOGIN=$(echo "$PR_JSON" | jq -r .user.login)
+
+          # === 여기부터 새로운 코드 추가 ===
+
+          # 1. 코드 변경량 정보 가져오기
+          ADDITIONS=$(echo "$PR_JSON" | jq -r .additions)
+          DELETIONS=$(echo "$PR_JSON" | jq -r .deletions)
+
+          # 2. 변경된 파일 목록 가져오기 (최대 10개까지 표시)
+          CHANGED_FILES_LIST=$(git diff --name-only HEAD^1 HEAD)
+          TOTAL_FILES_COUNT=$(echo "$CHANGED_FILES_LIST" | wc -l)
+          DISPLAY_FILES_COUNT=10
+
+          CHANGED_FILES_FORMATTED=$(echo "$CHANGED_FILES_LIST" | head -n $DISPLAY_FILES_COUNT | sed 's#^#• #')
+
+          if [ "$TOTAL_FILES_COUNT" -gt "$DISPLAY_FILES_COUNT" ]; then
+            REMAINING_FILES_COUNT=$((TOTAL_FILES_COUNT - DISPLAY_FILES_COUNT))
+            CHANGED_FILES_FORMATTED="${CHANGED_FILES_FORMATTED}\n... (그 외 ${REMAINING_FILES_COUNT}개 파일)"
+          fi
+
+          # === 여기까지 새로운 코드 추가 ===
 
           TEAM_MEMBERS=$(cat .github/config/team_members.json)
 
@@ -78,29 +102,48 @@ jobs:
             EMOJI=":x:"
           fi
 
-          # 첫 번째 메시지 구성 (PR 상태)
+          # === 메시지 구성 수정 ===
+
+          # 첫 번째 메시지 구성 (PR 상태 및 변경 내용 요약)
           MESSAGE1="<$PR_URL|$PR_TITLE> - ${EMOJI}
-          *작성자:* $AUTHOR_MENTION"
+          *작성자:* $AUTHOR_MENTION
+          *코드 변경:* \`+${ADDITIONS} / -${DELETIONS}\`
+          *변경된 파일 (${TOTAL_FILES_COUNT}개):*
+          ${CHANGED_FILES_FORMATTED}"
 
           if [ "$OVERALL_STATUS" = "failure" ]; then
           MESSAGE1="$MESSAGE1
+
           *Github Action:* $GITHUB_URL"
           fi
 
-          # 두 번째 메시지 구성 (리뷰어 정보)
+          # 두 번째 메시지 구성 (리뷰어 정보 - 기존과 동일)
           MESSAGE2="<$PR_URL|$PR_TITLE> :crown-sw:
           *작성자:* ${AUTHOR_NAME}쌤
           *리뷰어:* $REVIEWER_MENTIONS"
 
+          # === 메시지 전송 (주석 해제 후 사용) ===
+
           ## 첫 번째 메시지 Slack에 전송
-          #curl -X POST -H 'Content-type: application/json' --data '{
-          #"text": "'"$MESSAGE1"'",
-          #"username": "GitHub PR Status",
-          #"icon_url": "https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png"
-          #}' $SLACK_WEBHOOK_URL
+          # curl -X POST -H 'Content-type: application/json' --data-binary @- "$SLACK_WEBHOOK_URL" << EOF
+          # {
+          #   "text": "$MESSAGE1",
+          #   "username": "GitHub PR Status",
+          #   "icon_url": "https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png"
+          # }
+          # EOF
 
           ## 두 번째 메시지 Slack에 전송
-          #curl -X POST -H 'Content-type: application/json' --data '{
-          #"text": "'"$MESSAGE2"'",
-          #"username": "GitHub PR Reviewers",
-          #}' $SLACK_WEBHOOK_URL
+          # curl -X POST -H 'Content-type: application/json' --data-binary @- "$SLACK_WEBHOOK_URL" << EOF
+          # {
+          #   "text": "$MESSAGE2",
+          #   "username": "GitHub PR Reviewers"
+          # }
+          # EOF
+
+          # 테스트용으로 메시지 출력
+          echo "==== MESSAGE 1 ===="
+          echo "$MESSAGE1"
+          echo
+          echo "==== MESSAGE 2 ===="
+          echo "$MESSAGE2"

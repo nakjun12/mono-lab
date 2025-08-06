@@ -1,0 +1,75 @@
+name: Notify on PR Review
+
+on:
+  pull_request_review:
+    types: [submitted]
+
+jobs:
+  notify:
+    name: Notify Slack on Review
+    runs-on: ubuntu-latest
+    # 만약 helper script나 config 파일 접근 때문에 self-hosted runner가 필요하다면 아래와 같이 변경하세요.
+    # runs-on:
+    #   group: drpalette-runners
+    #   labels: 8-core-ubuntu
+    steps:
+      - name: Check out Code
+        uses: actions/checkout@v4
+
+      - name: Notify Slack on Review Status
+        if: github.event.review.state == 'approved' || github.event.review.state == 'changes_requested'
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          GITHUB_CONTEXT: ${{ toJSON(github) }}
+        run: |
+          source .github/script/review_helpers.sh
+          REVIEW_MEMBERS=$(cat .github/config/review_members.json)
+
+          PR_URL=$(echo "$GITHUB_CONTEXT" | jq -r .event.pull_request.html_url)
+          PR_TITLE=$(echo "$GITHUB_CONTEXT" | jq -r .event.pull_request.title)
+          PR_AUTHOR_LOGIN=$(echo "$GITHUB_CONTEXT" | jq -r .event.pull_request.user.login)
+          REVIEWER_LOGIN=$(echo "$GITHUB_CONTEXT" | jq -r .event.review.user.login)
+          REVIEW_STATE=$(echo "$GITHUB_CONTEXT" | jq -r .event.review.state)
+          REVIEW_URL=$(echo "$GITHUB_CONTEXT" | jq -r .event.review.html_url)
+
+          # PR 작성자가 리뷰 멤버가 아니면 알림을 보내지 않음 (기존 로직과 동일)
+          if ! is_review_member "$REVIEW_MEMBERS" "$PR_AUTHOR_LOGIN"; then
+              echo "PR author is not a review member. Skipping notification."
+              exit 0
+          fi
+
+          # 리뷰어가 자기 자신의 PR을 리뷰한 경우 알림을 보내지 않음
+          if [ "$PR_AUTHOR_LOGIN" = "$REVIEWER_LOGIN" ]; then
+              echo "Author and reviewer are the same. Skipping notification."
+              exit 0
+          fi
+
+          PR_AUTHOR_SLACK_ID=$(get_review_member_info "$REVIEW_MEMBERS" "$PR_AUTHOR_LOGIN" "slack_id")
+          REVIEWER_SLACK_ID=$(get_review_member_info "$REVIEW_MEMBERS" "$REVIEWER_LOGIN" "slack_id")
+
+          PR_AUTHOR_MENTION="<@${PR_AUTHOR_SLACK_ID}>"
+          REVIEWER_MENTION="<@${REVIEWER_SLACK_ID}>"
+
+          if [ "$REVIEW_STATE" = "approved" ]; then
+            EMOJI=":tada:"
+            STATUS_TEXT="승인"
+            MESSAGE="*PR:* <$PR_URL|$PR_TITLE> - *$STATUS_TEXT* ${EMOJI}
+            *작성자:* $PR_AUTHOR_MENTION
+            *리뷰어:* $REVIEWER_MENTION
+            *리뷰:* <$REVIEW_URL|리뷰 바로가기>"
+          elif [ "$REVIEW_STATE" = "changes_requested" ]; then
+            EMOJI=":warning:"
+            STATUS_TEXT="변경 요청"
+            MESSAGE="*PR:* <$PR_URL|$PR_TITLE> - *$STATUS_TEXT* ${EMOJI}
+            *작성자:* $PR_AUTHOR_MENTION
+            *리뷰어:* $REVIEWER_MENTION
+            *리뷰:* <$REVIEW_URL|리뷰 바로가기>"
+          else
+            # 'commented' 상태는 무시
+            exit 0
+          fi
+
+          curl -X POST -H 'Content-type: application/json' --data '{
+          "text": "'"$MESSAGE"'",
+          "username": "Review Status GitHub Action",
+          }' $SLACK_WEBHOOK_URL
