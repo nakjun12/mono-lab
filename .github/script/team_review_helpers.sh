@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # 팀 멤버 정보 가져오기
-get_member_info() {
+get_review_member_info() {
     local team_members="$1"
     local author_github_id="$2"
     local info_key="$3"
@@ -18,7 +18,7 @@ select_reviewers_and_create_mentions() {
 
     local reviewer_mentions=""
     for reviewer_github_id in $reviewers; do
-        local reviewer_slack_id=$(get_member_info "$team_members" "$reviewer_github_id" "slack_id")
+        local reviewer_slack_id=$(get_review_member_info "$team_members" "$reviewer_github_id" "slack_id")
         reviewer_mentions+="<@${reviewer_slack_id}> "
     done
 

@@ -64,8 +64,8 @@ jobs:
           fi
 
           # 작성자 정보 가져오기
-          AUTHOR_NAME=$(get_member_info "$TEAM_MEMBERS" "$AUTHOR_USERNAME" "name")
-          AUTHOR_SLACK_ID=$(get_member_info "$TEAM_MEMBERS" "$AUTHOR_USERNAME" "slack_id")
+          AUTHOR_NAME=$(get_review_member_info "$TEAM_MEMBERS" "$AUTHOR_USERNAME" "name")
+          AUTHOR_SLACK_ID=$(get_review_member_info "$TEAM_MEMBERS" "$AUTHOR_USERNAME" "slack_id")
           AUTHOR_MENTION="<@${AUTHOR_SLACK_ID}>"
 
 
