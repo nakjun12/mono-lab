@@ -115,8 +115,8 @@ jobs:
           fi
 
           # 작성자 정보 가져오기
-          AUTHOR_NAME=$(get_member_info "$TEAM_MEMBERS" "$PR_AUTHOR_LOGIN" "name")
-          AUTHOR_SLACK_ID=$(get_member_info "$TEAM_MEMBERS" "$PR_AUTHOR_LOGIN" "slack_id")
+          AUTHOR_NAME=$(get_review_member_info "$TEAM_MEMBERS" "$PR_AUTHOR_LOGIN" "name")
+          AUTHOR_SLACK_ID=$(get_review_member_info "$TEAM_MEMBERS" "$PR_AUTHOR_LOGIN" "slack_id")
           AUTHOR_MENTION="<@${AUTHOR_SLACK_ID}>"
 
           # 리뷰어 선택 및 멘션 생성
