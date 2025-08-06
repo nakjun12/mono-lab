@@ -32,17 +32,8 @@ jobs:
           REVIEW_STATE=$(echo "$GITHUB_CONTEXT" | jq -r .event.review.state)
           REVIEW_URL=$(echo "$GITHUB_CONTEXT" | jq -r .event.review.html_url)
 
-          # PR 작성자가 리뷰 멤버가 아니면 알림을 보내지 않음 (기존 로직과 동일)
-          if ! is_review_member "$REVIEW_MEMBERS" "$PR_AUTHOR_LOGIN"; then
-              echo "PR author is not a review member. Skipping notification."
-              exit 0
-          fi
 
-          # 리뷰어가 자기 자신의 PR을 리뷰한 경우 알림을 보내지 않음
-          if [ "$PR_AUTHOR_LOGIN" = "$REVIEWER_LOGIN" ]; then
-              echo "Author and reviewer are the same. Skipping notification."
-              exit 0
-          fi
+
 
           PR_AUTHOR_SLACK_ID=$(get_review_member_info "$REVIEW_MEMBERS" "$PR_AUTHOR_LOGIN" "slack_id")
           REVIEWER_SLACK_ID=$(get_review_member_info "$REVIEW_MEMBERS" "$REVIEWER_LOGIN" "slack_id")
