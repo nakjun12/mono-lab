@@ -20,47 +20,110 @@ jobs:
         if: github.event.review.state == 'approved' || github.event.review.state == 'changes_requested'
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
-          GITHUB_CONTEXT: ${{ toJSON(github) }}
         run: |
+          # 디버깅용 로그 추가
+          echo "=== PR 리뷰 알림 시작 ==="
+          echo "리뷰 상태: ${{ github.event.review.state }}"
+          echo "PR 번호: ${{ github.event.pull_request.number }}"
+          echo "PR 제목: ${{ github.event.pull_request.title }}"
+          echo "PR 작성자: ${{ github.event.pull_request.user.login }}"
+          echo "리뷰어: ${{ github.event.review.user.login }}"
+
+          # 필요한 파일들의 존재 확인
+          if [ ! -f ".github/script/review_helpers.sh" ]; then
+            echo "오류: review_helpers.sh 파일을 찾을 수 없습니다"
+            echo "위치: .github/script/review_helpers.sh"
+            exit 1
+          fi
+
+          if [ ! -f ".github/config/review_members.json" ]; then
+            echo "오류: review_members.json 파일을 찾을 수 없습니다"
+            echo "위치: .github/config/review_members.json"
+            exit 1
+          fi
+
+          # 헬퍼 스크립트 불러오기
           source .github/script/review_helpers.sh
           REVIEW_MEMBERS=$(cat .github/config/review_members.json)
 
-          PR_URL=$(echo "$GITHUB_CONTEXT" | jq -r .event.pull_request.html_url)
-          PR_TITLE=$(echo "$GITHUB_CONTEXT" | jq -r .event.pull_request.title)
-          PR_AUTHOR_LOGIN=$(echo "$GITHUB_CONTEXT" | jq -r .event.pull_request.user.login)
-          REVIEWER_LOGIN=$(echo "$GITHUB_CONTEXT" | jq -r .event.review.user.login)
-          REVIEW_STATE=$(echo "$GITHUB_CONTEXT" | jq -r .event.review.state)
-          REVIEW_URL=$(echo "$GITHUB_CONTEXT" | jq -r .event.review.html_url)
+          echo "설정 파일 로드 완료"
 
+          # GitHub 컨텍스트에서 직접 정보 가져오기 (JSON 파싱 제거)
+          PR_URL="${{ github.event.pull_request.html_url }}"
+          PR_TITLE="${{ github.event.pull_request.title }}"
+          PR_AUTHOR_LOGIN="${{ github.event.pull_request.user.login }}"
+          REVIEWER_LOGIN="${{ github.event.review.user.login }}"
+          REVIEW_STATE="${{ github.event.review.state }}"
+          REVIEW_URL="${{ github.event.review.html_url }}"
 
+          echo "PR 정보 수집 완료"
 
-
+          # 멤버 정보 확인 및 Slack ID 가져오기
           PR_AUTHOR_SLACK_ID=$(get_review_member_info "$REVIEW_MEMBERS" "$PR_AUTHOR_LOGIN" "slack_id")
           REVIEWER_SLACK_ID=$(get_review_member_info "$REVIEW_MEMBERS" "$REVIEWER_LOGIN" "slack_id")
 
-          PR_AUTHOR_MENTION="<@${PR_AUTHOR_SLACK_ID}>"
-          REVIEWER_MENTION="<@${REVIEWER_SLACK_ID}>"
+          # Slack ID 유효성 검사
+          if [ -z "$PR_AUTHOR_SLACK_ID" ] || [ "$PR_AUTHOR_SLACK_ID" = "null" ]; then
+            echo "경고: PR 작성자 '$PR_AUTHOR_LOGIN'의 Slack ID를 찾을 수 없습니다"
+            PR_AUTHOR_MENTION="$PR_AUTHOR_LOGIN"
+          else
+            PR_AUTHOR_MENTION="<@${PR_AUTHOR_SLACK_ID}>"
+          fi
 
+          if [ -z "$REVIEWER_SLACK_ID" ] || [ "$REVIEWER_SLACK_ID" = "null" ]; then
+            echo "경고: 리뷰어 '$REVIEWER_LOGIN'의 Slack ID를 찾을 수 없습니다"
+            REVIEWER_MENTION="$REVIEWER_LOGIN"
+          else
+            REVIEWER_MENTION="<@${REVIEWER_SLACK_ID}>"
+          fi
+
+          # 리뷰 상태에 따른 메시지 구성
           if [ "$REVIEW_STATE" = "approved" ]; then
             EMOJI=":tada:"
             STATUS_TEXT="승인"
             MESSAGE="*PR:* <$PR_URL|$PR_TITLE> - *$STATUS_TEXT* ${EMOJI}
-            *작성자:* $PR_AUTHOR_MENTION
-            *리뷰어:* $REVIEWER_MENTION
-            *리뷰:* <$REVIEW_URL|리뷰 바로가기>"
+          *작성자:* $PR_AUTHOR_MENTION
+          *리뷰어:* $REVIEWER_MENTION
+          *리뷰:* <$REVIEW_URL|리뷰 바로가기>"
           elif [ "$REVIEW_STATE" = "changes_requested" ]; then
             EMOJI=":warning:"
             STATUS_TEXT="변경 요청"
             MESSAGE="*PR:* <$PR_URL|$PR_TITLE> - *$STATUS_TEXT* ${EMOJI}
-            *작성자:* $PR_AUTHOR_MENTION
-            *리뷰어:* $REVIEWER_MENTION
-            *리뷰:* <$REVIEW_URL|리뷰 바로가기>"
+          *작성자:* $PR_AUTHOR_MENTION
+          *리뷰어:* $REVIEWER_MENTION
+          *리뷰:* <$REVIEW_URL|리뷰 바로가기>"
           else
             # 'commented' 상태는 무시
+            echo "댓글 리뷰는 알림을 보내지 않습니다."
             exit 0
           fi
 
-          curl -X POST -H 'Content-type: application/json' --data '{
-          "text": "'"$MESSAGE"'",
-          "username": "Review Status GitHub Action",
-          }' $SLACK_WEBHOOK_URL
+          echo "=== 전송할 메시지 미리보기 ==="
+          echo "$MESSAGE"
+          echo "=========================="
+
+          # Slack에 메시지 전송 (JSON 구문 오류 수정)
+          echo "Slack 메시지 전송 중..."
+          RESPONSE=$(curl -s -w "%{http_code}" -X POST -H 'Content-type: application/json' \
+            --data-binary @- "$SLACK_WEBHOOK_URL" << EOF
+          {
+            "text": "$MESSAGE",
+            "username": "Review Status GitHub Action",
+            "icon_url": "https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png"
+          }
+          EOF
+          )
+
+          # HTTP 응답 코드 확인
+          HTTP_CODE=$(echo "$RESPONSE" | tail -c 4)
+          RESPONSE_BODY=$(echo "$RESPONSE" | head -c -4)
+
+          if [ "$HTTP_CODE" = "200" ]; then
+            echo "✅ Slack 메시지 전송 성공"
+          else
+            echo "❌ Slack 메시지 전송 실패: HTTP $HTTP_CODE"
+            echo "응답 내용: $RESPONSE_BODY"
+            exit 1
+          fi
+
+          echo "=== PR 리뷰 알림 완료 ==="
