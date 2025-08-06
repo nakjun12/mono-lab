@@ -12,6 +12,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 2
+
   success_job:
     runs-on: ubuntu-latest
     steps:
@@ -39,48 +40,77 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
-          # PR의 base와 head를 모두 가져오기 위해 fetch-depth를 2로 설정한 것은 매우 잘하셨습니다.
-          # 파일 변경 목록을 가져오는 데 필수적입니다.
           fetch-depth: 2
 
       - name: Notify Slack
         env:
-          SLACK_WEBHOOK_URL: ${{secrets.SLACK_WEBHOOK_URL}}
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
           NEEDS_JSON: ${{ toJson(needs) }}
-          # PR 이벤트 컨텍스트를 직접 env로 주입하면 더 안정적으로 정보를 가져올 수 있습니다.
-          PR_JSON: ${{ toJson(github.event.pull_request) }}
         run: |
-          # 헬퍼 함수들을 포함하는 스크립트 불러오기
+          # 디버깅용 로그 추가
+          echo "=== 디버깅 시작 ==="
+          echo "PR Number: ${{ github.event.pull_request.number }}"
+          echo "PR Title: ${{ github.event.pull_request.title }}"
+          echo "PR Author: ${{ github.event.pull_request.user.login }}"
+          echo "Base SHA: ${{ github.event.pull_request.base.sha }}"
+          echo "Head SHA: ${{ github.event.pull_request.head.sha }}"
+
+          # 파일 존재 확인
+          if [ ! -f ".github/script/team_review_helpers.sh" ]; then
+            echo "오류: team_review_helpers.sh 파일을 찾을 수 없습니다"
+            exit 1
+          fi
+
+          if [ ! -f ".github/config/team_members.json" ]; then
+            echo "오류: team_members.json 파일을 찾을 수 없습니다"
+            exit 1
+          fi
+
+          # 헬퍼 함수 불러오기
           source .github/script/team_review_helpers.sh
 
-          PR_URL=$(echo "$PR_JSON" | jq -r .html_url)
-          PR_TITLE=$(echo "$PR_JSON" | jq -r .title)
-          PR_AUTHOR_LOGIN=$(echo "$PR_JSON" | jq -r .user.login)
+          # GitHub 컨텍스트에서 직접 정보 가져오기 (JSON 파싱 제거)
+          PR_URL="${{ github.event.pull_request.html_url }}"
+          PR_TITLE="${{ github.event.pull_request.title }}"
+          PR_AUTHOR_LOGIN="${{ github.event.pull_request.user.login }}"
+          PR_NUMBER="${{ github.event.pull_request.number }}"
 
-          # === 여기부터 새로운 코드 추가 ===
+          # 코드 변경량 정보
+          ADDITIONS="${{ github.event.pull_request.additions }}"
+          DELETIONS="${{ github.event.pull_request.deletions }}"
 
-          # 1. 코드 변경량 정보 가져오기
-          ADDITIONS=$(echo "$PR_JSON" | jq -r .additions)
-          DELETIONS=$(echo "$PR_JSON" | jq -r .deletions)
+          echo "PR 정보 수집 완료: $PR_TITLE"
 
-          # 2. 변경된 파일 목록 가져오기 (최대 10개까지 표시)
-          CHANGED_FILES_LIST=$(git diff --name-only HEAD^1 HEAD)
-          TOTAL_FILES_COUNT=$(echo "$CHANGED_FILES_LIST" | wc -l)
+          # PR의 변경된 파일 목록 가져오기 (올바른 base와 head 비교)
+          echo "변경된 파일 목록 가져오는 중..."
+          CHANGED_FILES_LIST=$(git diff --name-only ${{ github.event.pull_request.base.sha }} ${{ github.event.pull_request.head.sha }} 2>/dev/null || echo "")
+
+          if [ -z "$CHANGED_FILES_LIST" ]; then
+            echo "경고: 변경된 파일 목록을 가져올 수 없습니다. 대체 방법 시도..."
+            # 대체 방법: GitHub API 사용
+            CHANGED_FILES_LIST=$(curl -s -H "Authorization: token ${{ github.token }}" \
+              "https://api.github.com/repos/${{ github.repository }}/pulls/$PR_NUMBER/files" | \
+              jq -r '.[].filename' 2>/dev/null || echo "파일 목록을 가져올 수 없음")
+          fi
+
+          TOTAL_FILES_COUNT=$(echo "$CHANGED_FILES_LIST" | grep -v '^$' | wc -l)
           DISPLAY_FILES_COUNT=10
 
-          CHANGED_FILES_FORMATTED=$(echo "$CHANGED_FILES_LIST" | head -n $DISPLAY_FILES_COUNT | sed 's#^#• #')
+          CHANGED_FILES_FORMATTED=$(echo "$CHANGED_FILES_LIST" | head -n $DISPLAY_FILES_COUNT | sed 's#^#• #' | grep -v '^• $')
 
           if [ "$TOTAL_FILES_COUNT" -gt "$DISPLAY_FILES_COUNT" ]; then
             REMAINING_FILES_COUNT=$((TOTAL_FILES_COUNT - DISPLAY_FILES_COUNT))
-            CHANGED_FILES_FORMATTED="${CHANGED_FILES_FORMATTED}\n... (그 외 ${REMAINING_FILES_COUNT}개 파일)"
+            CHANGED_FILES_FORMATTED="${CHANGED_FILES_FORMATTED}
+          ... (그 외 ${REMAINING_FILES_COUNT}개 파일)"
           fi
 
-          # === 여기까지 새로운 코드 추가 ===
-
+          # 팀 멤버 정보 로드
           TEAM_MEMBERS=$(cat .github/config/team_members.json)
+          echo "팀 멤버 정보 로드 완료"
 
           # 작성자 확인
           if ! check_author "$TEAM_MEMBERS" "$PR_AUTHOR_LOGIN"; then
+              echo "작성자가 팀 멤버가 아닙니다. 알림을 건너뜁니다."
               exit 0
           fi
 
@@ -102,48 +132,73 @@ jobs:
             EMOJI=":x:"
           fi
 
-          # === 메시지 구성 수정 ===
-
-          # 첫 번째 메시지 구성 (PR 상태 및 변경 내용 요약)
+          # 첫 번째 메시지 구성
           MESSAGE1="<$PR_URL|$PR_TITLE> - ${EMOJI}
           *작성자:* $AUTHOR_MENTION
-          *코드 변경:* \`+${ADDITIONS} / -${DELETIONS}\`
+          *코드 변경:* \`+${ADDITIONS} / -${DELETIONS}\`"
+
+          if [ "$TOTAL_FILES_COUNT" -gt 0 ] && [ ! -z "$CHANGED_FILES_FORMATTED" ]; then
+            MESSAGE1="$MESSAGE1
           *변경된 파일 (${TOTAL_FILES_COUNT}개):*
-          ${CHANGED_FILES_FORMATTED}"
+          $CHANGED_FILES_FORMATTED"
+          fi
 
           if [ "$OVERALL_STATUS" = "failure" ]; then
-          MESSAGE1="$MESSAGE1
+            MESSAGE1="$MESSAGE1
 
           *Github Action:* $GITHUB_URL"
           fi
 
-          # 두 번째 메시지 구성 (리뷰어 정보 - 기존과 동일)
+          # 두 번째 메시지 구성
           MESSAGE2="<$PR_URL|$PR_TITLE> :crown-sw:
           *작성자:* ${AUTHOR_NAME}쌤
           *리뷰어:* $REVIEWER_MENTIONS"
 
-          # === 메시지 전송 (주석 해제 후 사용) ===
-
-          ## 첫 번째 메시지 Slack에 전송
-          # curl -X POST -H 'Content-type: application/json' --data-binary @- "$SLACK_WEBHOOK_URL" << EOF
-          # {
-          #   "text": "$MESSAGE1",
-          #   "username": "GitHub PR Status",
-          #   "icon_url": "https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png"
-          # }
-          # EOF
-
-          ## 두 번째 메시지 Slack에 전송
-          # curl -X POST -H 'Content-type: application/json' --data-binary @- "$SLACK_WEBHOOK_URL" << EOF
-          # {
-          #   "text": "$MESSAGE2",
-          #   "username": "GitHub PR Reviewers"
-          # }
-          # EOF
-
-          # 테스트용으로 메시지 출력
-          echo "==== MESSAGE 1 ===="
+          echo "=== 전송할 메시지 미리보기 ==="
+          echo "MESSAGE 1:"
           echo "$MESSAGE1"
-          echo
-          echo "==== MESSAGE 2 ===="
+          echo ""
+          echo "MESSAGE 2:"
           echo "$MESSAGE2"
+          echo "=========================="
+
+          # 첫 번째 메시지 Slack에 전송
+          echo "첫 번째 메시지 전송 중..."
+          RESPONSE1=$(curl -s -w "%{http_code}" -X POST -H 'Content-type: application/json' \
+            --data-binary @- "$SLACK_WEBHOOK_URL" << EOF
+          {
+            "text": "$MESSAGE1",
+            "username": "GitHub PR Status",
+            "icon_url": "https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png"
+          }
+          EOF
+          )
+
+          HTTP_CODE1=$(echo "$RESPONSE1" | tail -c 4)
+          if [ "$HTTP_CODE1" = "200" ]; then
+            echo "첫 번째 메시지 전송 성공"
+          else
+            echo "첫 번째 메시지 전송 실패: HTTP $HTTP_CODE1"
+            echo "$RESPONSE1"
+          fi
+
+          # 두 번째 메시지 Slack에 전송
+          echo "두 번째 메시지 전송 중..."
+          RESPONSE2=$(curl -s -w "%{http_code}" -X POST -H 'Content-type: application/json' \
+            --data-binary @- "$SLACK_WEBHOOK_URL" << EOF
+          {
+            "text": "$MESSAGE2",
+            "username": "GitHub PR Reviewers"
+          }
+          EOF
+          )
+
+          HTTP_CODE2=$(echo "$RESPONSE2" | tail -c 4)
+          if [ "$HTTP_CODE2" = "200" ]; then
+            echo "두 번째 메시지 전송 성공"
+          else
+            echo "두 번째 메시지 전송 실패: HTTP $HTTP_CODE2"
+            echo "$RESPONSE2"
+          fi
+
+          echo "=== 디버깅 완료 ==="
