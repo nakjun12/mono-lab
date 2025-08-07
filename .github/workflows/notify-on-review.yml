@@ -67,10 +67,10 @@ jobs:
           curl -X POST -H 'Content-type: application/json' --data "{\"text\": \"$MESSAGE\"}" "$SLACK_WEBHOOK_URL"
           echo "✅ Slack 메시지 전송 완료"
 
-  # 추가된 기능: PR 코멘트에서 멘션 시 알림
+# 추가된 기능: PR 코멘트에서 멘션 시 알림
   notify_on_mention:
     name: Notify Slack on Mention
-    # 이벤트가 'issue_comment'이고, 해당 코멘트가 PR에 달려 있으며, 그 PR이 'main' 브랜치를 타겟으로 할 때 실행
+    # 이벤트가 'issue_comment'이고, 해당 코멘트가 PR에 달려 있을 때 실행
     if: github.event_name == 'issue_comment' && github.event.issue.pull_request
     runs-on: ubuntu-latest
     steps:
@@ -117,7 +117,13 @@ jobs:
             exit 0
           fi
 
+          # 멘션된 각 사용자에게 알림 전송
           for USER in $MENTIONED_USERS; do
+            if [ "$USER" = "$COMMENTER_LOGIN" ]; then
+              echo "자기 자신을 멘션하여 알림을 보내지 않습니다: $USER"
+              continue
+            fi
+
             echo "멘션된 사용자 '$USER'에 대한 알림을 처리합니다."
             MENTIONED_SLACK_ID=$(get_review_member_info "$REVIEW_MEMBERS" "$USER" "slack_id")
 
@@ -128,15 +134,31 @@ jobs:
 
             MENTIONED_USER_TAG="<@${MENTIONED_SLACK_ID}>"
 
-            MESSAGE="${MENTIONED_USER_TAG}님, ${COMMENTER_MENTION}님이 PR에서 회원님을 멘션했습니다. :speech_balloon:\n*PR:* <$PR_URL|$PR_TITLE>\n*코멘트:* <${{ github.event.comment.html_url }}|바로가기>"
+            # --- ✨ 변경된 부분 시작 ---
+
+            # 1. 슬랙에서 보기 좋게 코멘트 내용을 인용(blockquote) 형식으로 만듭니다.
+            FORMATTED_COMMENT=$(echo "$COMMENT_BODY" | sed 's/^/> /')
+
+            # 2. 알림 메시지에 포매팅된 코멘트 내용을 추가합니다.
+            MESSAGE="${MENTIONED_USER_TAG}님, ${COMMENTER_MENTION}님이 PR에서 회원님을 멘션했습니다. :speech_balloon:
+            *PR:* <$PR_URL|$PR_TITLE>
+            *코멘트 내용:*
+            ${FORMATTED_COMMENT}
+
+            <${{ github.event.comment.html_url }}|코멘트 바로가기>"
+
+            # 3. jq를 사용해 메시지를 안전한 JSON 페이로드로 만듭니다.
+            PAYLOAD=$(jq -n --arg text "$MESSAGE" '{"text": $text}')
 
             echo "=== 전송할 메시지 미리보기 ($USER) ==="
-            echo -e "$MESSAGE"
+            echo "$PAYLOAD" # JSON 형식으로 미리보기
             echo "==================================="
 
-            # Slack에 메시지 전송
-            curl -X POST -H 'Content-type: application/json' --data "{\"text\": \"$MESSAGE\"}" "$SLACK_WEBHOOK_URL"
+            # 4. JSON 페이로드를 Slack에 전송합니다.
+            curl -X POST -H 'Content-type: application/json' --data "$PAYLOAD" "$SLACK_WEBHOOK_URL"
             echo "✅ '$USER'에게 Slack 메시지 전송 완료"
+
+            # --- ✨ 변경된 부분 끝 ---
           done
 
           echo "=== PR 멘션 알림 완료 ==="
