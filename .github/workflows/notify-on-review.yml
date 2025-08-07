@@ -118,11 +118,6 @@ jobs:
           fi
 
           for USER in $MENTIONED_USERS; do
-            if [ "$USER" = "$COMMENTER_LOGIN" ]; then
-              echo "자기 자신을 멘션하여 알림을 보내지 않습니다: $USER"
-              continue
-            fi
-
             echo "멘션된 사용자 '$USER'에 대한 알림을 처리합니다."
             MENTIONED_SLACK_ID=$(get_review_member_info "$REVIEW_MEMBERS" "$USER" "slack_id")
 
