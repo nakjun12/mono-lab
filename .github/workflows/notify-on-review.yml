@@ -1,5 +1,5 @@
 name: Notify on PR Activity
-
+run-name: 'Review on PR #${{ github.event.pull_request.number }} by @${{ github.actor }}'
 # 워크플로우 트리거: PR 리뷰가 제출되거나, PR에 코멘트가 작성되었을 때 실행
 on:
   pull_request_review:
