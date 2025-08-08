@@ -1,10 +1,12 @@
 name: Notify on PR Activity
-
+run-name: 'Review on PR #${{ github.event.pull_request.number }} by @${{ github.actor }}'
 # 워크플로우 트리거: PR 리뷰가 제출되거나, PR에 코멘트가 작성되었을 때 실행
 on:
   pull_request_review:
     types: [submitted]
   issue_comment:
+    types: [created]
+  pull_request_review_comment:  # 추가: PR 코멘트 답글 감지
     types: [created]
 
 jobs:
@@ -67,11 +69,12 @@ jobs:
           curl -X POST -H 'Content-type: application/json' --data "{\"text\": \"$MESSAGE\"}" "$SLACK_WEBHOOK_URL"
           echo "✅ Slack 메시지 전송 완료"
 
-  # 추가된 기능: PR 코멘트에서 멘션 시 알림
   notify_on_mention:
     name: Notify Slack on Mention
-    # 이벤트가 'issue_comment'이고, 해당 코멘트가 PR에 달려 있으며, 그 PR이 'main' 브랜치를 타겟으로 할 때 실행
-    if: github.event_name == 'issue_comment' && github.event.issue.pull_request
+    # 이슈 코멘트 또는 PR 리뷰 코멘트에서 멘션이 있을 때 실행
+    if: |
+      (github.event_name == 'issue_comment' && github.event.issue.pull_request) ||
+      github.event_name == 'pull_request_review_comment'
     runs-on: ubuntu-latest
     steps:
       - name: Check out Code
@@ -82,61 +85,166 @@ jobs:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # 'gh' CLI 인증에 필요
         run: |
+          echo "=== PR 멘션 알림 시작 ==="
+
+          # 🔍 GitHub 이벤트 정보 디버깅
+          echo "🔍 [DEBUG] GitHub 이벤트 정보:"
+          echo "  - Event Name: ${{ github.event_name }}"
+          echo "  - Repository: ${{ github.repository }}"
+          echo "  - Actor: ${{ github.actor }}"
+          echo "  - Ref: ${{ github.ref }}"
+
+          # 이벤트 타입에 따른 변수 설정 및 디버깅
+          if [ "${{ github.event_name }}" = "issue_comment" ]; then
+            # 일반 PR 코멘트
+            COMMENT_BODY="${{ github.event.comment.body }}"
+            COMMENTER_LOGIN="${{ github.event.comment.user.login }}"
+            PR_URL="${{ github.event.issue.html_url }}"
+            PR_TITLE="${{ github.event.issue.title }}"
+            COMMENT_URL="${{ github.event.comment.html_url }}"
+            PR_NUMBER="${{ github.event.issue.number }}"
+
+            echo "🔍 [DEBUG] 이슈 코멘트 이벤트 감지"
+            echo "  - Comment ID: ${{ github.event.comment.id }}"
+            echo "  - Issue Number: ${{ github.event.issue.number }}"
+            echo "  - Is Pull Request: ${{ github.event.issue.pull_request != null }}"
+
+          elif [ "${{ github.event_name }}" = "pull_request_review_comment" ]; then
+            # PR 리뷰 코멘트 (답글)
+            COMMENT_BODY="${{ github.event.comment.body }}"
+            COMMENTER_LOGIN="${{ github.event.comment.user.login }}"
+            PR_URL="${{ github.event.pull_request.html_url }}"
+            PR_TITLE="${{ github.event.pull_request.title }}"
+            COMMENT_URL="${{ github.event.comment.html_url }}"
+            PR_NUMBER="${{ github.event.pull_request.number }}"
+
+            echo "🔍 [DEBUG] PR 리뷰 코멘트 이벤트 감지"
+            echo "  - Comment ID: ${{ github.event.comment.id }}"
+            echo "  - PR Number: ${{ github.event.pull_request.number }}"
+            echo "  - Review ID: ${{ github.event.review.id }}"
+          fi
+
+          # 🔍 추출된 변수들 확인
+          echo "🔍 [DEBUG] 추출된 변수 값들:"
+          echo "  - COMMENTER_LOGIN: '$COMMENTER_LOGIN'"
+          echo "  - PR_NUMBER: '$PR_NUMBER'"
+          echo "  - PR_TITLE: '$PR_TITLE'"
+          echo "  - PR_URL: '$PR_URL'"
+          echo "  - COMMENT_URL: '$COMMENT_URL'"
+          echo "  - COMMENT_BODY 길이: ${#COMMENT_BODY} characters"
+          echo "  - COMMENT_BODY 미리보기 (첫 100자): '${COMMENT_BODY:0:100}'"
+
           # gh cli를 사용해 PR의 베이스 브랜치 확인
-          BASE_BRANCH=$(gh pr view ${{ github.event.issue.number }} --json baseRefName --jq .baseRefName)
+          echo "🔍 [DEBUG] gh CLI로 PR 정보 조회 중..."
+          BASE_BRANCH=$(gh pr view $PR_NUMBER --json baseRefName --jq .baseRefName)
+          echo "  - BASE_BRANCH: '$BASE_BRANCH'"
 
           if [ "$BASE_BRANCH" != "main" ]; then
-            echo "PR이 main 브랜치를 대상으로 하지 않으므로 알림을 보내지 않습니다. (대상: $BASE_BRANCH)"
+            echo "❌ PR이 main 브랜치를 대상으로 하지 않으므로 알림을 보내지 않습니다. (대상: $BASE_BRANCH)"
             exit 0
           fi
 
-          echo "=== PR 멘션 알림 시작 ==="
-
           # 헬퍼 스크립트 및 설정 파일 확인
+          echo "🔍 [DEBUG] 필수 파일 존재 확인:"
+          echo "  - .github/script/team_review_helpers.sh: $([ -f ".github/script/team_review_helpers.sh" ] && echo "존재" || echo "없음")"
+          echo "  - .github/config/team_members.json: $([ -f ".github/config/team_members.json" ] && echo "존재" || echo "없음")"
+
           if [ ! -f ".github/script/team_review_helpers.sh" ] || [ ! -f ".github/config/team_members.json" ]; then
-            echo "오류: 헬퍼 스크립트 또는 팀원 설정 파일을 찾을 수 없습니다."
+            echo "❌ 오류: 헬퍼 스크립트 또는 팀원 설정 파일을 찾을 수 없습니다."
             exit 1
           fi
 
           source .github/script/team_review_helpers.sh
           REVIEW_MEMBERS=$(cat .github/config/team_members.json)
 
-          COMMENT_BODY="${{ github.event.comment.body }}"
-          COMMENTER_LOGIN="${{ github.event.comment.user.login }}"
-          PR_URL="${{ github.event.issue.html_url }}"
-          PR_TITLE="${{ github.event.issue.title }}"
+          # 🔍 팀 멤버 데이터 확인
+          echo "🔍 [DEBUG] 팀 멤버 데이터:"
+          echo "  - JSON 파일 크기: $(echo "$REVIEW_MEMBERS" | wc -c) bytes"
+          echo "  - JSON 내용 미리보기: $(echo "$REVIEW_MEMBERS" | head -c 200)..."
 
           COMMENTER_SLACK_ID=$(get_review_member_info "$REVIEW_MEMBERS" "$COMMENTER_LOGIN" "slack_id")
           COMMENTER_MENTION=$([ -z "$COMMENTER_SLACK_ID" ] && echo "$COMMENTER_LOGIN" || echo "<@$COMMENTER_SLACK_ID>")
 
-          # 코멘트 본문에서 '@'로 시작하는 모든 멘션 추출
-          MENTIONED_USERS=$(echo "$COMMENT_BODY" | grep -oP '@[a-zA-Z0-9_-]+' | sed 's/@//' | sort -u)
+          echo "🔍 [DEBUG] 작성자 정보:"
+          echo "  - COMMENTER_SLACK_ID: '$COMMENTER_SLACK_ID'"
+          echo "  - COMMENTER_MENTION: '$COMMENTER_MENTION'"
+
+          # 🔍 멘션 추출 로직 디버깅
+          echo "🔍 [DEBUG] 멘션 추출 과정:"
+          echo "  - grep 실행 전 COMMENT_BODY: '$COMMENT_BODY'"
+
+          # 멘션 추출 단계별 확인
+          GREP_OUTPUT=$(echo "$COMMENT_BODY" | grep -oP '@[a-zA-Z0-9_-]+' || echo "")
+          echo "  - grep 결과: '$GREP_OUTPUT'"
+
+          SED_OUTPUT=$(echo "$GREP_OUTPUT" | sed 's/@//')
+          echo "  - sed 결과: '$SED_OUTPUT'"
+
+          MENTIONED_USERS=$(echo "$SED_OUTPUT" | sort -u)
+          echo "  - 최종 MENTIONED_USERS: '$MENTIONED_USERS'"
+          echo "  - 멘션된 사용자 수: $(echo "$MENTIONED_USERS" | wc -w)"
 
           if [ -z "$MENTIONED_USERS" ]; then
-            echo "코멘트에 멘션된 사용자가 없어 알림을 보내지 않습니다."
+            echo "❌ 코멘트에 멘션된 사용자가 없어 알림을 보내지 않습니다."
             exit 0
           fi
 
+          # 멘션된 각 사용자에게 알림 전송 (멘션 작성자 본인도 포함)
+          USER_COUNT=0
           for USER in $MENTIONED_USERS; do
-            echo "멘션된 사용자 '$USER'에 대한 알림을 처리합니다."
+            USER_COUNT=$((USER_COUNT + 1))
+            echo ""
+            echo "🔍 [DEBUG] 사용자 #${USER_COUNT} 처리 중:"
+            echo "  - USER: '$USER'"
+
             MENTIONED_SLACK_ID=$(get_review_member_info "$REVIEW_MEMBERS" "$USER" "slack_id")
+            echo "  - MENTIONED_SLACK_ID: '$MENTIONED_SLACK_ID'"
 
             if [ -z "$MENTIONED_SLACK_ID" ] || [ "$MENTIONED_SLACK_ID" = "null" ]; then
-              echo "경고: '$USER'의 Slack ID를 찾을 수 없어 알림을 건너뜁니다."
+              echo "❌ 경고: '$USER'의 Slack ID를 찾을 수 없어 알림을 건너뜁니다."
               continue
             fi
 
             MENTIONED_USER_TAG="<@${MENTIONED_SLACK_ID}>"
+            echo "  - MENTIONED_USER_TAG: '$MENTIONED_USER_TAG'"
 
-            MESSAGE="${MENTIONED_USER_TAG}님, ${COMMENTER_MENTION}님이 PR에서 회원님을 멘션했습니다. :speech_balloon:\n*PR:* <$PR_URL|$PR_TITLE>\n*코멘트:* <${{ github.event.comment.html_url }}|바로가기>"
+            # --- ✨ 개선된 메시지 생성 로직 ---
+
+            # 1. 코멘트 내용을 Slack에서 읽기 쉽게 포맷팅
+            # 긴 코멘트의 경우 첫 200자만 보여주고 "..." 추가
+            COMMENT_PREVIEW=$(echo "$COMMENT_BODY" | head -c 200)
+            if [ ${#COMMENT_BODY} -gt 200 ]; then
+              COMMENT_PREVIEW="${COMMENT_PREVIEW}..."
+            fi
+
+            echo "🔍 [DEBUG] 메시지 포맷팅:"
+            echo "  - 원본 길이: ${#COMMENT_BODY}"
+            echo "  - 미리보기 길이: ${#COMMENT_PREVIEW}"
+            echo "  - COMMENT_PREVIEW: '$COMMENT_PREVIEW'"
+
+            # 2. 개행 문자를 처리하고 인용 블록으로 표시
+            FORMATTED_COMMENT=$(echo "$COMMENT_PREVIEW" | sed 's/^/> /')
+            echo "  - FORMATTED_COMMENT: '$FORMATTED_COMMENT'"
+
+            # 3. 메시지 템플릿 생성
+            MESSAGE_TEMPLATE="${MENTIONED_USER_TAG}님, ${COMMENTER_MENTION}님이 PR에서 회원님을 멘션했습니다. :speech_balloon:\n\n*PR:* <${PR_URL}|${PR_TITLE}>\n\n*코멘트 내용:*\n${FORMATTED_COMMENT}\n\n<${COMMENT_URL}|코멘트 바로가기>"
+
+            echo "🔍 [DEBUG] 메시지 템플릿:"
+            echo "  - MESSAGE_TEMPLATE: '$MESSAGE_TEMPLATE'"
+
+            # 4. jq를 사용하여 JSON 페이로드 안전하게 생성
+            PAYLOAD=$(jq -n --arg text "$MESSAGE_TEMPLATE" '{"text": $text}')
+            echo "🔍 [DEBUG] JSON 페이로드:"
+            echo "  - PAYLOAD 길이: ${#PAYLOAD} bytes"
+            echo "  - PAYLOAD 미리보기: $(echo "$PAYLOAD" | head -c 300)..."
 
             echo "=== 전송할 메시지 미리보기 ($USER) ==="
-            echo -e "$MESSAGE"
+            echo "$MESSAGE_TEMPLATE"
             echo "==================================="
 
-            # Slack에 메시지 전송
-            curl -X POST -H 'Content-type: application/json' --data "{\"text\": \"$MESSAGE\"}" "$SLACK_WEBHOOK_URL"
-            echo "✅ '$USER'에게 Slack 메시지 전송 완료"
-          done
+            # 5. Slack 웹훅 URL 확인
+            echo "🔍 [DEBUG] Slack 전송 준비:"
+            echo "  - SLACK_WEBHOOK_URL 설정됨: $([ -n "$SLACK_WEBHOOK_URL" ] && echo "예" || echo "아니오")"
+            echo "  - SLACK_WEBHOOK_URL 길이: ${#SLACK_WEBHOOK_URL}"
 
-          echo "=== PR 멘션 알림 완료 ==="
+            # 6. 생성된 JSON 페이로드를 Slack
