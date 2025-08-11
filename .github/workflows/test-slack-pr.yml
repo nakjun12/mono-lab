@@ -117,27 +117,38 @@ jobs:
             echo "=== 🏁 워크플로우 종료 ==="
             exit 0
           fi
-
           # --- 여기가 '최초 성공' 시점 ---
-          echo "✨ 최초 성공! 리뷰어를 할당하고 전체 알림을 보냅니다."
+          echo "✨ 최초 성공! 리뷰어를 할당하고 통합 알림을 보냅니다."
 
-          # 1. 실제 리뷰어 할당
-          # team_review_helpers.sh의 함수 대신, 직접 랜덤 선택 및 할당 로직을 사용
-          echo "👤 리뷰어 2명을 랜덤으로 선택합니다..."
-          REVIEWER_IDS=$(jq -r --arg author "$PR_AUTHOR" '.[] | select(.github_id != $author) | .github_id' .github/config/team_members.json | shuf -n 2 | tr '\n' ',')
+          # [수정] 리뷰어 선택 로직 단순화
+          echo "👤 리뷰어 후보를 찾는 중... (작성자: $PR_AUTHOR 제외)"
+          # 1. PR 작성자만 제외하고 모든 후보를 가져옵니다.
+          CANDIDATES=$(jq -r --arg author "$PR_AUTHOR" '.members[] | select(.github_id != $author) | .github_id' .github/config/team_members.json)
+          CANDIDATE_COUNT=$(echo "$CANDIDATES" | grep -v '^$' | wc -l)
+          echo "선택 가능한 리뷰어 후보: $CANDIDATE_COUNT 명"
+
+          REVIEWER_IDS=""
+          if [ "$CANDIDATE_COUNT" -gt 0 ]; then
+            # 2. 후보가 2명 이상이면 2명을, 1명이면 1명을 선택합니다.
+            if [ "$CANDIDATE_COUNT" -ge 2 ]; then
+              NUM_TO_SELECT=2
+            else
+              NUM_TO_SELECT=1
+            fi
+
+            echo "선택할 리뷰어 수: $NUM_TO_SELECT 명"
+            REVIEWER_IDS=$(echo "$CANDIDATES" | shuf -n "$NUM_TO_SELECT" | tr '\n' ',')
+          fi
 
           if [ -z "$REVIEWER_IDS" ]; then
-             echo "⚠️ 리뷰어를 선택할 수 없습니다."
+             echo "⚠️ 리뷰어를 선택할 수 없거나 후보가 없습니다."
              REVIEWER_MENTIONS="리뷰어 자동 할당 실패"
           else
-            echo "🤝 선택된 리뷰어 ($REVIEWER_IDS)를 PR에 할당합니다..."
+            echo "🤝 선택된 리뷰어 ($REVIEWER_IDS)를 PR에 할당합니다."
             gh pr edit $PR_NUMBER --add-reviewer "$REVIEWER_IDS"
-
-            # 2. 리뷰 요청 완료 라벨 추가
-            echo "🏷️ 'review-requested' 라벨을 PR에 추가하여 상태를 기억합니다."
+            echo "🏷️ 'review-requested' 라벨을 PR에 추가합니다."
             gh pr edit $PR_NUMBER --add-label "review-requested"
 
-            # 3. 슬랙 멘션 문자열 생성
             REVIEWER_MENTIONS=""
             IFS=',' read -r -a id_array <<< "$REVIEWER_IDS"
             for id in "${id_array[@]}"; do
