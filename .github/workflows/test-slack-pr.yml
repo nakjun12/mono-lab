@@ -61,7 +61,7 @@ jobs:
           PR_TITLE="${{ github.event.pull_request.title }}"
           ADDITIONS="${{ github.event.pull_request.additions }}"
           DELETIONS="${{ github.event.pull_request.deletions }}"
-
+          CHANGED_FILES="${{ github.event.pull_request.changed_files }}"
           if ! check_author "$TEAM_MEMBERS" "$PR_AUTHOR"; then
               echo "작성자가 팀 멤버가 아니므로 알림을 건너뜁니다."
               exit 0
@@ -151,12 +151,10 @@ jobs:
 
           # 최종 통합 메시지 구성
           echo "✍️ 전송할 최종 메시지를 하나로 구성합니다..."
-          CHANGED_FILES_LIST=$(git diff --name-only ${{ github.event.pull_request.base.sha }} ${{ github.event.pull_request.head.sha }} 2>/dev/null || echo "")
-          TOTAL_FILES_COUNT=$(echo "$CHANGED_FILES_LIST" | grep -v '^$' | wc -l)
-          CHANGED_FILES_FORMATTED=$(echo "$CHANGED_FILES_LIST" | head -n 10 | sed 's#^#• #' | grep -v '^• $')
-          if [ "$TOTAL_FILES_COUNT" -gt 10 ]; then
-            REMAINING_FILES_COUNT=$((TOTAL_FILES_COUNT - 10))
-            CHANGED_FILES_FORMATTED="${CHANGED_FILES_FORMATTED}\n... (그 외 ${REMAINING_FILES_COUNT}개 파일)"
+           if [ -n "$CHANGED_FILES" ] && [ "$CHANGED_FILES" != "0" ]; then
+            FILES_INFO=" (${CHANGED_FILES} files)"
+          else
+            FILES_INFO=""
           fi
 
           FINAL_MESSAGE="<$PR_URL|$PR_TITLE> - :white_check_mark:
