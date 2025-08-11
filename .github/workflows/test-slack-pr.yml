@@ -151,6 +151,7 @@ jobs:
             done
           fi
 
+          echo "CHANGED_FILES: $CHANGED_FILES"
 
           # 최종 통합 메시지 구성
           echo "✍️ 전송할 최종 메시지를 하나로 구성합니다..."
