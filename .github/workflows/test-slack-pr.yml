@@ -20,19 +20,19 @@ jobs:
       - name: 성공하는 단계
         run: echo "This job always succeeds."
 
-  # failure_job:
-  #   name: This job will fail
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - name: 실패하는 단계
-  #       run: |
-  #         echo "This job is designed to fail."
-  #         exit 1
+  failure_job:
+    name: This job will fail
+    runs-on: ubuntu-latest
+    steps:
+      - name: 실패하는 단계
+        run: |
+          echo "This job is designed to fail."
+          exit 1
 
   notify-on-completion:
     name: Notify Slack on Job Completion
     # 실패를 테스트하려면 'success_job'을 'failure_job'으로 바꾸세요.
-    needs: [test_job, success_job]
+    needs: [test_job, success_job, failure_job]
     if: always()
     runs-on: ubuntu-latest
     steps:
