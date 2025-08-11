@@ -20,19 +20,19 @@ jobs:
       - name: 성공하는 단계
         run: echo "This job always succeeds."
 
-  failure_job:
-    name: This job will fail
-    runs-on: ubuntu-latest
-    steps:
-      - name: 실패하는 단계
-        run: |
-          echo "This job is designed to fail."
-          exit 1
+  # failure_job:
+  #   name: This job will fail
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: 실패하는 단계
+  #       run: |
+  #         echo "This job is designed to fail."
+  #         exit 1
 
   notify-on-completion:
     name: Notify Slack on Job Completion
-    # success_job과 failure_job 둘 중 하나만 needs에 포함하여 테스트하세요.
-    needs: [test_job, success_job] # 실패를 테스트하려면 success_job을 failure_job으로 바꾸세요.
+    # 실패를 테스트하려면 'success_job'을 'failure_job'으로 바꾸세요.
+    needs: [test_job, success_job]
     if: always()
     runs-on: ubuntu-latest
     steps:
@@ -43,16 +43,15 @@ jobs:
 
       - name: Run Stateful Notification Logic
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # gh cli 사용을 위해 추가
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
           NEEDS_JSON: ${{ toJson(needs) }}
-          # 라벨 확인 및 PR 수정을 위해 아래 변수들을 추가
           PR_NUMBER: ${{ github.event.pull_request.number }}
           PR_AUTHOR: ${{ github.event.pull_request.user.login }}
           PR_LABELS: ${{ toJSON(github.event.pull_request.labels.*.name) }}
         run: |
           # ================================================================
-          # 📝 사전 준비 및 디버깅 로그 (기존 스크립트)
+          # 📝 사전 준비 및 디버깅 로그
           # ================================================================
           echo "=== 🚦 워크플로우 시작: 상태 확인 및 알림 처리 ==="
           source .github/script/team_review_helpers.sh
@@ -79,12 +78,10 @@ jobs:
           echo "✅ 최종 작업 상태: $OVERALL_STATUS"
 
           # ================================================================
-          #  logique 1: 빌드 실패 시 처리
+          #  1. 빌드 실패 시 처리
           # ================================================================
           if [ "$OVERALL_STATUS" = "failure" ]; then
-            echo "🚫 빌드 실패! 실패 알림을 준비하고 리뷰어 할당은 건너뜁니다."
-
-            echo "🏷️ 'build-failed' 라벨을 PR에 추가합니다..."
+            echo "🚫 빌드 실패! 실패 알림만 전송합니다."
             gh pr edit $PR_NUMBER --add-label "build-failed"
 
             GITHUB_URL="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
@@ -93,51 +90,55 @@ jobs:
             *코드 변경:* \`+${ADDITIONS} / -${DELETIONS}\`
             *Github Action:* $GITHUB_URL"
 
-            echo "📤 실패 알림(MESSAGE1)만 전송합니다..."
             curl -X POST -H 'Content-type: application/json' --data "{\"text\": \"$MESSAGE\", \"username\": \"GitHub PR Status\"}" "$SLACK_WEBHOOK_URL"
-
             echo "=== 🏁 워크플로우 종료 ==="
             exit 0
           fi
 
           # ================================================================
-          # logique 2: 빌드 성공 시 처리 (상태 기억)
+          #  2. 빌드 성공 시 처리 (상태 기억)
           # ================================================================
-          echo "✅ 빌드 성공! 상태 라벨을 확인하여 리뷰어 할당 여부를 결정합니다."
-
-          # 이전에 실패했다면 'build-failed' 라벨 제거
+          echo "✅ 빌드 성공! 상태 라벨을 확인합니다."
           if echo "$PR_LABELS" | jq -e 'any(. == "build-failed")'; then
-            echo "🏷️ 이전에 실패했던 'build-failed' 라벨을 제거합니다."
+            echo "🏷️ 'build-failed' 라벨을 제거합니다."
             gh pr edit $PR_NUMBER --remove-label "build-failed"
           fi
 
-          # [핵심] 이미 리뷰 요청을 보냈는지 확인
           if echo "$PR_LABELS" | jq -e 'any(. == "review-requested")'; then
-            echo "ℹ️ 'review-requested' 라벨이 이미 존재합니다. 추가 작업을 수행하지 않고 종료합니다."
+            echo "ℹ️ 이미 리뷰 요청을 보냈으므로 작업을 종료합니다."
             echo "=== 🏁 워크플로우 종료 ==="
             exit 0
           fi
 
-          # --- 여기가 '최초 성공' 시점 ---
-          echo "✨ 최초 성공! 리뷰어를 할당하고 전체 알림을 보냅니다."
+          echo "✨ 최초 성공! 리뷰어를 할당하고 통합 알림을 보냅니다."
 
-          # 1. 실제 리뷰어 할당
-          # team_review_helpers.sh의 함수 대신, 직접 랜덤 선택 및 할당 로직을 사용
-          echo "👤 리뷰어 2명을 랜덤으로 선택합니다..."
-          REVIEWER_IDS=$(jq -r --arg author "$PR_AUTHOR" '.[] | select(.github_id != $author) | .github_id' .github/config/team_members.json | shuf -n 2 | tr '\n' ',')
+          # 리뷰어 선택
+          echo "👤 리뷰어 후보를 찾는 중... (작성자: $PR_AUTHOR 제외)"
+          CANDIDATES=$(jq -r --arg author "$PR_AUTHOR" '.members[] | select(.github_id != $author) | .github_id' .github/config/team_members.json)
+          CANDIDATE_COUNT=$(echo "$CANDIDATES" | grep -v '^$' | wc -l)
+          echo "선택 가능한 리뷰어 후보: $CANDIDATE_COUNT 명"
 
+          REVIEWER_IDS=""
+          if [ "$CANDIDATE_COUNT" -gt 0 ]; then
+            if [ "$CANDIDATE_COUNT" -ge 2 ]; then
+              NUM_TO_SELECT=2
+            else
+              NUM_TO_SELECT=1
+            fi
+            echo "선택할 리뷰어 수: $NUM_TO_SELECT 명"
+            REVIEWER_IDS=$(echo "$CANDIDATES" | shuf -n "$NUM_TO_SELECT" | tr '\n' ',')
+          fi
+
+          # 리뷰어 할당 및 멘션 준비
           if [ -z "$REVIEWER_IDS" ]; then
-             echo "⚠️ 리뷰어를 선택할 수 없습니다."
+             echo "⚠️ 리뷰어를 선택할 수 없거나 후보가 없습니다."
              REVIEWER_MENTIONS="리뷰어 자동 할당 실패"
           else
-            echo "🤝 선택된 리뷰어 ($REVIEWER_IDS)를 PR에 할당합니다..."
+            echo "🤝 선택된 리뷰어 ($REVIEWER_IDS)를 PR에 할당합니다."
             gh pr edit $PR_NUMBER --add-reviewer "$REVIEWER_IDS"
-
-            # 2. 리뷰 요청 완료 라벨 추가
-            echo "🏷️ 'review-requested' 라벨을 PR에 추가하여 상태를 기억합니다."
+            echo "🏷️ 'review-requested' 라벨을 PR에 추가합니다."
             gh pr edit $PR_NUMBER --add-label "review-requested"
 
-            # 3. 슬랙 멘션 문자열 생성
             REVIEWER_MENTIONS=""
             IFS=',' read -r -a id_array <<< "$REVIEWER_IDS"
             for id in "${id_array[@]}"; do
@@ -148,7 +149,8 @@ jobs:
             done
           fi
 
-          # 4. 메시지 구성
+          # 최종 통합 메시지 구성
+          echo "✍️ 전송할 최종 메시지를 하나로 구성합니다..."
           CHANGED_FILES_LIST=$(git diff --name-only ${{ github.event.pull_request.base.sha }} ${{ github.event.pull_request.head.sha }} 2>/dev/null || echo "")
           TOTAL_FILES_COUNT=$(echo "$CHANGED_FILES_LIST" | grep -v '^$' | wc -l)
           CHANGED_FILES_FORMATTED=$(echo "$CHANGED_FILES_LIST" | head -n 10 | sed 's#^#• #' | grep -v '^• $')
@@ -157,20 +159,17 @@ jobs:
             CHANGED_FILES_FORMATTED="${CHANGED_FILES_FORMATTED}\n... (그 외 ${REMAINING_FILES_COUNT}개 파일)"
           fi
 
-          MESSAGE1="<$PR_URL|$PR_TITLE> - :white_check_mark:
+          FINAL_MESSAGE="<$PR_URL|$PR_TITLE> - :white_check_mark:
           *작성자:* $AUTHOR_MENTION
+          *리뷰어:* $(echo $REVIEWER_MENTIONS | xargs) :crown-sw:
           *코드 변경:* \`+${ADDITIONS} / -${DELETIONS}\`"
+
           if [ "$TOTAL_FILES_COUNT" -gt 0 ] && [ ! -z "$CHANGED_FILES_FORMATTED" ]; then
-            MESSAGE1="$MESSAGE1\n*변경된 파일 (${TOTAL_FILES_COUNT}개):*\n$CHANGED_FILES_FORMATTED"
+            FINAL_MESSAGE="$FINAL_MESSAGE\n*변경된 파일 (${TOTAL_FILES_COUNT}개):*\n$CHANGED_FILES_FORMATTED"
           fi
 
-          MESSAGE2="<$PR_URL|$PR_TITLE> :crown-sw:
-          *작성자:* ${AUTHOR_NAME}쌤
-          *리뷰어:* $(echo $REVIEWER_MENTIONS | xargs)"
-
-          # 5. 두 메시지 모두 전송
-          echo "📤 성공 알림(MESSAGE1)과 리뷰어 알림(MESSAGE2)을 모두 전송합니다..."
-          curl -X POST -H 'Content-type: application/json' --data "{\"text\": \"$MESSAGE1\", \"username\": \"GitHub PR Status\"}" "$SLACK_WEBHOOK_URL"
-          curl -X POST -H 'Content-type: application/json' --data "{\"text\": \"$MESSAGE2\", \"username\": \"GitHub PR Reviewers\"}" "$SLACK_WEBHOOK_URL"
+          # 통합 메시지를 한 번만 전송
+          echo "📤 통합 알림을 한 번만 전송합니다..."
+          curl -X POST -H 'Content-type: application/json' --data "{\"text\": \"$FINAL_MESSAGE\", \"username\": \"GitHub PR Notifier\"}" "$SLACK_WEBHOOK_URL"
 
           echo "=== 🏁 워크플로우 종료 ==="
