@@ -110,9 +110,10 @@ jobs:
             exit 0
           fi
 
+          # --- 여기가 '최초 성공' 시점 ---
           echo "✨ 최초 성공! 리뷰어를 할당하고 통합 알림을 보냅니다."
 
-          # 리뷰어 선택
+          # 리뷰어 선택 로직
           echo "👤 리뷰어 후보를 찾는 중... (작성자: $PR_AUTHOR 제외)"
           CANDIDATES=$(jq -r --arg author "$PR_AUTHOR" '.members[] | select(.github_id != $author) | .github_id' .github/config/team_members.json)
           CANDIDATE_COUNT=$(echo "$CANDIDATES" | grep -v '^$' | wc -l)
@@ -126,7 +127,8 @@ jobs:
               NUM_TO_SELECT=1
             fi
             echo "선택할 리뷰어 수: $NUM_TO_SELECT 명"
-            REVIEWER_IDS=$(echo "$CANDIDATES" | shuf -n "$NUM_TO_SELECT" | tr '\n' ',')
+            # [수정] 명령어 맨 끝에 sed를 추가하여 마지막 쉼표를 제거합니다.
+            REVIEWER_IDS=$(echo "$CANDIDATES" | shuf -n "$NUM_TO_SELECT" | tr '\n' ',' | sed 's/,$//')
           fi
 
           # 리뷰어 할당 및 멘션 준비
@@ -148,6 +150,7 @@ jobs:
               fi
             done
           fi
+
 
           # 최종 통합 메시지 구성
           echo "✍️ 전송할 최종 메시지를 하나로 구성합니다..."
