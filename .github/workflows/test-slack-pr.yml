@@ -92,7 +92,8 @@ jobs:
             CURRENT_BUILD_STATUS="failure"
           fi
           echo "✅ 현재 빌드 상태: $CURRENT_BUILD_STATUS"
-
+          RESULT=$(assign_reviewers_and_create_mentions "$PR_AUTHOR" "$GITHUB_TOKEN" "${{ github.repository }}" "$PR_NUMBER" "$TEAM_MEMBERS")
+          echo "결과: $RESULT"
           # 이전 상태 확인 (라벨 기반)
           HAS_BUILD_FAILED_LABEL=$(echo "$PR_LABELS" | jq -e 'any(. == "build-failed")')
           HAS_REVIEW_REQUESTED_LABEL=$(echo "$PR_LABELS" | jq -e 'any(. == "review-requested")')
@@ -156,8 +157,7 @@ jobs:
                 fi
               fi
 
-          RESULT=$(assign_reviewers_and_create_mentions "$PR_AUTHOR" "$GITHUB_TOKEN" "${{ github.repository }}" "$PR_NUMBER" "$TEAM_MEMBERS")
-          echo "결과: $RESULT"
+
           # ================================================================
           # 👥 리뷰어 할당 로직 (필요한 경우에만)
           # ================================================================
