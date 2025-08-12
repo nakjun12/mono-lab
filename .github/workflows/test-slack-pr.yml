@@ -156,7 +156,8 @@ jobs:
                 fi
               fi
 
-
+          RESULT=$(assign_reviewers_and_create_mentions "$PR_AUTHOR" "$GITHUB_TOKEN" "${{ github.repository }}" "$PR_NUMBER" "$TEAM_MEMBERS")
+          echo "결과: $RESULT"
           # ================================================================
           # 👥 리뷰어 할당 로직 (필요한 경우에만)
           # ================================================================
